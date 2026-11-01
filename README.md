@@ -170,7 +170,7 @@ Then `python3 scripts/fetch_data.py snapshot-counts` fetches each school's Engli
 
 ### 3b. State test scores (late summer, when the DOE posts the spring's results at [InfoHub](https://infohub.nyced.org/reports/academics/test-results))
 
-1. Set `TESTS_YEAR` in `scripts/settings.py` to the spring of the tests (2026 for spring 2026). Also update `CITY_ELA_ES` and `CITY_MATH_ES`, the citywide share meeting standards in grades 3–5, from the citywide ELA and math files on the same page ("All Students", grades 3, 4 and 5 together).
+1. Set `TESTS_YEAR` in `scripts/settings.py` to the spring of the tests (2026 for spring 2026). Also update `CITY_ELA_ES` and `CITY_MATH_ES`, the citywide share meeting standards in grades 3–5, from the citywide ELA and math files on the same page ("All Students", grades 3, 4 and 5 together). Clear or rewrite `TESTS_NOTE` and `TESTS_NOTE_SHORT`, the note about that year's scores (`""` hides it).
 2. `python3 scripts/fetch_data.py tests` downloads the school ELA and math files (about 50 MB each) and writes `state_tests.json`. If InfoHub is blocked, download them in a browser and run `python3 scripts/fetch_data.py tests <school-ela.xlsx> <school-math.xlsx>`.
 
 The build stops if `state_tests.json` doesn't match `TESTS_YEAR`. Charter schools aren't in these files, so theirs still come from the Snapshot (step 3).
