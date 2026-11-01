@@ -28,11 +28,10 @@ DOE_ZONES = "https://maps.schools.nyc/giswebadaptor/rest/services/SchoolSearch"
 ZONE_LAYERS = {"elem_zones.json": "ElemZones3", "ms_zones.json": "MidZones3", "hs_zones.json": "HSZones"}
 ZONES_SOURCE = "DOE Find a School"
 LOCATIONS_DATASET = "wg9x-4ke6"   # 2019-2020 School Locations (lat/lon, grades)
-ELA_DATASET = "iebs-5yhr"         # ELA Test Results 2013-2023
-MATH_DATASET = "74kb-55u9"        # Math Test Results 2013-2023
-TEST_YEAR = "2023"
+# DOE school-level state test results (every year since 2018, all grades), from infohub.nyced.org/reports/academics/test-results
+TESTS_URL = "https://infohub.nyced.org/docs/default-source/default-document-library/school-{}-results-public.xlsx"
 SNAPSHOT_API = "https://tools.nycenet.edu/api/v1/data/school/app/snapshot/all"
-from settings import SNAPSHOT_YEAR, MYSCHOOLS_LABEL, DEMOGRAPHICS_LABEL  # which Snapshot, MySchools and Demographic Snapshot year (scripts/settings.py)
+from settings import SNAPSHOT_YEAR, MYSCHOOLS_LABEL, DEMOGRAPHICS_LABEL, TESTS_YEAR  # which Snapshot, MySchools, Demographic Snapshot and test year (scripts/settings.py)
 CENTERLINE_DATASET = "inkn-q76z"  # NYC Street Centerline (CSCL)
 NTA_DATASET = "9nt8-h7nd"         # 2020 Neighborhood Tabulation Areas (NYC Planning)
 PARKS_DATASET = "enfh-gkve"       # NYC Parks Properties (parks, playgrounds, gardens)
@@ -145,31 +144,35 @@ def _save_zones(gj, outname, by_code):
     save(outname, {"type": "FeatureCollection", "source": ZONES_SOURCE, "schools": schools, "features": feats})
 
 
-def fetch_tests():
-    """Per school: [ELA tested, ELA proficient, Math tested, Math proficient].
-    Grades 3-5 for elementary (state_tests.json), 6-8 for middle school (ms_state_tests.json)."""
-    _fetch_tests(("3", "4", "5"), "state_tests.json")
-    _fetch_tests(("6", "7", "8"), "ms_state_tests.json")
-
-
-def _fetch_tests(grade_list, outname):
+def fetch_tests(ela_path=None, math_path=None):
+    """State ELA and math results per school, every tested grade (3-8) together, for settings.TESTS_YEAR, from the
+    DOE's school results on InfoHub (a year ahead of the Snapshot; charter schools aren't in them).
+    state_tests.json: {"year": TESTS_YEAR, "schools": {dbn: [ELA tested, ELA proficient, Math tested, Math proficient]}};
+    proficient is level 3 or 4. A subject the file hides for privacy ("s") counts as 0 tested.
+    Pass downloaded copies if InfoHub is blocked:  fetch_data.py tests ~/Downloads/school-ela.xlsx ~/Downloads/school-math.xlsx"""
     out = {}
-
-    def add(dbn, i, tested, prof):
-        try:
-            t, p = float(tested), float(prof)
-        except (TypeError, ValueError):
-            return  # suppressed ("s") values
-        row = out.setdefault(dbn, [0, 0, 0, 0])
-        row[i] += int(t)
-        row[i + 1] += int(p)
-
-    grades = "grade in(" + ",".join(f"'{g}'" for g in grade_list) + ")"
-    for r in soql(ELA_DATASET, f"year='{TEST_YEAR}' AND report_category='School' AND category='All Students' AND {grades}"):
-        add(r.get("geographic_subdivision"), 0, r.get("number_tested"), r.get("level_3_4"))
-    for r in soql(MATH_DATASET, f"year='{TEST_YEAR}' AND report_category='School' AND student_category='All Students' AND {grades}"):
-        add(r.get("geographic_division"), 2, r.get("number_tested"), r.get("num_level_3_and_4"))
-    save(outname, out)
+    for i, (subj, path) in enumerate((("ela", ela_path), ("math", math_path))):
+        if not path:
+            path = os.path.join(DATA, f"_school_{subj}.xlsx")
+            req = urllib.request.Request(TESTS_URL.format(subj), headers={"User-Agent": "nycschoolzones"})
+            with urllib.request.urlopen(req, timeout=300) as r, open(path, "wb") as f:
+                f.write(r.read())
+        years = set()
+        for row in xlsx_rows(os.path.expanduser(path), 1):  # the "ELA - All" / "Math - All" tab
+            if not row or row[0] == "DBN" or len(row) < 16:
+                continue
+            years.add(row[3])
+            if row[2] != "All Grades" or row[3] != TESTS_YEAR or row[4] != "All Students":
+                continue
+            tested, prof = row[5], row[15]
+            if str(tested).isdigit() and str(prof).isdigit():
+                out.setdefault(row[0], [0, 0, 0, 0])[2 * i:2 * i + 2] = [int(tested), int(prof)]
+        if TESTS_YEAR not in years:
+            sys.exit(f"{subj} file has no {TESTS_YEAR} results (it has {', '.join(sorted(y for y in years if y))}); "
+                     "check TESTS_YEAR in scripts/settings.py")
+    out = {k: v for k, v in out.items() if v[0] or v[2]}
+    print(f"  {len(out)} schools with {TESTS_YEAR} results")
+    save("state_tests.json", {"year": TESTS_YEAR, "schools": out})
 
 
 def snapshot_record(v, rt):
@@ -350,6 +353,39 @@ def read_xlsx(path):
             rows.append([vals.get(i) for i in range(max(vals) + 1)] if vals else [])
         out[sh.get("name")] = rows
     return out
+
+
+def xlsx_rows(path, index):
+    """One tab of a large .xlsx (index: its position, 0 for the first), row by row as lists of cell values, without
+    holding the whole sheet in memory as read_xlsx does (InfoHub's test files are about 50 MB each)."""
+    import zipfile
+    import xml.etree.ElementTree as ET
+    m = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
+    z = zipfile.ZipFile(path)
+    strings = ["".join(t.text or "" for t in si.iter(m + "t"))
+               for si in ET.fromstring(z.read("xl/sharedStrings.xml")).findall(m + "si")]
+    rels = {r.get("Id"): r.get("Target") for r in ET.fromstring(z.read("xl/_rels/workbook.xml.rels"))}
+    sheet = list(ET.fromstring(z.read("xl/workbook.xml")).find(m + "sheets"))[index]
+    target = rels[sheet.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id")].lstrip("/")
+    target = target if target.startswith("xl/") else "xl/" + target
+    for _, el in ET.iterparse(z.open(target)):
+        if el.tag != m + "row":
+            continue
+        vals = {}
+        for c in el.findall(m + "c"):
+            col = 0
+            for ch in c.get("r"):
+                if ch.isalpha():
+                    col = col * 26 + ord(ch.upper()) - 64
+            v = c.find(m + "v")
+            val = v.text if v is not None else None
+            if c.get("t") == "s" and val is not None:
+                val = strings[int(val)]
+            elif c.get("t") == "inlineStr":
+                val = "".join(x.text or "" for x in c.iter(m + "t"))
+            vals[col - 1] = val
+        yield [vals.get(i) for i in range(max(vals) + 1)] if vals else []
+        el.clear()
 
 
 def fetch_class_size(path=None):
@@ -1425,6 +1461,10 @@ if __name__ == "__main__":
     if args[:1] == ["zones"] and len(args) == 2:  # zones from downloaded files: fetch_data.py zones ~/Downloads
         print("-- zones (from files)")
         fetch_zones(os.path.expanduser(args[1]))
+        sys.exit()
+    if args[:1] == ["tests"] and len(args) == 3:  # from the downloaded school ELA and math files
+        print("-- tests (from files)")
+        fetch_tests(args[1], args[2])
         sys.exit()
     if args[:1] == ["classsize"] and len(args) == 2:  # from a downloaded report
         print("-- classsize (from file)")

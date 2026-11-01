@@ -370,7 +370,7 @@ def ratings_html(dbn, r):
     ]) + f'<p class="src">The DOE’s own ratings, from its {SNAPSHOT_LABEL} School Quality Snapshot.</p>')
 
 
-def tests_html(t, grades):
+def tests_html(t, grades, dbn):
     if not t or not (t[0] or t[2]):
         return ""
     rows = []
@@ -379,7 +379,10 @@ def tests_html(t, grades):
     if t[2]:
         rows.append(bar("Math", 100 * t[3] / t[2], TEST_STOPS, pct(100 * t[3] / t[2])))
     return (f'<h2>State test scores</h2><div class="bars">{"".join(rows)}</div>'
-            f'<p class="src">Share of students in grade{"s" if "–" in grades else ""} {grades} who met state standards (level 3 or 4), {SNAPSHOT_LABEL}.</p>')
+            f'<p class="src">Share of students in grade{"s" if "–" in grades else ""} {grades} who met state standards (level 3 or 4), '
+            + (f'from the {SNAPSHOT_LABEL} School Quality Snapshot (the DOE’s {settings.TESTS_LABEL} results '
+               + ('leave out charter schools' if dbn.startswith("84") else 'don’t include this school') + ').</p>'
+               if len(t) > 4 and t[4] else f'{settings.TESTS_LABEL}.</p>'))
 
 
 def hs_outcomes_html(dbn, o, q, cut):
@@ -960,7 +963,7 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                                                    f"SAT {q2[0]}" if q2 and q2[0] else "") if x2), True))
         else:
             t = (MS.get("T") or {}).get(dbn) or d.get("T", {}).get(dbn) if lv == "ms" else d.get("T", {}).get(dbn)
-            th = tests_html(t, tested)
+            th = tests_html(t, tested, dbn)
             if th:
                 cards.append((th + more(ext(snap, "Scores by student group in the Snapshot")),
                               " · ".join(x2 for x2 in (f"ELA {pct(100 * t[1] / t[0])}" if t[0] else "",
@@ -1503,7 +1506,9 @@ def write_districts(d, root, site_url, goat, nbi=None):
                    f'{e(k)} families. They can’t screen: no tests, grades, interviews or auditions. Families apply through the '
                    '<a href="' + CH_APPLY + '" target="_blank" rel="noopener">common charter application ↗</a>, not MySchools.</p>')
         def ch_table(lst, cols, lv, rr=R):
-            return f'<section class="card"><h2>Charter schools</h2>{school_table(lst, names, rr, cols, lv=lv)}{ch_note}</section>' if lst else ""
+            yr = f' Their test scores are from the {SNAPSHOT_LABEL} School Quality Snapshot.' if lv != "hs" else ""
+            return (f'<section class="card"><h2>Charter schools</h2>{school_table(lst, names, rr, cols, lv=lv)}'
+                    f'{ch_note.replace("</p>", yr + "</p>", 1) if yr else ch_note}</section>' if lst else "")
         def cw_table(lv, head, cols, how):
             return (f'<section class="card"><h2>{head}</h2>{school_table(cw[lv], names, R, cols, cw_where, note_line=True, lv=lv)}'
                     f'<p class="src">{how}</p></section>' if cw[lv] else "")
@@ -1521,7 +1526,7 @@ def write_districts(d, root, site_url, goat, nbi=None):
              + f'<section class="card"><h2>Zoned elementary schools</h2>{school_table(es_z, names, R, es_cols, lv="es")}'
              + (f'<h2>Elementary schools without a zone</h2>{school_table(es_n, names, R, es_cols, es_note, lv="es")}' if es_n else "")
              + '<p class="src">Rating is the DOE’s overall rating (out of 4). Tests is the share of students meeting state standards '
-               'in ELA and math, grades 3–5. Zoned schools give priority to families in their zone; schools without a zone give '
+               f'in ELA and math, grades 3–5, {settings.TESTS_LABEL}. Zoned schools give priority to families in their zone; schools without a zone give '
                'priority by district.</p></section>' + ch_table(es_c, es_cols, "es")
              + cw_table("es", "Citywide G&amp;T schools", es_cols, f'Open to children found eligible for gifted and talented, from '
                         f'anywhere in NYC, District {e(k)} included.')),
@@ -1531,7 +1536,7 @@ def write_districts(d, root, site_url, goat, nbi=None):
              + (f'<h2>Zoned middle schools</h2>{school_table(ms_z, names, R, ms_cols, lv="ms")}' if ms_z else "")
              + (f'<h2>Middle schools without a zone</h2>{school_table(ms_n, names, R, ms_cols, ms_note, lv="ms")}' if ms_n else "")
              + '<p class="src">Rating is the DOE’s overall rating (out of 4). Tests is the share of students meeting state standards '
-               f'in ELA and math, grades 6–8. Most middle school programs fill seats with District {e(k)} students and residents first, '
+               f'in ELA and math, grades 6–8, {settings.TESTS_LABEL}. Most middle school programs fill seats with District {e(k)} students and residents first, '
                'then consider other districts.</p></section>' + ch_table(ms_c, ms_cols, "ms")
              + cw_table("ms", "Citywide middle schools", ms_cols, f'Open to students from anywhere in NYC, District {e(k)} included. '
                         'Each school’s page lists its programs’ priority groups.')),

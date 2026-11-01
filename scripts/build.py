@@ -14,7 +14,7 @@ Steps:
   1. Load zone boundaries (data/elem_zones.json).
   2. Give each zone a "neighbor color" (0-5) so adjacent zones differ in the
      Plain view, a label point inside the zone, and an approximate area.
-  3. Attach state test results (data/state_tests.json),
+  3. Attach state test results (data/state_tests.json; the Snapshot's for schools it lacks),
      School Quality Snapshot ratings (data/snapshot_ratings.json) and
      the street overlays (data/streets.json, data/local_streets.json).
   4. Inline everything into the template and write index.html.
@@ -24,6 +24,7 @@ import json
 import math
 import re
 import os
+import sys
 from html import escape
 
 import settings
@@ -60,7 +61,8 @@ def fill_settings(template):
     for k, v in {"__SNAPSHOT_YEAR__": settings.SNAPSHOT_YEAR, "__SNAPSHOT__": settings.SNAPSHOT_LABEL,
                  "__PREK__": settings.PREK_LABEL, "__MYSCHOOLS__": settings.MYSCHOOLS_LABEL,
                  "__CITY_GRAD__": str(settings.CITY_GRAD), "__CITY_READINESS__": str(settings.CITY_READINESS), "__BLUE_BOOK__": settings.BLUE_BOOK_LABEL,
-                 "__DEMOGRAPHICS__": settings.DEMOGRAPHICS_LABEL,
+                 "__DEMOGRAPHICS__": settings.DEMOGRAPHICS_LABEL, "__TESTS__": settings.TESTS_LABEL,
+                 "__CITY_ELA_ES__": str(settings.CITY_ELA_ES), "__CITY_MATH_ES__": str(settings.CITY_MATH_ES),
                  "__RATE_STOPS__": json.dumps(settings.RATE_STOPS, separators=(",", ":")),
                  "__TEST_STOPS__": json.dumps(settings.TEST_STOPS, separators=(",", ":")),
                  "__OUT_STOPS__": json.dumps(settings.OUT_STOPS, separators=(",", ":")),
@@ -487,20 +489,24 @@ def color_districts(dist):
         dist[k]["c"] = next(i for i in range(6) if i not in used)
 
 
-def load_tests(fallback_name):
-    """State test results per school as [ELA tested, ELA proficient, Math tested, Math proficient].
-    Prefers the DOE School Quality Snapshot (data/snapshot_tests.json, newer); falls back to the
-    NYC Open Data results (2023) in fallback_name."""
-    path = os.path.join(DATA, "snapshot_tests.json")
-    if os.path.exists(path):
-        out = {}
-        for dbn, (n_ela, p_ela, n_mth, p_mth, *_rest) in load("snapshot_tests.json").items():
-            n_ela = n_ela or (20 if p_ela is not None else 0)  # tiny/suppressed counts: small weight
-            n_mth = n_mth or (20 if p_mth is not None else 0)
-            out[dbn] = [int(n_ela) if p_ela is not None else 0, round(n_ela * p_ela / 100) if p_ela is not None else 0,
-                        int(n_mth) if p_mth is not None else 0, round(n_mth * p_mth / 100) if p_mth is not None else 0]
-        return out
-    return load(fallback_name)
+def load_tests():
+    """State test results per school (every tested grade together) as [ELA tested, ELA proficient, Math tested,
+    Math proficient], from the DOE's results for settings.TESTS_YEAR (data/state_tests.json, fetch_data.py tests)."""
+    t = load("state_tests.json")
+    if t.get("year") != settings.TESTS_YEAR:
+        sys.exit(f"data/state_tests.json has {t.get('year')} results but settings.TESTS_YEAR is {settings.TESTS_YEAR}; "
+                 "run fetch_data.py tests")
+    return t["schools"]
+
+
+def test_row(city, dbn, snap_t):
+    """A school's T row: its settings.TESTS_YEAR results when the DOE file has them, else its Snapshot scores
+    (snapshot_tests_row) with a trailing 1, so the map and pages label them with the older Snapshot year
+    (charter schools, which the DOE file leaves out, and the odd school missing from it). None without either."""
+    if dbn in city:
+        return city[dbn]
+    t = snapshot_tests_row(snap_t)
+    return t + [1] if t else None
 
 
 def hs_snapshot_rows(o, city_grad):
@@ -616,7 +622,7 @@ def priority_steps(groups, dbn):
 
 def snapshot_tests_row(t):
     """Snapshot tests [ELA tested, ELA %, Math tested, Math %, ...] -> [ELA tested, proficient, Math tested, proficient],
-    or None. Tiny or hidden counts get a small weight (20), as in load_tests."""
+    or None. Tiny or hidden counts get a small weight (20)."""
     if not t or (t[1] is None and t[3] is None):
         return None
     n_ela = t[0] or (20 if t[1] is not None else 0)
@@ -625,7 +631,7 @@ def snapshot_tests_row(t):
             int(n_mth) if t[3] is not None else 0, round(n_mth * t[3] / 100) if t[3] is not None else 0]
 
 
-def add_charters(d):
+def add_charters(d, city_tests):
     """Charter schools (data/charters.json, charter_snapshot.json), on each level whose grades they teach now.
     CH rows (d["CH"], d["MS"]["CH"], d["HS"]["CH"]) have the NZ row shape: [dbn, name, address, lat, lon,
     [district], 0, [], 0, ""], the district being the one the building is in (charter DBNs start with 84).
@@ -671,7 +677,7 @@ def add_charters(d):
             x[4] = dual[dbn]
             if hsr and ems:
                 hsr["x"] = hsr["x"][:4] + [dual[dbn]] + hsr["x"][5:]
-        t = snapshot_tests_row(ems and ems.get("t"))
+        t = test_row(city_tests, dbn, ems and ems.get("t"))
         if set(now) & {0, 1, 2, 3, 4, 5}:
             d["CH"].append(row)
             if t:
@@ -700,8 +706,9 @@ def main(standalone_path=None, pages=None):
     ncolors = prepare_zones(d)
     zoned = {x for f in d["features"] for x in f["properties"]["dbns"]}
 
-    tests = load_tests("state_tests.json")
-    d["T"] = {k: v for k, v in tests.items() if k in zoned and (v[0] or v[2])}
+    city_tests = load_tests()
+    snap_tests = load("snapshot_tests.json") if os.path.exists(os.path.join(DATA, "snapshot_tests.json")) else {}
+    d["T"] = {k: v for k in sorted(zoned) if (v := test_row(city_tests, k, snap_tests.get(k)))}
     d["R"] = load("snapshot_ratings.json")
     d["X"] = load("snapshot_extra.json") if os.path.exists(os.path.join(DATA, "snapshot_extra.json")) else {}
 
@@ -723,12 +730,9 @@ def main(standalone_path=None, pages=None):
                 row = [dbn, row[1] if row[8] else (s["r"][0] or row[1]), s["r"][1] or row[2], *row[3:]]
                 d["R"][dbn] = s["r"]
                 d["X"][dbn] = s["x"]
-                t = s.get("t")
-                if t and (t[1] is not None or t[3] is not None):
-                    n_ela = t[0] or (20 if t[1] is not None else 0)
-                    n_mth = t[2] or (20 if t[3] is not None else 0)
-                    d["T"][dbn] = [int(n_ela) if t[1] is not None else 0, round(n_ela * t[1] / 100) if t[1] is not None else 0,
-                                   int(n_mth) if t[3] is not None else 0, round(n_mth * t[3] / 100) if t[3] is not None else 0]
+            t = test_row(city_tests, dbn, s and s.get("t"))
+            if t:
+                d["T"][dbn] = t
             d["NZ"].append(row)
             nz_dbns.add(dbn)
         print(f"non-zoned elementary schools: {sum(1 for x in d['NZ'] if not x[8])}, citywide G&T: {sum(1 for x in d['NZ'] if x[8])}, "
@@ -747,9 +751,8 @@ def main(standalone_path=None, pages=None):
         ms = load("ms_zones.json")
         prepare_zones(ms)
         ms_zoned = {x for f in ms["features"] for x in f["properties"]["dbns"]}
-        ms_tests = load_tests("ms_state_tests.json")
         d["MS"] = {"schools": ms["schools"], "features": ms["features"],
-                   "T": {k: v for k, v in ms_tests.items() if k in ms_zoned and (v[0] or v[2])}}
+                   "T": {k: v for k in sorted(ms_zoned) if (v := test_row(city_tests, k, snap_tests.get(k)))}}
 
         # Middle school programs (MySchools directory) and choice schools with no zone. P: programs per school,
         # [name ('' = the school's main program), method code, seats, applicants, all seats filled, diversity set-aside,
@@ -790,14 +793,9 @@ def main(standalone_path=None, pages=None):
                     name, addr = s["r"][0] or name, s["r"][1] or addr
                     d["R"].setdefault(dbn, s["r"])
                     d["X"].setdefault(dbn, s["x"])
-                t = s and s.get("t")
-                if t and (t[1] is not None or t[3] is not None):
-                    n_ela = t[0] or (20 if t[1] is not None else 0)
-                    n_mth = t[2] or (20 if t[3] is not None else 0)
-                    d["MS"]["T"][dbn] = [int(n_ela) if t[1] is not None else 0, round(n_ela * t[1] / 100) if t[1] is not None else 0,
-                                         int(n_mth) if t[3] is not None else 0, round(n_mth * t[3] / 100) if t[3] is not None else 0]
-                elif dbn in ms_tests and (ms_tests[dbn][0] or ms_tests[dbn][2]):
-                    d["MS"]["T"][dbn] = ms_tests[dbn]
+                t = test_row(city_tests, dbn, s and s.get("t"))
+                if t:
+                    d["MS"]["T"][dbn] = t
                 # programs without their priority steps: the card reads those from P
                 d["MS"]["NZ"].append([dbn, name, addr, r[3], r[4], [], 0, [p[:6] for p in r[5]], 1 if dbn in citywide else 0])
             print(f"middle school choice schools (no zone): {len(d['MS']['NZ'])}, programs for {len(d['MS']['P'])} schools")
@@ -880,7 +878,7 @@ def main(standalone_path=None, pages=None):
             print(f"high schools without a zone: {len(d['HS']['NZ'])} ({sum(1 for r in d['HS']['NZ'] if r[8])} specialized), "
                   f"programs for {len(d['HS']['P'])} schools")
 
-    add_charters(d)
+    add_charters(d, city_tests)
 
     # grade 6 and grade 9 admissions (Local Law 72), same record shape as kindergarten (see fetch_k_admissions)
     for key, name in (("MS", "ms_admissions.json"), ("HS", "hs_admissions.json")):

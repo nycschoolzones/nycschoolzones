@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- State test scores are now from spring 2026, a year newer than before, on the map, the school pages and the district and neighborhood tables. Ratings and programs are still from the 2024–25 School Quality Snapshot. The city's spring 2026 results leave out charter schools, so their scores are still from 2024–25, and their cards and tables say so. Citywide, the share of 3rd to 5th graders meeting the ELA standard fell from 58% to 47% this year, so many elementary schools' ELA scores are lower than before.
+
 ## 1.63.0 (2026-10-29)
 
 ### Fixed

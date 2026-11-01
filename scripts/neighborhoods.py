@@ -358,7 +358,9 @@ def write(d, nbi, root, site_url, goat):
                       + '<p class="src">Charter schools admit by lottery, with priority to siblings and then to families '
                         f'in the school’s district ({and_list([f"District {k}" for k in cd])}). They can’t screen: no tests, '
                         'grades, interviews or auditions. Families apply through the <a href="' + CH_APPLY + '" target="_blank" '
-                        'rel="noopener">common charter application ↗</a>, not MySchools.</p>')
+                        'rel="noopener">common charter application ↗</a>, not MySchools.'
+                      + (f' Their test scores are from the {settings.SNAPSHOT_LABEL} School Quality Snapshot.' if lv != "hs" else "")
+                      + '</p>')
             if not h:
                 h = ("<p>No high school zones cover this neighborhood, and no high schools are located in it. "
                      "Any NYC student can apply to high schools across the city.</p>" if lv == "hs" else
@@ -367,8 +369,8 @@ def write(d, nbi, root, site_url, goat):
                 h = district_note("ms", dists) + h
             elif lv == "es" and [k for k in dists if k not in es_zone_dists]:
                 h = district_note("es", [k for k in dists if k not in es_zone_dists]) + h
-            note = {"es": "Tests is the share of students meeting state standards in ELA and math, grades 3–5.",
-                    "ms": "Tests is the share of students meeting state standards in ELA and math, grades 6–8.",
+            note = {"es": f"Tests is the share of students meeting state standards in ELA and math, grades 3–5, {settings.TESTS_LABEL}.",
+                    "ms": f"Tests is the share of students meeting state standards in ELA and math, grades 6–8, {settings.TESTS_LABEL}.",
                     "hs": "Grad is the 4-year graduation rate, SAT the average score and Readiness the DOE’s college "
                           f"readiness score (city average {settings.CITY_READINESS})."}[lv]
             go = (f'<a class="go" href="/#{lv}-d{e(dists[0])}">Open the {word} school map '

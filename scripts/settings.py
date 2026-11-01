@@ -4,10 +4,18 @@ pages (pages.py, neighborhoods.py) and fetch_data.py. Change a value here and re
 
 # ---------- which year's data the site shows ----------
 
-# School Quality Snapshot: ratings, test scores, programs, high school outcomes. "2025" is the 2024-25 school year
+# School Quality Snapshot: ratings, programs, high school outcomes (and charter schools' test scores). "2025" is the 2024-25 school year
 # (its address on tools.nycenet.edu/snapshot/2025/...).
 SNAPSHOT_YEAR = "2025"
 SNAPSHOT_LABEL = f"{int(SNAPSHOT_YEAR) - 1}–{SNAPSHOT_YEAR[2:]}"   # "2024–25"
+# State ELA and math test scores (data/state_tests.json): the DOE's school results on InfoHub, a year ahead of the
+# Snapshot. TESTS_YEAR is the spring the tests were taken. Charter schools aren't in that file, so theirs (and any
+# school missing from it) still come from the Snapshot and say so.
+TESTS_YEAR = "2026"
+TESTS_LABEL = f"spring {TESTS_YEAR}"
+# NYC-wide share meeting standards in grades 3-5 that spring (%), from the DOE's citywide results, quoted on the map
+CITY_ELA_ES = 47
+CITY_MATH_ES = 60
 # Pre-K and 3-K seats and applicants: the DOE's Local Law 72 admissions report (data/prek.json)
 PREK_LABEL = "fall 2025"
 # MySchools directories (data/ms_directory.json, hs_directory.json, k_priority.json): the admissions round their
