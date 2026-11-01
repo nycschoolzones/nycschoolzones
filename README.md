@@ -80,6 +80,10 @@ data/
   neighborhoods.json    residential neighborhood boundaries (NYC Planning NTAs)
   school_fixes.json     hand-checked: district schools that moved, better map points, closed schools
   zips.json             each school's current address, ZIP code, tax lot center and grades (DOE LCGMS, NYC Planning PLUTO)
+  history/<name>/<period>.json  dated copies of the yearly datasets above, kept for trends (the build doesn't read them):
+                        Snapshot files by school year (2024-25), MySchools files by admissions round (fall-2026), demographics,
+                        class size and building use by school year, pre-K by fall, zones by the month fetched (2026-10),
+                        and state_tests/<year>.json: every year in the DOE's file since 2018, all grades and each grade
 scripts/
   build.py              data/ + src/template.html  →  index.html
   settings.py           data years, citywide averages and color scales, shared by the map, the pages and fetch_data.py
@@ -236,6 +240,8 @@ python3 scripts/build.py          # site, school, district and neighborhood page
 python3 scripts/make_preview.py   # optional: redraw preview.png
 python3 scripts/make_brand.py     # optional: redraw the YouTube and Facebook images
 ```
+
+`fetch_data.py` also files each yearly dataset it writes under `data/history/<name>/<period>.json`, the period taken from `scripts/settings.py` (so set the years there first). A file imported or edited by hand gets its dated copy with `python3 scripts/fetch_data.py history`, which never overwrites one that's already there. Commit the dated files with the rest.
 
 The school, district and neighborhood pages, including the neighborhood zone maps, are rebuilt from `data/`, so they need nothing by hand. Every year shown on the map and the pages comes from the dates of the data files or from `scripts/settings.py`: check that `SNAPSHOT_YEAR`, `CITY_GRAD`, `CITY_READINESS`, `PREK_LABEL`, `BLUE_BOOK_LABEL` and `DEMOGRAPHICS_LABEL` match what you refreshed. Also update the years in "Data sources" below.
 

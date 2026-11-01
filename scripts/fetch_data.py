@@ -31,7 +31,8 @@ LOCATIONS_DATASET = "wg9x-4ke6"   # 2019-2020 School Locations (lat/lon, grades)
 # DOE school-level state test results (every year since 2018, all grades), from infohub.nyced.org/reports/academics/test-results
 TESTS_URL = "https://infohub.nyced.org/docs/default-source/default-document-library/school-{}-results-public.xlsx"
 SNAPSHOT_API = "https://tools.nycenet.edu/api/v1/data/school/app/snapshot/all"
-from settings import SNAPSHOT_YEAR, MYSCHOOLS_LABEL, DEMOGRAPHICS_LABEL, TESTS_YEAR  # which Snapshot, MySchools, Demographic Snapshot and test year (scripts/settings.py)
+from settings import (SNAPSHOT_YEAR, MYSCHOOLS_LABEL, DEMOGRAPHICS_LABEL, TESTS_YEAR,  # which year of each source (scripts/settings.py)
+                      PREK_LABEL, BLUE_BOOK_LABEL)
 CENTERLINE_DATASET = "inkn-q76z"  # NYC Street Centerline (CSCL)
 NTA_DATASET = "9nt8-h7nd"         # 2020 Neighborhood Tabulation Areas (NYC Planning)
 PARKS_DATASET = "enfh-gkve"       # NYC Parks Properties (parks, playgrounds, gardens)
@@ -48,12 +49,72 @@ def soql(dataset, where, limit=50000):
     return get_json(f"{OPEN_DATA}/resource/{dataset}.json?{q}")
 
 
-def save(name, obj):
+# Dated copies: each yearly school dataset is also kept as data/history/<name>/<period>.json, so next year's refresh
+# doesn't lose this year's numbers and trends can be read later. The build only reads the files in data/ itself.
+HISTORY = os.path.join(DATA, "history")
+_SNAP = f"{int(SNAPSHOT_YEAR) - 1}-{SNAPSHOT_YEAR[2:]}"   # "2024-25"
+_FALL = MYSCHOOLS_LABEL.replace(" ", "-")                  # "fall-2026": the admissions round the directories describe
+HISTORY_PERIODS = {
+    **{n: _SNAP for n in ("snapshot_ratings.json", "snapshot_extra.json", "snapshot_tests.json", "hs_outcomes.json",
+                          "nonzoned_snapshot.json", "ms_snapshot.json", "hs_snapshot.json", "charter_snapshot.json",
+                          "snapshot_counts.json", "colocation.json")},
+    **{n: _FALL for n in ("nonzoned_k.json", "citywide_gt_k.json", "k_priority.json", "ms_directory.json",
+                          "hs_directory.json", "accessibility.json")},
+    "demographics.json": DEMOGRAPHICS_LABEL.replace("–", "-"),
+    "class_size.json": None,   # from the report's file name (CLASS_SIZE_URL), set below
+    "prek.json": PREK_LABEL.replace(" ", "-"),
+    "utilization.json": BLUE_BOOK_LABEL.replace("–", "-"),
+    # zones change a little each fall: dated by the month they were fetched
+    **{n: "zones" for n in ("elem_zones.json", "ms_zones.json", "hs_zones.json")},
+}
+# state_tests.json isn't listed: fetch_tests writes every year in the DOE file to history/state_tests/<year>.json itself.
+
+
+def history_period(name):
+    """The period a dataset's dated copy is filed under, or None for files that aren't kept by year."""
+    import datetime
+    import re
+    p = HISTORY_PERIODS.get(name)
+    if name == "class_size.json":
+        m = re.search(r"(\d{4}-\d{2})-class-size", CLASS_SIZE_URL)
+        p = m and m.group(1)
+    elif p == "zones":
+        p = datetime.date.today().strftime("%Y-%m")
+    return p
+
+
+def save(name, obj, period=None):
+    """Write data/<name>, and its dated copy (history_period) when the dataset is kept by year. period: file it
+    only under data/history/<name>/<period>.json (for a year other than the current one)."""
     os.makedirs(DATA, exist_ok=True)
-    path = os.path.join(DATA, name)
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(obj, f, separators=(",", ":"))
-    print(f"wrote {path} ({os.path.getsize(path) / 1e6:.2f} MB)")
+    text = json.dumps(obj, separators=(",", ":"))
+    paths = [] if period else [os.path.join(DATA, name)]
+    period = period or history_period(name)
+    if period:
+        paths.append(os.path.join(HISTORY, name[:-5], f"{period}.json"))
+    for path in paths:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
+        print(f"wrote {path} ({os.path.getsize(path) / 1e6:.2f} MB)")
+
+
+def archive_current():
+    """Copy each yearly dataset now in data/ to its dated file in data/history/, for files saved before dated copies
+    existed or imported by hand. Leaves a dated file that's already there alone."""
+    for name in sorted(HISTORY_PERIODS):
+        src = os.path.join(DATA, name)
+        period = history_period(name)
+        if not os.path.exists(src) or not period:
+            continue
+        dst = os.path.join(HISTORY, name[:-5], f"{period}.json")
+        if os.path.exists(dst):
+            print(f"  {dst} already there")
+            continue
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        with open(src, encoding="utf-8") as f, open(dst, "w", encoding="utf-8") as g:
+            g.write(f.read())
+        print(f"wrote {dst}")
 
 
 def rnd(c):
@@ -145,32 +206,37 @@ def _save_zones(gj, outname, by_code):
 
 
 def fetch_tests(ela_path=None, math_path=None):
-    """State ELA and math results per school, every tested grade (3-8) together, for settings.TESTS_YEAR, from the
-    DOE's school results on InfoHub (a year ahead of the Snapshot; charter schools aren't in them).
-    state_tests.json: {"year": TESTS_YEAR, "schools": {dbn: [ELA tested, ELA proficient, Math tested, Math proficient]}};
-    proficient is level 3 or 4. A subject the file hides for privacy ("s") counts as 0 tested.
+    """State ELA and math results per school from the DOE's school results on InfoHub (a year ahead of the Snapshot;
+    charter schools aren't in them). Proficient is level 3 or 4; a count the file hides for privacy ("s") is left out.
+    state_tests.json, what the map shows: {"year": TESTS_YEAR, "schools": {dbn: [ELA tested, ELA proficient,
+      Math tested, Math proficient]}}, every tested grade (3-8) together.
+    history/state_tests/<year>.json, one per year in the file (2018 on, no 2020 or 2021): {"year", "source",
+      "schools": {dbn: {"all" or grade "3".."8": [ELA tested, ELA proficient, Math tested, Math proficient]}}}.
+      Before 2025 the DOE counted students who went to school outside their home district separately, so a few
+      schools' older numbers are a little lower; see the file's NOTES tab.
     Pass downloaded copies if InfoHub is blocked:  fetch_data.py tests ~/Downloads/school-ela.xlsx ~/Downloads/school-math.xlsx"""
-    out = {}
+    years = {}
     for i, (subj, path) in enumerate((("ela", ela_path), ("math", math_path))):
         if not path:
             path = os.path.join(DATA, f"_school_{subj}.xlsx")
             req = urllib.request.Request(TESTS_URL.format(subj), headers={"User-Agent": "nycschoolzones"})
             with urllib.request.urlopen(req, timeout=300) as r, open(path, "wb") as f:
                 f.write(r.read())
-        years = set()
         for row in xlsx_rows(os.path.expanduser(path), 1):  # the "ELA - All" / "Math - All" tab
-            if not row or row[0] == "DBN" or len(row) < 16:
-                continue
-            years.add(row[3])
-            if row[2] != "All Grades" or row[3] != TESTS_YEAR or row[4] != "All Students":
+            if not row or row[0] == "DBN" or len(row) < 16 or row[4] != "All Students" or not str(row[3]).isdigit():
                 continue
             tested, prof = row[5], row[15]
             if str(tested).isdigit() and str(prof).isdigit():
-                out.setdefault(row[0], [0, 0, 0, 0])[2 * i:2 * i + 2] = [int(tested), int(prof)]
-        if TESTS_YEAR not in years:
-            sys.exit(f"{subj} file has no {TESTS_YEAR} results (it has {', '.join(sorted(y for y in years if y))}); "
-                     "check TESTS_YEAR in scripts/settings.py")
-    out = {k: v for k, v in out.items() if v[0] or v[2]}
+                grade = "all" if row[2] == "All Grades" else str(row[2])
+                cell = years.setdefault(row[3], {}).setdefault(row[0], {}).setdefault(grade, [0, 0, 0, 0])
+                cell[2 * i:2 * i + 2] = [int(tested), int(prof)]
+    if TESTS_YEAR not in years:
+        sys.exit(f"the DOE files have no {TESTS_YEAR} results (they have {', '.join(sorted(years))}); "
+                 "check TESTS_YEAR in scripts/settings.py")
+    for y, schools in sorted(years.items()):
+        save("state_tests.json", {"year": y, "source": "DOE school ELA and math results (InfoHub), All Students",
+                                  "schools": dict(sorted(schools.items()))}, period=y)
+    out = {k: v["all"] for k, v in sorted(years[TESTS_YEAR].items()) if "all" in v and (v["all"][0] or v["all"][2])}
     print(f"  {len(out)} schools with {TESTS_YEAR} results")
     save("state_tests.json", {"year": TESTS_YEAR, "schools": out})
 
@@ -1461,6 +1527,9 @@ if __name__ == "__main__":
     if args[:1] == ["zones"] and len(args) == 2:  # zones from downloaded files: fetch_data.py zones ~/Downloads
         print("-- zones (from files)")
         fetch_zones(os.path.expanduser(args[1]))
+        sys.exit()
+    if args[:1] == ["history"]:  # dated copies of the yearly datasets now in data/ (fetching writes them itself)
+        archive_current()
         sys.exit()
     if args[:1] == ["tests"] and len(args) == 3:  # from the downloaded school ELA and math files
         print("-- tests (from files)")
