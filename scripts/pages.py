@@ -370,7 +370,7 @@ def ratings_html(dbn, r):
     ]) + f'<p class="src">The DOE’s own ratings, from its {SNAPSHOT_LABEL} School Quality Snapshot.</p>')
 
 
-def tests_html(t, grades, dbn):
+def tests_html(t, grades, dbn, lv):
     if not t or not (t[0] or t[2]):
         return ""
     rows = []
@@ -382,7 +382,7 @@ def tests_html(t, grades, dbn):
             f'<p class="src">Share of students in grade{"s" if "–" in grades else ""} {grades} who met state standards (level 3 or 4), '
             + (f'from the {SNAPSHOT_LABEL} School Quality Snapshot (the DOE’s {settings.TESTS_LABEL} results '
                + ('leave out charter schools' if dbn.startswith("84") else 'don’t include this school') + ').</p>'
-               if len(t) > 4 and t[4] else f'{settings.TESTS_LABEL}.</p>'))
+               if len(t) > 4 and t[4] else f'{settings.TESTS_LABEL}. {settings.TESTS_NOTE if lv == "es" else ""}</p>'.replace(' </p>', '</p>')))
 
 
 def hs_outcomes_html(dbn, o, q, cut):
@@ -963,7 +963,7 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                                                    f"SAT {q2[0]}" if q2 and q2[0] else "") if x2), True))
         else:
             t = (MS.get("T") or {}).get(dbn) or d.get("T", {}).get(dbn) if lv == "ms" else d.get("T", {}).get(dbn)
-            th = tests_html(t, tested, dbn)
+            th = tests_html(t, tested, dbn, lv)
             if th:
                 cards.append((th + more(ext(snap, "Scores by student group in the Snapshot")),
                               " · ".join(x2 for x2 in (f"ELA {pct(100 * t[1] / t[0])}" if t[0] else "",

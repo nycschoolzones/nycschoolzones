@@ -16,6 +16,12 @@ TESTS_LABEL = f"spring {TESTS_YEAR}"
 # NYC-wide share meeting standards in grades 3-5 that spring (%), from the DOE's citywide results, quoted on the map
 CITY_ELA_ES = 47
 CITY_MATH_ES = 60
+# A note on that year's scores, next to them on the map and the school pages; "" for none. Spring 2026: ELA fell
+# statewide, mostly in grades 3-5 (citywide grade 3: 58.0% -> 44.2%, grade 5: 59.7% -> 46.6%), after the state had
+# lowered the grade 3, 4 and 6 ELA cut scores in 2025. TESTS_NOTE_SHORT goes on each school's card.
+TESTS_NOTE = ("ELA scores fell across New York State in spring 2026, mostly in grades 3–5 (citywide, grade 3 went from "
+              "58% to 44%). Compare schools with each other rather than with last year.")
+TESTS_NOTE_SHORT = "ELA fell statewide in 2026"
 # Pre-K and 3-K seats and applicants: the DOE's Local Law 72 admissions report (data/prek.json)
 PREK_LABEL = "fall 2025"
 # MySchools directories (data/ms_directory.json, hs_directory.json, k_priority.json): the admissions round their
