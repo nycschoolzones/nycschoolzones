@@ -52,7 +52,12 @@ def soql(dataset, where, limit=50000):
 # Dated copies: each yearly school dataset is also kept as data/history/<name>/<period>.json, so next year's refresh
 # doesn't lose this year's numbers and trends can be read later. The build only reads the files in data/ itself.
 HISTORY = os.path.join(DATA, "history")
-_SNAP = f"{int(SNAPSHOT_YEAR) - 1}-{SNAPSHOT_YEAR[2:]}"   # "2024-25"
+def school_year(year):
+    """A Snapshot year ("2025", the spring it ends) -> the school year it's filed under ("2024-25")."""
+    return f"{int(year) - 1}-{str(year)[2:]}"
+
+
+_SNAP = school_year(SNAPSHOT_YEAR)   # "2024-25"
 _FALL = MYSCHOOLS_LABEL.replace(" ", "-")                  # "fall-2026": the admissions round the directories describe
 HISTORY_PERIODS = {
     **{n: _SNAP for n in ("snapshot_ratings.json", "snapshot_extra.json", "snapshot_tests.json", "hs_outcomes.json",
@@ -1417,12 +1422,12 @@ def _charter_record(rec):
     return out
 
 
-def _save_charter_snapshot(snap):
+def _save_charter_snapshot(snap, year=SNAPSHOT_YEAR, period=None):
     wanted = _charter_reports()
     out = {d: e for d in sorted(wanted) if d in snap and (e := _charter_record(snap[d]))}
     rated = sum(1 for e in out.values() for v in e.values() if v["r"][2] is not None)
     print(f"  charters: {len(out)} of {len(wanted)} have a Snapshot page, {rated} reports with an Instruction rating")
-    save("charter_snapshot.json", {"year": SNAPSHOT_YEAR, "schools": out})
+    save("charter_snapshot.json", {"year": year, "schools": out}, period)
 
 
 def fetch_charter_snapshot():
@@ -1451,8 +1456,9 @@ def fetch_charter_snapshot():
     _save_charter_snapshot(snap)
 
 
-def snapshot_job(out=None):
-    """Write ~/Downloads/snapshot_job.js: scripts/browser/snapshot.js with this year's list of schools filled in."""
+def _snapshot_jobs():
+    """{dbn: [[report types to try, in order], ...]}: one list per Snapshot report wanted, for every school on the map
+    (a 6-12 school wants both its middle school and high school reports) and every charter."""
     zoned, hs_z, es_nz, ms_nz, hs_all = _snapshot_groups()
     jobs = {}
     for d in zoned | es_nz | ms_nz | hs_all:
@@ -1464,6 +1470,12 @@ def snapshot_job(out=None):
         jobs[d] = wants
     for d, wants in _charter_reports().items():
         jobs[d] = wants
+    return jobs
+
+
+def snapshot_job(out=None):
+    """Write ~/Downloads/snapshot_job.js: scripts/browser/snapshot.js with this year's list of schools filled in."""
+    jobs = _snapshot_jobs()
     with open(os.path.join(BROWSER, "snapshot.js"), encoding="utf-8") as f:
         js = f.read()
     js = js.replace("__YEAR__", json.dumps(SNAPSHOT_YEAR)).replace("__JOBS__", json.dumps(sorted(jobs.items())))
@@ -1473,15 +1485,50 @@ def snapshot_job(out=None):
     print(f"wrote {out}: {len(jobs)} schools for the {SNAPSHOT_YEAR} Snapshot. Paste it into the browser console on tools.nycenet.edu.")
 
 
+def fetch_snapshot_year(year):
+    """Every Snapshot report snapshot_job.js would download, straight from the API (it answers scripts as of 2026),
+    for any year, written as data/_snapshot_raw_<year>.json in the browser job's format. Then import_snapshot.
+    The list of schools is today's, so schools that have since closed are left out of an older year."""
+    import datetime
+    def one(item):
+        dbn, wants = item
+        rec = {}
+        for order in wants:
+            for rt in order:
+                if rt in rec:
+                    break
+                try:
+                    rows = get_json(f"{SNAPSHOT_API}/{year}/{dbn}/{rt}")
+                except Exception:
+                    continue
+                rows = list(rows.values()) if isinstance(rows, dict) else rows
+                if rows:
+                    rec[rt] = {r["varname"]: r["value"] for r in rows if r.get("value") not in (None, "")}
+                    break
+        return dbn, rec
+    jobs = sorted(_snapshot_jobs().items())
+    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+        schools = {d: rec for d, rec in pool.map(one, jobs) if rec}
+    print(f"  {len(schools)} of {len(jobs)} schools have a {year} Snapshot page")
+    path = os.path.join(DATA, f"_snapshot_raw_{year}.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"source": f"DOE School Quality Snapshot {year}", "fetched": datetime.date.today().isoformat(),
+                   "schools": schools}, f, separators=(",", ":"))
+    return path
+
+
 HS_SNAPSHOT_KEEP = ("avg_sat", "val_ccr_4yr_all", "cavg_ccr_4yr_all", "val_pct_cer_6mo_all", "cavg_pct_cer_6mo_all",
                     "val_grad_pct_4_all", "cavg_grad_pct_4_all", "disp_str_advanced_enroll", "disp_str_ap_enroll", "ccpc_total_n")
 
 
-def import_snapshot(path):
+def import_snapshot(path, year=SNAPSHOT_YEAR):
     """Turn snapshot_raw.json (from snapshot_job.js) into the Snapshot files in data/: snapshot_ratings.json,
     snapshot_extra.json, hs_outcomes.json and snapshot_tests.json for zoned schools; nonzoned_snapshot.json and
     ms_snapshot.json for schools without zones; hs_snapshot.json (SAT, readiness, where graduates went) for high schools;
-    charter_snapshot.json for charters (see fetch_charter_snapshot)."""
+    charter_snapshot.json for charters (see fetch_charter_snapshot).
+    year: the Snapshot year the file holds. Any year but SNAPSHOT_YEAR is filed only in data/history/<name>/<school year>.json,
+    leaving what the site shows alone. Only 2024 (2023-24) on have today's three ratings; older years rate other things."""
+    period = None if str(year) == SNAPSHOT_YEAR else school_year(year)
     with open(os.path.expanduser(path), encoding="utf-8") as f:
         raw = json.load(f)
     snap = raw["schools"]
@@ -1511,15 +1558,15 @@ def import_snapshot(path):
     missing = sorted((zoned | es_nz | ms_nz | hs_all) - set(snap))
     if missing:
         print(f"  no Snapshot page for {len(missing)} schools: {', '.join(missing[:20])}{' ...' if len(missing) > 20 else ''}")
-    save("snapshot_ratings.json", ratings)
-    save("snapshot_extra.json", extra)
-    save("hs_outcomes.json", outcomes)
-    save("snapshot_tests.json", tests)
-    save("nonzoned_snapshot.json", nz)
-    save("ms_snapshot.json", ms)
+    save("snapshot_ratings.json", ratings, period)
+    save("snapshot_extra.json", extra, period)
+    save("hs_outcomes.json", outcomes, period)
+    save("snapshot_tests.json", tests, period)
+    save("nonzoned_snapshot.json", nz, period)
+    save("ms_snapshot.json", ms, period)
     save("hs_snapshot.json", {"source": f"{raw.get('source', 'DOE School Quality Snapshot')} (HS report), "
-                                        f"tools.nycenet.edu/snapshot, fetched {raw.get('fetched', '')}", "schools": hs})
-    _save_charter_snapshot(snap)
+                                        f"tools.nycenet.edu/snapshot, fetched {raw.get('fetched', '')}", "schools": hs}, period)
+    _save_charter_snapshot(snap, str(year), period)
 
 
 if __name__ == "__main__":
@@ -1579,6 +1626,14 @@ if __name__ == "__main__":
         sys.exit()
     if args[:1] == ["snapshot-job"]:  # writes ~/Downloads/snapshot_job.js to paste into the browser
         snapshot_job(args[1] if len(args) > 1 else None)
+        sys.exit()
+    if args[:1] == ["snapshot-year"] and len(args) == 2:  # an older Snapshot year, into data/history only
+        print(f"-- snapshot {args[1]} (into data/history)")
+        import_snapshot(fetch_snapshot_year(args[1]), args[1])
+        sys.exit()
+    if args[:1] == ["snapshot-raw"] and len(args) == 3:  # a browser download of another year: snapshot-raw <file> 2024
+        print(f"-- snapshot {args[2]} (from browser download)")
+        import_snapshot(args[1], args[2])
         sys.exit()
     if args[:1] == ["snapshot-raw"] and len(args) == 2:  # the file snapshot_job.js downloaded
         print("-- snapshot (from browser download)")

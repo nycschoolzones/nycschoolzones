@@ -166,6 +166,8 @@ This writes `snapshot_ratings.json`, `snapshot_extra.json`, `snapshot_tests.json
 
 Then `python3 scripts/fetch_data.py snapshot-counts` fetches each school's English language learners and students with IEPs as counts (`snapshot_counts.json`), for "159 of 1,030" under Demographics at the few schools the Demographic Snapshot (step 6b) doesn't list. It reads the files above, so run it last; it needs the Snapshot to answer scripted requests.
 
+Older years, for trends: `python3 scripts/fetch_data.py snapshot-year 2024` fetches that year (2024 means 2023–24) for today's schools and files it only in `data/history/<name>/2023-24.json`; the site keeps showing `SNAPSHOT_YEAR`. From a browser download instead: `python3 scripts/fetch_data.py snapshot-raw <file> 2024` (set the year in `snapshot_job.js` before pasting it). Only 2023–24 on have today's three ratings; earlier years rate other things.
+
 `python3 scripts/fetch_data.py colocation` does the same for "Shares its building with" under School details (`colocation.json`): it reads each school's co-location line from the Snapshot and the other schools' current names from LCGMS, leaving out schools LCGMS no longer lists as open. Run it after `snapshot-counts`; it takes about a minute.
 
 ### 3b. State test scores (late summer, when the DOE posts the spring's results at [InfoHub](https://infohub.nyced.org/reports/academics/test-results))
