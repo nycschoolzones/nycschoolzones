@@ -4,7 +4,7 @@ An interactive map of New York City's elementary (kindergarten), middle and high
 
 - **Zones:** current elementary, middle and high school zones from the DOE's Find a School map
 - **School Quality Snapshot (2024–25):** Instruction and Performance, Safety and School Climate, and Relationships with Families, each rated 1–4, plus an Overall average of the three
-- **State tests (2024–25 Snapshot):** share of students scoring proficient in ELA and Math (grades 3–5 for elementary, 6–8 for middle); high schools show 4-year graduation and college/career enrollment instead
+- **State tests (spring 2026):** share of students scoring proficient in ELA and Math, every tested grade at the school, from the DOE's school results (`data/state_tests.json`); charter schools, which those leave out, show their 2024–25 Snapshot scores; high schools show 4-year graduation and college/career enrollment instead
 - **Programs:** gifted & talented, dual language and special education
 - **Students with IEPs and English language learners:** counts from the Demographic Snapshot (`data/demographics.json`, also behind Color by special ed); the School Quality Snapshot's counts (`data/snapshot_counts.json`) fill in for the few schools it doesn't list
 - **Demographics:** race and ethnicity, girls and boys, the share of low-income students (the DOE's "poverty" count), and students with IEPs and English language learners at each school, next to all of NYC, from the DOE's Demographic Snapshot (`data/demographics.json`)
@@ -67,13 +67,12 @@ brand/                  Channel art: youtube-icon.png (800×800), youtube-banner
 data/
   elem_zones.json       zone boundaries + school names/locations
   ms_zones.json         middle school zone boundaries + school names/locations
-  ms_state_tests.json   grade 6–8 ELA/Math results by school
   hs_zones.json         high school zone boundaries + school names/locations
   hs_outcomes.json      high school graduation and college/career rates
   snapshot_extra.json   enrollment, programs and other Snapshot facts by school
   colocation.json       other schools in each school's building (Snapshot co-location, LCGMS names)
   demographics.json     race and ethnicity, girls and boys, % low-income, IEPs and English learners by school, plus all of NYC (DOE Demographic Snapshot)
-  state_tests.json      grade 3–5 ELA/Math results by school
+  state_tests.json      ELA/Math results by school, all tested grades (DOE, settings.TESTS_YEAR)
   snapshot_ratings.json Snapshot ratings by school
   streets.json          simplified major streets for the overlay
   local_streets.json    every other street, compactly encoded
@@ -81,6 +80,10 @@ data/
   neighborhoods.json    residential neighborhood boundaries (NYC Planning NTAs)
   school_fixes.json     hand-checked: district schools that moved, better map points, closed schools
   zips.json             each school's current address, ZIP code, tax lot center and grades (DOE LCGMS, NYC Planning PLUTO)
+  history/<name>/<period>.json  dated copies of the yearly datasets above, kept for trends (the build doesn't read them):
+                        Snapshot files by school year (2024-25), MySchools files by admissions round (fall-2026), demographics,
+                        class size and building use by school year, pre-K by fall, zones by the month fetched (2026-10),
+                        and state_tests/<year>.json: every year in the DOE's file since 2018, all grades and each grade
 scripts/
   build.py              data/ + src/template.html  →  index.html
   settings.py           data years, citywide averages and color scales, shared by the map, the pages and fetch_data.py
@@ -152,7 +155,7 @@ This writes `nonzoned_k.json`, `citywide_gt_k.json`, `k_priority.json`, `ms_dire
 
 ### 3. School Quality Snapshot (when a new year appears at [tools.nycenet.edu/snapshot](https://tools.nycenet.edu/snapshot/))
 
-Ratings, test scores, graduation, SAT, college readiness, where graduates went, and school facts, for every school on the map.
+Ratings, graduation, SAT, college readiness, where graduates went, and school facts, for every school on the map; test scores for charter schools and the few schools step 3b doesn't have.
 
 1. Set `SNAPSHOT_YEAR` in `scripts/settings.py` to the new year (2025 means 2024–25). Every "2024–25" label on the map and the pages follows it. Also update `CITY_GRAD` and `CITY_READINESS` there, the citywide averages from the new Snapshot.
 2. `python3 scripts/fetch_data.py snapshot-job` writes `~/Downloads/snapshot_job.js`, with the list of schools from steps 1–2 filled in.
@@ -164,6 +167,13 @@ This writes `snapshot_ratings.json`, `snapshot_extra.json`, `snapshot_tests.json
 Then `python3 scripts/fetch_data.py snapshot-counts` fetches each school's English language learners and students with IEPs as counts (`snapshot_counts.json`), for "159 of 1,030" under Demographics at the few schools the Demographic Snapshot (step 6b) doesn't list. It reads the files above, so run it last; it needs the Snapshot to answer scripted requests.
 
 `python3 scripts/fetch_data.py colocation` does the same for "Shares its building with" under School details (`colocation.json`): it reads each school's co-location line from the Snapshot and the other schools' current names from LCGMS, leaving out schools LCGMS no longer lists as open. Run it after `snapshot-counts`; it takes about a minute.
+
+### 3b. State test scores (late summer, when the DOE posts the spring's results at [InfoHub](https://infohub.nyced.org/reports/academics/test-results))
+
+1. Set `TESTS_YEAR` in `scripts/settings.py` to the spring of the tests (2026 for spring 2026). Also update `CITY_ELA_ES` and `CITY_MATH_ES`, the citywide share meeting standards in grades 3–5, from the citywide ELA and math files on the same page ("All Students", grades 3, 4 and 5 together). Clear or rewrite `TESTS_NOTE` and `TESTS_NOTE_SHORT`, the note about that year's scores (`""` hides it).
+2. `python3 scripts/fetch_data.py tests` downloads the school ELA and math files (about 50 MB each) and writes `state_tests.json`. If InfoHub is blocked, download them in a browser and run `python3 scripts/fetch_data.py tests <school-ela.xlsx> <school-math.xlsx>`.
+
+The build stops if `state_tests.json` doesn't match `TESTS_YEAR`. Charter schools aren't in these files, so theirs still come from the Snapshot (step 3).
 
 ### 4. Admissions: kindergarten, grade 6, grade 9, pre-K and 3-K (each fall or winter, for the previous fall)
 
@@ -222,7 +232,6 @@ Download the Classic Edition PDF from the [SCA](https://www.nycsca.org/Community
 - Streets: `python3 scripts/fetch_data.py streets`.
 - Parks: `python3 scripts/fetch_data.py parks`.
 - Neighborhoods (only when NYC Planning redraws them, about once a decade): `python3 scripts/fetch_data.py neighborhoods`.
-- State test files from NYC Open Data, only used as a fallback when the Snapshot has no scores: `python3 scripts/fetch_data.py tests`, after updating `TEST_YEAR`.
 
 ### Then
 
@@ -231,6 +240,8 @@ python3 scripts/build.py          # site, school, district and neighborhood page
 python3 scripts/make_preview.py   # optional: redraw preview.png
 python3 scripts/make_brand.py     # optional: redraw the YouTube and Facebook images
 ```
+
+`fetch_data.py` also files each yearly dataset it writes under `data/history/<name>/<period>.json`, the period taken from `scripts/settings.py` (so set the years there first). A file imported or edited by hand gets its dated copy with `python3 scripts/fetch_data.py history`, which never overwrites one that's already there. Commit the dated files with the rest.
 
 The school, district and neighborhood pages, including the neighborhood zone maps, are rebuilt from `data/`, so they need nothing by hand. Every year shown on the map and the pages comes from the dates of the data files or from `scripts/settings.py`: check that `SNAPSHOT_YEAR`, `CITY_GRAD`, `CITY_READINESS`, `PREK_LABEL`, `BLUE_BOOK_LABEL` and `DEMOGRAPHICS_LABEL` match what you refreshed. Also update the years in "Data sources" below.
 
