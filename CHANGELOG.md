@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- Behind the scenes: the 2023–24 School Quality Snapshot is now saved next to 2024–25, the one earlier year with the same three ratings, so year-to-year changes can be shown later.
+
 ## 1.64.0 (2026-11-02)
 
 ### Changed
