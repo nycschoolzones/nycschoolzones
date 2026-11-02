@@ -157,7 +157,7 @@ aside>*{flex-shrink:0}
 .school hr.sep,.card>hr.sep{border:0;border-top:1px solid var(--line);margin:8px 0 6px;width:100%}
 .card>hr.sep{margin:0}
 .rates .sub-r{padding-left:14px;color:var(--muted)}
-.lbar{height:12px;border-radius:3px;background:linear-gradient(90deg,var(--r-red) 0%,var(--r-red) 5%,var(--r-yellow) 50%,var(--r-green) 95%,var(--r-green) 100%)}
+.lbar{height:12px;border-radius:3px;background:linear-gradient(90deg,var(--r-red) 0%,var(--r-red) 10%,var(--r-yellow) 50%,var(--r-green) 90%,var(--r-green) 100%)}
 .lticks{position:relative;height:16px;font-family:var(--display);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .lticks span{position:absolute;top:2px;transform:translateX(-50%)}
 .lticks span:last-child{transform:translateX(-70%)}
@@ -585,8 +585,8 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       </div>
       <div class="legend" id="leg-test" hidden>
         <div class="lbar"></div>
-        <div class="lticks"><span style="left:5%">5</span><span style="left:50%">50</span><span style="left:95%">95%</span></div>
-        <p class="hint" id="test-hint">Share of students who met state standards (Level 3 or 4) on the New York State ELA and math tests, spring 2026 (charter schools: 2024–25 School Quality Snapshot). Covers every tested grade at the school (grades 3–8). Citywide, grades 3–5: ELA 47%, Math 60%. ELA scores fell across New York State in spring 2026, mostly in grades 3–5 (citywide, grade 3 went from 58% to 44%). Compare schools with each other rather than with last year. <span class="nd"></span> No test results.</p>
+        <div class="lticks"><span style="left:10%">10</span><span style="left:50%">50</span><span style="left:90%">90%</span></div>
+        <p class="hint" id="test-hint">Share of students who met state standards (Level 3 or 4) on the New York State ELA and math tests, spring 2026 (charter schools: 2024–25 School Quality Snapshot). Covers every tested grade at the school (grades 3–8). Citywide, grades 3–5: ELA 47%, Math 60%. ELA scores jumped across New York State in 2025 and fell back in 2026, mostly in grades 3–5. Compare schools with each other rather than with last year. <span class="nd"></span> No test results.</p>
       </div>
       <div class="legend nz-key" id="nz-key"><div class="sw"><span id="zsk-item"><i class="zsk"></i>Zoned</span><span id="nzk-item"><i class="nzk"></i>Non-zoned</span><span id="gtk-item"><i class="gtk"></i>Citywide G&amp;T</span><span id="chk-item"><i class="chs"></i>Charter</span></div></div>
   </div>
@@ -912,8 +912,8 @@ let rampTheme=null;
 function rampColor(v,S){const P=RAMP[rampTheme||(isDark()?'dark':'light')];if(v<=S[0][0])return rgb(P[S[0][1]]);for(let i=1;i<S.length;i++){const[a,na]=S[i-1],[b,nb]=S[i];if(v<=b){const t=(v-a)/(b-a),ca=P[na],cb=P[nb];return rgb(ca.map((c,k)=>c+(cb[k]-c)*t))}}return rgb(P[S[S.length-1][1]])}
 // card swatches and bars: the light color inline, the dark one in --cd for the dark theme's CSS rule, so they follow a theme switch
 function bgBoth(f){rampTheme='light';const l=f();rampTheme='dark';const d=f();rampTheme=null;return 'background:'+l+';--cd:'+d}
-// state tests: straight red (5%) -> yellow (50%) -> green (95%)
-const TEST_STOPS=[[5,"red"],[50,"yellow"],[95,"green"]];
+// state tests: straight red -> yellow -> green at settings.TEST_STOPS (10% / 50% / 90%)
+const TEST_STOPS=[[10,"red"],[50,"yellow"],[90,"green"]];
 function scoreColor(v){return rampColor(v,TEST_STOPS)}
 // high school outcomes have their own ranges: graduation 65/80/95, college & career 40/60/80
 const OUT_STOPS={"grad":[[65,"red"],[80,"yellow"],[95,"green"]],"coll":[[40,"red"],[60,"yellow"],[80,"green"]],"ccr":[[35,"red"],[55,"yellow"],[80,"green"]],"sat":[[800,"red"],[950,"yellow"],[1200,"green"]]},outTicks=m=>OUT_STOPS[m].map(x=>x[0]);
@@ -1375,7 +1375,7 @@ function advHtml(q){if(q[2]==null&&!(q[5]&&q[5].length))return '';
 function zonedHtml(d){const a=X[d]&&X[d][8]||'';if(/Zoned Guarantee/i.test(a))return '<div class="tags"><span class="tag">Zoned guarantee</span></div><span class="meta">Students in this zone who apply are guaranteed a seat in the zoned program.</span>';
   if(/Zoned Priority/i.test(a))return '<div class="tags"><span class="tag">Zoned priority</span></div><span class="meta">Students in this zone who apply get priority for the zoned program, but a seat isn’t guaranteed.</span>';return ''}
 function scoreHtml(d){if(level==='hs')return outHtml(d);const g=LEVEL_TXT[level].grades,v=T[d];if(!v)return '<span class="meta">No spring 2026 state test results'+(level==='es'?' (K–2 or newer school)':' (newer school)')+'.</span>';
-  const n=Math.max(v[0],v[2]);return '<div class="scores">'+row('ELA',v[0],v[1])+row('Math',v[2],v[3])+'<small>'+(v[4]?'2024–25 School Quality Snapshot':'State tests, spring 2026')+' · '+n+' test takers'+(n<60?' · small group, read with care':'')+(!v[4]&&level==='es'&&'ELA fell statewide in 2026'?' · ELA fell statewide in 2026':'')+'</small></div>'}
+  const n=Math.max(v[0],v[2]);return '<div class="scores">'+row('ELA',v[0],v[1])+row('Math',v[2],v[3])+'<small>'+(v[4]?'2024–25 School Quality Snapshot':'State tests, spring 2026')+' · '+n+' test takers'+(n<60?' · small group, read with care':'')+(!v[4]&&level==='es'&&'ELA jumped statewide in 2025, then fell back'?' · ELA jumped statewide in 2025, then fell back':'')+'</small></div>'}
 // how a zone with several schools works, from the DOE's note
 function zoneKind(p){const r=p.remarks||'';if(/zoned by address/i.test(r))return 'address';
   if(/grades?\s*K\s*-\s*[12]\b.*zoned|zoned to.*grades?|grades?\s*\d\s*-\s*\d\s*(are|is)?\s*zoned/i.test(r)&&!/^shared zone/i.test(r))return 'grade';
@@ -1601,7 +1601,7 @@ async function setLevel(lv){if(lv===level)return;if(!LV[lv]&&!(await loadLevel(l
   document.getElementById('g-tests').textContent=hs?'Outcomes':'Tests';
   if(hs&&['both','ela','math'].includes(lastPick.tests)){testsPick=lastPick.tests;lastPick.tests=outPick}else if(!hs&&isOut(lastPick.tests)){outPick=lastPick.tests;lastPick.tests=testsPick}
   if(hs&&['both','ela','math'].includes(metric)||!hs&&isOut(metric)){const r=document.querySelector('input[name=metric][value='+lastPick.tests+']');r.checked=true;r.dispatchEvent(new Event('change'))}
-  document.getElementById('test-hint').innerHTML='Share of students who met state standards (Level 3 or 4) on the New York State ELA and math tests, spring 2026 (charter schools: 2024–25 School Quality Snapshot). Covers every tested grade at the school (grades 3–8). '+(tx.avg?tx.avg+'. ':'')+'ELA scores fell across New York State in spring 2026, mostly in grades 3–5 (citywide, grade 3 went from 58% to 44%). Compare schools with each other rather than with last year. <span class="nd"></span> No test results.';
+  document.getElementById('test-hint').innerHTML='Share of students who met state standards (Level 3 or 4) on the New York State ELA and math tests, spring 2026 (charter schools: 2024–25 School Quality Snapshot). Covers every tested grade at the school (grades 3–8). '+(tx.avg?tx.avg+'. ':'')+'ELA scores jumped across New York State in 2025 and fell back in 2026, mostly in grades 3–5. Compare schools with each other rather than with last year. <span class="nd"></span> No test results.';
   // G&T is an elementary program; hide it for middle school
   const noGT=lv!=='es',gt=document.getElementById('m-gt');gt.hidden=noGT;document.getElementById('lbl-gt').hidden=noGT;
   document.getElementById('m-pk').hidden=noGT;document.getElementById('lbl-pk').hidden=noGT;

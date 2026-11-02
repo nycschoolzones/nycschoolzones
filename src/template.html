@@ -877,7 +877,7 @@ let rampTheme=null;
 function rampColor(v,S){const P=RAMP[rampTheme||(isDark()?'dark':'light')];if(v<=S[0][0])return rgb(P[S[0][1]]);for(let i=1;i<S.length;i++){const[a,na]=S[i-1],[b,nb]=S[i];if(v<=b){const t=(v-a)/(b-a),ca=P[na],cb=P[nb];return rgb(ca.map((c,k)=>c+(cb[k]-c)*t))}}return rgb(P[S[S.length-1][1]])}
 // card swatches and bars: the light color inline, the dark one in --cd for the dark theme's CSS rule, so they follow a theme switch
 function bgBoth(f){rampTheme='light';const l=f();rampTheme='dark';const d=f();rampTheme=null;return 'background:'+l+';--cd:'+d}
-// state tests: straight red (5%) -> yellow (50%) -> green (95%)
+// state tests: straight red -> yellow -> green at settings.TEST_STOPS (10% / 50% / 90%)
 const TEST_STOPS=__TEST_STOPS__;
 function scoreColor(v){return rampColor(v,TEST_STOPS)}
 // high school outcomes have their own ranges: graduation 65/80/95, college & career 40/60/80

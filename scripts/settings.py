@@ -16,12 +16,12 @@ TESTS_LABEL = f"spring {TESTS_YEAR}"
 # NYC-wide share meeting standards in grades 3-5 that spring (%), from the DOE's citywide results, quoted on the map
 CITY_ELA_ES = 47
 CITY_MATH_ES = 60
-# A note on that year's scores, next to them on the map and the school pages; "" for none. Spring 2026: ELA fell
-# statewide, mostly in grades 3-5 (citywide grade 3: 58.0% -> 44.2%, grade 5: 59.7% -> 46.6%), after the state had
-# lowered the grade 3, 4 and 6 ELA cut scores in 2025. TESTS_NOTE_SHORT goes on each school's card.
-TESTS_NOTE = ("ELA scores fell across New York State in spring 2026, mostly in grades 3–5 (citywide, grade 3 went from "
-              "58% to 44%). Compare schools with each other rather than with last year.")
-TESTS_NOTE_SHORT = "ELA fell statewide in 2026"
+# A note on that year's scores, next to them on the map and the school pages; "" for none. Spring 2026: grades 3-5
+# ELA jumped in 2025 (the state lowered the grade 3, 4 and 6 cut scores) and fell back in 2026 to about its 2023-24
+# level (citywide grade 3: 2024 ~46%, 2025 58%, 2026 44%). TESTS_NOTE_SHORT goes on each elementary school's card.
+TESTS_NOTE = ("ELA scores jumped across New York State in 2025 and fell back in 2026, mostly in grades 3–5. "
+              "Compare schools with each other rather than with last year.")
+TESTS_NOTE_SHORT = "ELA jumped statewide in 2025, then fell back"
 # Pre-K and 3-K seats and applicants: the DOE's Local Law 72 admissions report (data/prek.json)
 PREK_LABEL = "fall 2025"
 # MySchools directories (data/ms_directory.json, hs_directory.json, k_priority.json): the admissions round their
@@ -48,7 +48,7 @@ RAMP_COLORS = {"light": {"red": [228, 68, 73], "orange": [249, 140, 16], "yellow
 # DOE ratings: 1 -> 5, 2 -> 50, 3 -> 75, 4 -> 95 on this scale
 RATE_STOPS = [[5, "red"], [50, "orange"], [75, "yellow"], [95, "green"]]
 # % meeting state standards
-TEST_STOPS = [[5, "red"], [50, "yellow"], [95, "green"]]
+TEST_STOPS = [[10, "red"], [50, "yellow"], [90, "green"]]
 # high school outcomes
 OUT_STOPS = {"grad": [[65, "red"], [80, "yellow"], [95, "green"]],     # 4-year graduation rate (%)
              "coll": [[40, "red"], [60, "yellow"], [80, "green"]],     # college or career program (%)
