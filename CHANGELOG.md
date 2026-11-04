@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.66.0 (2026-11-04)
 
 ### Changed
 - The yellow outline around the selected zone or district is a softer yellow, so it's easier on the eyes and still stands out.
