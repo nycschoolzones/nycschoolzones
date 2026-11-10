@@ -69,6 +69,7 @@ def fill_settings(template):
                  "__OUT_STOPS__": json.dumps(settings.OUT_STOPS, separators=(",", ":")),
                  "__DEMO_GROUPS__": json.dumps(settings.DEMO_GROUPS, separators=(",", ":"), ensure_ascii=False),
                  "__HS_METHOD_HELP__": json.dumps(settings.HS_METHOD_HELP, separators=(",", ":"), ensure_ascii=False),
+                 "__MS_METHOD_HELP__": json.dumps(settings.MS_METHOD_HELP, separators=(",", ":"), ensure_ascii=False),
                  "__TEST_GRADIENT__": gradient, "__TEST_TICKS__": ticks,
                  "__RAMP_COLORS__": json.dumps(settings.RAMP_COLORS, separators=(",", ":")), "__RAMP_CSS__": ramp_css}.items():
         template = template.replace(k, v)
@@ -611,6 +612,31 @@ def extras(lv, rows):
     return {"EX": ex, "EXV": exv, "EXG": [list(g[1:]) for g in EX_GROUPS[lv]]}
 
 
+BORO_OF_DISTRICT = {**{n: "Manhattan" for n in range(1, 7)}, **{n: "the Bronx" for n in range(7, 13)},
+                    **{n: "Brooklyn" for n in [*range(13, 24), 32]}, **{n: "Queens" for n in range(24, 31)}, 31: "Staten Island"}
+
+
+def district_list(nums):
+    """"1, 3, 4 and 5 in Manhattan; 7, 9 and 12 in the Bronx" for districts by number."""
+    by = {}
+    for n in nums:
+        by.setdefault(BORO_OF_DISTRICT[n], []).append(str(n))
+    say = lambda l: l[0] if len(l) == 1 else ", ".join(l[:-1]) + " and " + l[-1]
+    return "; ".join(f"{say(l)} in {b}" for b, l in by.items())
+
+
+def k_room(d):
+    """Percent of zoned elementary schools that made kindergarten offers to families from other districts in the
+    latest Local Law 72 year (k_admissions.json; row[10] is other-district offers, low end): a sign that every
+    zoned family who applied got a seat."""
+    if not os.path.exists(os.path.join(DATA, "k_admissions.json")):
+        return "most"
+    ka = load("k_admissions.json")
+    zoned = {x for f in d["features"] for x in f["properties"]["dbns"]}
+    yr = max(y for v in ka.values() for y in v)
+    rows = [v[yr] for k, v in ka.items() if k in zoned and yr in v]
+    return f"{round(100 * sum(1 for r in rows if r[10]) / len(rows))}%" if rows else "most"
+
 def priority_steps(groups, dbn):
     """MySchools priority groups [[name, outcome sentence]] -> the steps the map and pages show, in order.
     A step is [group, applicants, offers]: group "S" siblings, "C" continuing students, "B" the school's borough,
@@ -1008,6 +1034,12 @@ def main(standalone_path=None, pages=None):
     zdate = datetime.date.fromtimestamp(os.path.getmtime(os.path.join(DATA, "elem_zones.json")))
     template = template.replace("__ZONES_DATE__", zdate.strftime("%b %Y"))
     template = template.replace("__ES_ZONES__", str(len(d["features"])))
+    # for "How middle school / kindergarten admissions work": districts with no zoned middle school, and the share
+    # of zoned elementary schools that also made kindergarten offers to families from other districts last fall
+    template = template.replace("__MS_ZONED_DISTRICTS__", str(len(ms_districts := {
+        int(x[:2]) for f in d.get("MS", {}).get("features", []) for x in f["properties"]["dbns"]})))
+    template = template.replace("__MS_UNZONED__", district_list(sorted(set(range(1, 33)) - ms_districts)))
+    template = template.replace("__K_ROOM__", str(k_room(d)))
     template = fill_settings(template)
 
     full = dict(d)

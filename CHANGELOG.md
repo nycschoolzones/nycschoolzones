@@ -6,6 +6,15 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- Elementary and middle school notes now match the high school one: a short note under the yellow box, plus a "How kindergarten admissions work" or "How middle school admissions work" window that spells out what a zone gives you, district priority, G&T (kindergarten) and how middle school programs choose students.
+- On a middle school's card, tap a program's admissions method ("Zone priority", "Screened", …) to see in one line what it means. School pages show that line under each program.
+
+### Fixed
+- The middle school note said most districts don't zone middle schools. In fact 20 of the 32 districts zone some or all of them; the note now says so and names the districts that don't.
+
 ## 1.70.0 (2026-11-10)
 
 ### Added

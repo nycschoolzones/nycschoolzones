@@ -551,6 +551,7 @@ def ms_adm_html(dbn, lv, progs, eg=None):
     if not R:
         return ""
     N = HNAME if lv == "hs" else MNAME
+    help_ = settings.HS_METHOD_HELP if lv == "hs" else settings.MS_METHOD_HELP
     solo = len(R) == 1
     G = f"Grade {eg}" if eg else {"ms": "Grade 6", "hs": "Grade 9"}[lv]
     h = f"<h2>{G} admissions, {settings.MYSCHOOLS_LABEL}</h2>"
@@ -568,8 +569,7 @@ def ms_adm_html(dbn, lv, progs, eg=None):
         how = " · ".join(x for x in (N.get(p[1], p[1]), f"{p[2]} seats" + (", all filled" if p[4] else "") if p[2] is not None else "",
                                       "diversity set-aside" if p[5] else "") if x)
         h += (f'<h3 class="adm-p">{"" if solo else e(p[0] or "Main program") + " "}<small>{e(how)}</small></h3>'
-              + (f'<p class="src">{e(N.get(p[1], p[1]))}: {e(settings.HS_METHOD_HELP[p[1]])}</p>'
-                 if lv == "hs" and p[1] in settings.HS_METHOD_HELP else "")
+              + (f'<p class="src">{e(N.get(p[1], p[1]))}: {e(help_[p[1]])}</p>' if p[1] in help_ else "")
               + (f'<p>{e(p[10])} <small>(MySchools)</small></p>' if len(p) > 10 and p[10] else "")
               + adm_table(dbn, lv, p[6] if len(p) > 6 else [], p[3], "students"))
         if len(p) > 7 and p[7]:

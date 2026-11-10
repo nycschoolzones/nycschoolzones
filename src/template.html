@@ -410,8 +410,8 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <div class="note how" id="how">
         <p class="must">Always confirm an exact address on <a href="https://schoolsearch.schools.nyc/" target="_blank" rel="noopener">schoolsearch.schools.nyc</a> before applying.</p>
       </div>
-      <details class="lvl-more"><summary id="lvl-sum">A zone gives priority, not a guaranteed seat</summary>
-        <div id="lvl-note">Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.</div>
+      <details class="lvl-more"><summary id="lvl-sum">How elementary school zones work</summary>
+        <div id="lvl-note"><p>Families apply for kindergarten through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and get one offer.</p><p>Living in a school’s zone gives your child top priority there, and most zoned schools have room for every zoned family who applies on time. List your zoned school anywhere on your application.</p><p><button type="button" class="link-btn" data-open="es-guide">How kindergarten admissions work →</button></p></div>
       </details>
     </header>
 
@@ -476,6 +476,41 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
   </details>
   <div class="row"><small>Questions or corrections? <a href="mailto:info@nycschoolzones.com?subject=NYC%20School%20Zones%20feedback">info@nycschoolzones.com</a></small>
     <button type="button" id="intro-ok" autofocus>Got it</button></div>
+</dialog>
+<dialog class="intro guide" id="es-guide" aria-labelledby="esg-h">
+  <h2 id="esg-h">How kindergarten admissions work</h2>
+  <p>Families apply for kindergarten through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> in the winter before their child starts, the year the child turns 5. You rank up to 12 programs and get one offer.</p>
+  <h3>If you live in a school zone</h3>
+  <p>Living in a zone gives your child top priority at that school, and siblings of current students often come first. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools offer a seat to every zoned family who applies on time, but a few crowded schools can’t. Last fall, __K_ROOM__ of zoned schools also had room for families from other districts. List your zoned school anywhere on your application, even last, as a backup. Ranking other schools above it doesn’t hurt your priority there.</p>
+  <h3>Other schools in your district</h3>
+  <p>Seats a zoned school has left over, and schools with no zone, go to families in the school’s district first, then to the rest of the city. A few non-zoned schools take families from more than one district.</p>
+  <h3>Gifted &amp; Talented</h3>
+  <p>District G&amp;T programs give priority to eligible children in their district, and five citywide G&amp;T schools take children from across the city. If you list G&amp;T programs, your child is screened to see if they’re eligible. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/gifted-talented" target="_blank" rel="noopener">How G&amp;T eligibility works</a>.</p>
+  <h3>Other programs and charter schools</h3>
+  <p>Some schools have extra programs, like dual language, that use the same priorities as their main kindergarten program. Charter schools aren’t on MySchools: each runs its own lottery, with its own application.</p>
+  <div class="row"><span></span><button type="button" class="guide-ok">Close</button></div>
+</dialog>
+<dialog class="intro guide" id="ms-guide" aria-labelledby="msg-h">
+  <h2 id="msg-h">How middle school admissions work</h2>
+  <p>Every 5th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> in the fall, ranking up to 12 programs, and gets one offer.</p>
+  <h3>If you live in a middle school zone</h3>
+  <p>__MS_ZONED_DISTRICTS__ of NYC’s 32 districts zone some or all of their middle schools. Living in a zone gives you priority at that school, after siblings of current students and, at K–8 schools, the school’s own 5th graders. Last year zoned students who applied got an offer at almost every zoned school. List the zoned school anywhere on your application, even last, as a backup. Ranking other schools above it doesn’t hurt your priority there.</p>
+  <p>These districts have no zoned middle schools: __MS_UNZONED__. There, every student chooses among programs in their district and beyond.</p>
+  <h3>Your district comes first</h3>
+  <p>Unlike high school, nearly every middle school program puts students who live or go to school in its district first, then the rest of the city. A few give priority to a borough or to particular ZIP codes instead, sometimes for a share of seats.</p>
+  <h3>How programs choose</h3>
+  <ul>
+    <li><b>Zone priority</b> (the most common, with Open): students in the zone first.</li>
+    <li><b>Open:</b> random among applicants, after any priorities.</li>
+    <li><b>Screened:</b> ranks applicants by their course grades. A few also use the school’s own assessment.</li>
+    <li><b>Language program:</b> for students learning English or joining a dual-language program.</li>
+    <li><b>Audition:</b> arts programs, by audition.</li>
+    <li><b>Talent test:</b> District 21’s Mark Twain school, by its own test.</li>
+  </ul>
+  <p>On a school’s card, tap a program’s method to see what it means.</p>
+  <h3>Seats for low-income students, and charter schools</h3>
+  <p>Some programs set aside a share of seats for students from low-income families. Charter schools aren’t on MySchools: each runs its own lottery, with its own application.</p>
+  <div class="row"><span></span><button type="button" class="guide-ok">Close</button></div>
 </dialog>
 <dialog class="intro guide" id="hs-guide" aria-labelledby="hsg-h">
   <h2 id="hsg-h">How high school admissions work</h2>
@@ -614,10 +649,12 @@ const O=Object.assign({},HSD&&HSD.O||{});
 const Q=Object.assign({},HSD&&HSD.Q||{});
 let level='es',F=LV.es.F,T=LV.es.T;
 const LEVEL_TXT={
-  es:{sum:'A zone gives priority, not a guaranteed seat',badge:'Kindergarten zones · __ZONES_DATE__',note:'Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.',h1:'NYC Elementary School Zones',sub:n=>n+' kindergarten zones from the NYC Department of Education.',grades:'3–5',avg:'Citywide, grades 3–5: ELA __CITY_ELA_ES__%, Math __CITY_MATH_ES__%',miss:'That point is outside every elementary zone. Check the coordinates, or it may be in a park or outside NYC.',noZone:'No zoned elementary school'},
+  es:{sum:'How elementary school zones work',badge:'Kindergarten zones · __ZONES_DATE__',note:'<p>Families apply for kindergarten through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and get one offer.</p><p>Living in a school’s zone gives your child top priority there, and most zoned schools have room for every zoned family who applies on time. List your zoned school anywhere on your application.</p><p><button type="button" class="link-btn" data-open="es-guide">How kindergarten admissions work →</button></p>',h1:'NYC Elementary School Zones',sub:n=>n+' kindergarten zones from the NYC Department of Education.',grades:'3–5',avg:'Citywide, grades 3–5: ELA __CITY_ELA_ES__%, Math __CITY_MATH_ES__%',miss:'That point is outside every elementary zone. Check the coordinates, or it may be in a park or outside NYC.',noZone:'No zoned elementary school'},
   hs:{sum:'How high school zones work',badge:'High school zones · __ZONES_DATE__',h1:'NYC Zoned High Schools',sub:n=>n+' high schools give priority to students who live in their zone.',grades:'9–12',avg:'',miss:'That point isn’t in a high school zone. Most of the city has no zoned high school; students apply citywide through MySchools.',noZone:'No zoned high school',
       note:'<p>Most of NYC has no zoned high school. Every 8th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and gets one offer.</p><p>If you live in a high school zone, list the zoned program anywhere on your application: last year every zoned student who did got an offer.</p><p><button type="button" class="link-btn" data-open="hs-guide">How high school admissions work →</button></p>'},
-  ms:{sum:'How middle school zones work',badge:'Middle school zones · __ZONES_DATE__',sub:n=>'Zones for '+n+' middle schools, in the districts that have them.',note:'Most districts don’t zone middle schools. In the uncolored areas, students apply to middle schools through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>. Even in zoned districts, many students also apply to other programs.',h1:'NYC Middle School Zones',grades:'6–8',avg:'NYC middle schools average ELA 55%, Math 53%',miss:'That point isn’t in a zoned middle school area. It may be in a district without zoned middle schools, a park, or outside NYC.',noZone:'No zoned middle school'}};
+  ms:{sum:'How middle school zones work',badge:'Middle school zones · __ZONES_DATE__',sub:n=>'Zones for '+n+' middle schools, in the districts that have them.',note:'<p>__MS_ZONED_DISTRICTS__ of NYC’s 32 districts zone some or all of their middle schools. Every 5th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and gets one offer.</p><p>If you live in a middle school zone, list the zoned school anywhere on your application: last year zoned students who did got an offer at almost every zoned school.</p><p><button type="button" class="link-btn" data-open="ms-guide">How middle school admissions work →</button></p>',h1:'NYC Middle School Zones',grades:'6–8',avg:'NYC middle schools average ELA 55%, Math 53%',miss:'That point isn’t in a zoned middle school area. It may be in a district without zoned middle schools, a park, or outside NYC.',noZone:'No zoned middle school'}};
+// the page opens on elementary: its note comes from here too, so the copy in the header can't go stale
+document.getElementById('lvl-sum').textContent=LEVEL_TXT.es.sum;document.getElementById('lvl-note').innerHTML=LEVEL_TXT.es.note;
 let metric='comp';
 const R=D.R||{};
 // prefer current (2024-25) names and addresses from the School Quality Snapshot
@@ -730,8 +767,8 @@ function chOptions(dist,skip=[]){if(!dist)return '';const l=NZ.filter(o=>o.ch&&o
     l.map(o=>'<li><button type="button" data-nz="'+o.d+'"><span class="on">'+esc(o.n)+'<small>'+esc(CHX[o.d]&&CHX[o.d][0]?'Grades '+grades(CHX[o.d][0]):'Charter school')+'</small></span>'+chip(schoolRating(o.d,'comp'),1)+'</button></li>').join('')+'</ul></details>'}
 // middle school programs from the MySchools directory: how each admits students and last year's demand
 const MNAME={O:'Open',Z:'Zone priority',S:'Screened',SA:'Screened + assessment',A:'Audition',T:'Talent test',L:'Language program',D75:'District 75 special education',ASD:'Autism (ASD) or ACES program'};
-// high school admissions methods, one line each (settings.py HS_METHOD_HELP): tap a program's method on the card
-const HS_METHOD_HELP=__HS_METHOD_HELP__;
+// middle and high school admissions methods, one line each (settings.py MS_/HS_METHOD_HELP): tap a program's method on the card
+const HS_METHOD_HELP=__HS_METHOD_HELP__,MS_METHOD_HELP=__MS_METHOD_HELP__;
 const HNAME={S:'Screened (grades)',SA:'Screened + assessment',SL:'Screened: language & academics',E:'Ed. Opt. (mixed academic levels)',A:'Audition',O:'Open',L:'Language program',T:'SHSAT test',ZG:'Zoned guarantee',ZP:'Zoned priority',TR:'Transfer school (older students)',D75:'District 75 special education',ASD:'Autism (ASD) or ACES program'};
 // admissions tables (MySchools, __MYSCHOOLS__): per program, a row for all students, then each priority group in the
 // order it gets offers (build.py priority_steps); the Local Law 72 table (admHtml) is the fallback and sits inside
@@ -768,12 +805,12 @@ const SPECIAL=c=>c==='D75'||c==='ASD';
 // the programs a middle or high school table covers: MySchools numbers or priority groups, not the SHSAT-only ones
 function msProgs(d,lv){const P=(LV[lv]&&LV[lv].P||{})[d]||[];return P.filter(p=>!SPECIAL(p[1])&&p[1]!=='T'&&(p[3]!=null||p[6]&&p[6].length))}
 function msAdm(d,lv){const P=(LV[lv]&&LV[lv].P||{})[d]||[],R=msProgs(d,lv);if(!R.length)return '';const N=lv==='hs'?HNAME:MNAME,solo=R.length===1;
-  const mHelp=p=>lv==='hs'&&HS_METHOD_HELP[p[1]];
+  const mHelp=p=>(lv==='hs'?HS_METHOD_HELP:MS_METHOD_HELP)[p[1]];
   const head=p=>'<div class="adm-p">'+(solo?'':esc(p[0]||'Main program')+' ')+'<small>'+[mHelp(p)?'<button type="button" class="mx-btn" aria-expanded="false">'+esc(N[p[1]]||p[1])+'</button>':esc(N[p[1]]||p[1]),p[2]!=null?p[2]+' seats'+(p[4]?', all filled':''):'',p[5]?'diversity set-aside':''].filter(Boolean).join(' · ')+'</small></div>';
   const swdLine=p=>p[7]?'<p class="adm-note">Special ed seats: '+p[7]+(p[8]!=null?' · '+p[8]+' applied':'')+(p[9]?', all filled':'')+'</p>':'';
   // p[10]: a priority only the program's MySchools description states, often with its share of seats
   const prio=p=>p[10]?'<p class="adm-note">'+esc(p[10])+' <small>(MySchools)</small></p>':'';
-  const mx=p=>mHelp(p)?'<p class="adm-note mx-note" hidden>'+esc(HS_METHOD_HELP[p[1]])+'</p>':'';
+  const mx=p=>mHelp(p)?'<p class="adm-note mx-note" hidden>'+esc(mHelp(p))+'</p>':'';
   const one=p=>head(p)+mx(p)+prio(p)+admTable(d,lv,p[6]||[],p[3],'students')+swdLine(p);
   const top=R.slice(0,R.length>3?2:3),rest=R.slice(top.length),sp=P.filter(p=>SPECIAL(p[1])&&(p[7]||p[2]));
   return top.map(one).join('')+(rest.length?'<details class="more-progs"><summary>'+rest.length+' more program'+(rest.length>1?'s':'')+'</summary>'+rest.map(one).join('')+'</details>':'')+
@@ -1654,11 +1691,11 @@ intro.addEventListener('close',()=>{try{localStorage.setItem(INTRO_KEY,'1')}catc
 document.getElementById('intro-ok').addEventListener('click',()=>intro.close());
 intro.addEventListener('click',e=>{if(e.target===intro)intro.close()});  // tap outside the box
 document.getElementById('about-open').addEventListener('click',openIntro);
-// "How high school admissions work": a link in the level note (redrawn per level) opens it
-const hsGuide=document.getElementById('hs-guide');
-document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-open="hs-guide"]')){try{hsGuide.showModal()}catch(err){hsGuide.setAttribute('open','')}}});
-hsGuide.querySelector('.guide-ok').addEventListener('click',()=>hsGuide.close());
-hsGuide.addEventListener('click',e=>{if(e.target===hsGuide)hsGuide.close()});
+// "How … admissions work" windows (dialog.guide): a link in the level note (redrawn per level) opens one
+document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('[data-open]');if(!a)return;const g=document.getElementById(a.dataset.open);
+  if(g&&g.classList.contains('guide')){try{g.showModal()}catch(err){g.setAttribute('open','')}}});
+document.querySelectorAll('dialog.guide').forEach(g=>{g.querySelector('.guide-ok').addEventListener('click',()=>g.close());
+  g.addEventListener('click',e=>{if(e.target===g)g.close()})});
 const introTerms=document.getElementById('intro-terms');
 document.getElementById('terms-open').addEventListener('click',()=>{introTerms.open=true;openIntro();
   requestAnimationFrame(()=>introTerms.scrollIntoView({block:'start'}))});
