@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.69.0 (2026-11-10)
 
 ### Changed
 - On a computer, once you pick a zone or school, the top of the side panel folds down to just its title, so the school card starts higher. "More" next to the title opens it again; it comes back on its own when nothing is selected.
