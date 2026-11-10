@@ -289,7 +289,7 @@ def more(*links):
 FOLD_KEYS = (("DOE ratings", "rate"), ("High school ratings", "rate"), ("State test scores", "tests"),
              ("Graduation and college", "grad"), ("Advanced courses", "grad"), ("Kindergarten admissions", "adm"),
              ("Grade ", "adm"), ("High school programs", "adm"), ("Pre-K", "prek"),
-             ("School details", "details"), ("Demographics", "demo"), ("Classes", "ex"), ("Other ", "near"))
+             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Classes", "ex"), ("Other ", "near"))
 
 
 def fold_card(html, summary="", start_open=False):
@@ -614,6 +614,22 @@ def extras_html(ex, vocab, groups):
             '<p class="src">As the school lists them on MySchools.</p>')
 
 
+def ap_html(ix, areas):
+    """A high school's AP classes as the map card lists them (src/template.html apSec): a sorted list per subject
+    area. ix: indexes into the catalog areas, [[subject area, [names]]] counted through in order (build.py ap_courses)."""
+    if not ix:
+        return ""
+    has, i, h = set(ix), 0, ""
+    for a, names in areas:
+        got = [n for k, n in enumerate(names, i) if k in has]
+        i += len(names)
+        if got:
+            h += f'<h3 class="ex-h">{e(a)} · {len(got)}</h3><ul class="ap">' + "".join(f"<li>{e(n)}</li>" for n in got) + "</ul>"
+    return ("<h2>AP classes</h2>" + h +
+            f'<p class="src">As the school lists them on MySchools, {settings.MYSCHOOLS_LABEL}, by the College Board’s '
+            "subject areas. Ask the school which run every year.</p>")
+
+
 def extras_summary(ex, vocab, groups):
     """The folded card's line: "12 AP classes · 22 PSAL teams · 15 activities", groups that count as the same word
     added up; an entry over 80 characters is a description written as prose, not one activity."""
@@ -803,6 +819,7 @@ table.dm{width:100%;border-collapse:collapse;margin-top:12px;font-size:.95rem;fo
 .dm tr.pov>*{border-top:1px solid var(--line);padding-top:8px}
 .progs{list-style:none;margin:0;padding:0}
 h3.ex-h{font-size:.95rem;margin:14px 0 2px}h3.ex-h+p{margin:0}
+ul.ap{columns:2 12rem;column-gap:24px;margin:0;padding-left:1.2em}ul.ap li{break-inside:avoid;padding:2px 0}
 .adm-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin:6px 0 4px;font-size:.95rem}
 .adm-t th,.adm-t td{padding:6px 0 6px 10px;text-align:right;font-weight:400;white-space:nowrap}
 .adm-t thead th{font-family:var(--display);font-weight:600;color:var(--muted);font-size:.8rem}
@@ -1075,6 +1092,9 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
         if lv in ("ms", "hs"):
             LD = MS if lv == "ms" else HS
             ex, exv, exg = (LD.get("EX") or {}).get(dbn), LD.get("EXV") or [], LD.get("EXG") or []
+            if lv == "hs":
+                ap = (HS.get("AP") or {}).get(dbn)
+                cards.append((ap_html(ap, HS.get("APC") or []), f"{len(ap)} AP class{'es' if len(ap) > 1 else ''}" if ap else "", False))
             cards.append((extras_html(ex, exv, exg), extras_summary(ex, exv, exg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)
 

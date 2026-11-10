@@ -589,7 +589,8 @@ EX_GROUPS = {
     "ms": (("acc", "Accelerated and honors classes", "advanced class", "advanced classes"), ("art", "Arts courses", "", ""),
            ("el", "Electives", "", ""), ("sp", "Sports", "sport", "sports"),
            ("ac", "Clubs and activities", "activity", "activities")),
-    "hs": (("ap", "AP classes", "AP class", "AP classes"), ("ib", "IB classes", "IB class", "IB classes"),
+    # AP classes have their own section (ap_courses)
+    "hs": (("ib", "IB classes", "IB class", "IB classes"),
            ("col", "College courses", "", ""), ("adv", "Other advanced classes", "", ""), ("lang", "Languages", "", ""),
            ("art", "Arts courses", "", ""), ("el", "Electives", "", ""),
            ("psb", "PSAL teams, boys", "PSAL team", "PSAL teams"), ("psg", "PSAL teams, girls", "PSAL team", "PSAL teams"),
@@ -611,6 +612,32 @@ def extras(lv, rows):
     keys = [g[0] for g in EX_GROUPS[lv]]
     ex = {dbn: [[ix(n) for n in x.get(k, [])] for k in keys] for dbn, x in rows.items() if any(x.values())}
     return {"EX": ex, "EXV": exv, "EXG": [list(g[1:]) for g in EX_GROUPS[lv]]}
+
+
+def ap_courses(rows):
+    """{"AP": {dbn: [indexes into the catalog]}, "APC": [[subject area, [course names]] per area]} for each high
+    school's AP classes, from {dbn: [MySchools names ("AP Calculus AB")]} (fetch_data.py _hs_extras "ap"). The catalog
+    is settings.AP_COURSES, each area sorted A-Z; an index counts through the areas in order. A name it can't match
+    (after settings.AP_ALIASES) goes in an "Other" area, with a warning. Schools with no AP classes are left out."""
+    areas = [[a, sorted(names, key=str.lower)] for a, names in settings.AP_COURSES]
+    other = set()
+    for names in rows.values():
+        for n in names:
+            short = re.sub(r"^AP\s+", "", n.strip())
+            short = settings.AP_ALIASES.get(short, short)
+            if not any(short in l for _, l in areas):
+                other.add(short)
+    for n in sorted(other):
+        print(f"  ap: no College Board course matches {n!r}; add it to settings.AP_COURSES or AP_ALIASES")
+    if other:
+        areas.append(["Other", sorted(other, key=str.lower)])
+    flat = {n: i for i, n in enumerate(n for _, l in areas for n in l)}
+    ap = {}
+    for dbn, names in rows.items():
+        ix = sorted({flat[settings.AP_ALIASES.get(s, s)] for s in (re.sub(r"^AP\s+", "", n.strip()) for n in names)})
+        if ix:
+            ap[dbn] = ix
+    return {"AP": ap, "APC": areas}
 
 
 BORO_OF_DISTRICT = {**{n: "Manhattan" for n in range(1, 7)}, **{n: "the Bronx" for n in range(7, 13)},
@@ -908,6 +935,8 @@ def main(standalone_path=None, pages=None):
                 d["HS"]["NZ"].append([dbn, o["n"], o["a"], o["lat"], o["lon"], [], 0, [p[:6] for p in progs], 1 if shs else 0, pz])
             d["HS"]["O"] = outcomes
             d["HS"].update(extras("hs", {o["dbn"]: o["x"] for o in hsdir if o.get("x")}))
+            d["HS"].update(ap_courses({o["dbn"]: o["x"].get("ap", []) for o in hsdir if o.get("x")}))
+            print(f"high school AP classes: {len(d['HS']['AP'])} schools")
             # SAT, college readiness, where graduates went and advanced courses (2024-25 Snapshot, high school report).
             # Q: [average SAT, college & career readiness score, % in any advanced course, % in AP,
             #     [CUNY 4-year, CUNY 2-year, NY public (SUNY etc.), NY private, out of state, for-profit, other] % of graduates,

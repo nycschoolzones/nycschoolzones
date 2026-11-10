@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- High schools now have their own "AP classes" section, on the map card and the school page: how many AP classes the school lists, and each one in a short sorted list under its subject (math and computer science, sciences, English, history and social sciences, world languages, arts, AP Capstone). Course names follow the College Board's current names, so "Pre-Calculus" and "Studio Art" show as "Precalculus" and "2-D Art and Design" or "Drawing". The AP classes are no longer repeated under "Classes, sports and activities".
+
 ## 1.71.0 (2026-11-10)
 
 ### Added
