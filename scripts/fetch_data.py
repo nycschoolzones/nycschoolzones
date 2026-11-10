@@ -1320,10 +1320,20 @@ def _hs_extras(x):
             "ac": tidy(split(x.get("activities_description")))}
 
 
+def _stated_priority(q):
+    """A priority only the program's MySchools description states, often with its share of seats: "This program gives
+    a priority to Manhattan students or residents for up to 75% of the seats." (02M416), or by ZIP code (27Q323).
+    02M411's has no closing period; 28Q440 words it "Priority is given to ..."."""
+    import re
+    return " ".join(m.strip().rstrip(".") + "." for m in
+                    re.findall(r"(?:This program gives a priority to|Priority is given to)[^.]*", q.get("description") or ""))
+
+
 def _myschools_ms(schools):
     """ms_directory.json rows: [dbn, name, address, lat, lon,
     programs [[name ('' = the school's main program), method code, seats, applicants, all seats filled, diversity set-aside,
-               priority groups, seats for students with disabilities, their applicants, all filled]] (District 75 and
+               priority groups, seats for students with disabilities, their applicants, all filled, and when the
+               description states one, _stated_priority]] (District 75 and
                ASD/ACES programs too, whose seats are all for students with disabilities),
      classes, sports and activities (_ms_extras)]"""
     out = []
@@ -1340,8 +1350,9 @@ def _myschools_ms(schools):
             if not pname and (q not in ps or any(not p[0] for p in progs)):
                 pname = _strip_dbn(q["name"], q["program"]["code"])  # only one main program per school
             seats, apps, filled = _demand(q)
+            bp = _stated_priority(q)
             progs.append([pname, MS_CODE.get(method, method), seats, apps, None if filled is None else int(filled),
-                          1 if q.get("diversity_in_admission_1") else 0, _priority_groups(q), *_swd_demand(q)])
+                          1 if q.get("diversity_in_admission_1") else 0, _priority_groups(q), *_swd_demand(q)] + ([bp] if bp else []))
         out.append([dbn, name, addr.upper(), lat, lon, progs, _ms_extras(x)])
     save("ms_directory.json", out)
     print(f"  middle school: {len(out)} schools, {sum(1 for r in out if any(p[6] for p in r[5]))} with priority groups")
@@ -1367,11 +1378,7 @@ def _myschools_hs(schools, fetched):
                           "f": g.get("all_seats_filled"), "ws": w.get("seats"), "wa": w.get("applicants"), "wf": w.get("all_seats_filled"),
                           "pg": _priority_groups(q),
                           "d1": q.get("diversity_in_admission_1"), "sc": [z.get("name") for z in q.get("selection_criteria") or []],
-                          # a priority only the program's description states, often with its share of seats: "This program
-                          # gives a priority to Manhattan students or residents for up to 75% of the seats." (02M416)
-                          # (02M411's has no closing period; 28Q440 words it "Priority is given to ...")
-                          "bp": " ".join(m.strip().rstrip(".") + "." for m in
-                                         re.findall(r"(?:This program gives a priority to|Priority is given to)[^.]*", q.get("description") or ""))})
+                          "bp": _stated_priority(q)})
         out.append({"dbn": s["dbn"], "id": x.get("id"), "n": re.sub(r"\s*\(\w+\)$", "", x["name"]), "a": a.get("address_1"),
                     "boro": (s.get("district") or {}).get("borough"),
                     "lat": float(a.get("latitude") or 0), "lon": float(a.get("longitude") or 0), "p": progs,

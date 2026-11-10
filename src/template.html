@@ -497,7 +497,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
   <p>__MS_ZONED_DISTRICTS__ of NYC’s 32 districts zone some or all of their middle schools. Living in a zone gives you priority at that school, after siblings of current students and, at K–8 schools, the school’s own 5th graders. Last year zoned students who applied got an offer at almost every zoned school. List the zoned school anywhere on your application, even last, as a backup. Ranking other schools above it doesn’t hurt your priority there.</p>
   <p>These districts have no zoned middle schools: __MS_UNZONED__. There, every student chooses among programs in their district and beyond.</p>
   <h3>Your district comes first</h3>
-  <p>Unlike high school, nearly every middle school program puts students who live or go to school in its district first, then the rest of the city. A few give priority to a borough or to particular ZIP codes instead, sometimes for a share of seats.</p>
+  <p>Unlike high school, nearly every middle school program puts students who live or go to school in its district first, then the rest of the city. A few give priority to a borough or to particular ZIP codes instead, sometimes for a share of seats (the school’s card says so).</p>
   <h3>How programs choose</h3>
   <ul>
     <li><b>Zone priority</b> (the most common, with Open): students in the zone first.</li>
@@ -808,7 +808,7 @@ function msAdm(d,lv){const P=(LV[lv]&&LV[lv].P||{})[d]||[],R=msProgs(d,lv);if(!R
   const mHelp=p=>(lv==='hs'?HS_METHOD_HELP:MS_METHOD_HELP)[p[1]];
   const head=p=>'<div class="adm-p">'+(solo?'':esc(p[0]||'Main program')+' ')+'<small>'+[mHelp(p)?'<button type="button" class="mx-btn" aria-expanded="false">'+esc(N[p[1]]||p[1])+'</button>':esc(N[p[1]]||p[1]),p[2]!=null?p[2]+' seats'+(p[4]?', all filled':''):'',p[5]?'diversity set-aside':''].filter(Boolean).join(' · ')+'</small></div>';
   const swdLine=p=>p[7]?'<p class="adm-note">Special ed seats: '+p[7]+(p[8]!=null?' · '+p[8]+' applied':'')+(p[9]?', all filled':'')+'</p>':'';
-  // p[10]: a priority only the program's MySchools description states, often with its share of seats
+  // p[10]: a priority only the program's MySchools description states, often with its share of seats (both levels)
   const prio=p=>p[10]?'<p class="adm-note">'+esc(p[10])+' <small>(MySchools)</small></p>':'';
   const mx=p=>mHelp(p)?'<p class="adm-note mx-note" hidden>'+esc(mHelp(p))+'</p>':'';
   const one=p=>head(p)+mx(p)+prio(p)+admTable(d,lv,p[6]||[],p[3],'students')+swdLine(p);

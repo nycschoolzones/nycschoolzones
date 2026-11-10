@@ -821,7 +821,8 @@ def main(standalone_path=None, pages=None):
         if os.path.exists(os.path.join(DATA, "ms_directory.json")):
             msdir = load("ms_directory.json")
             for r in msdir:
-                r[5] = [p[:6] + [priority_steps(p[6] if len(p) > 6 else [], r[0])] + (p[7:10] + [None] * 3)[:3] for p in r[5]]
+                r[5] = [p[:6] + [priority_steps(p[6] if len(p) > 6 else [], r[0])] + (p[7:10] + [None] * 3)[:3] + p[10:11]
+                        for p in r[5]]  # p[10]: a priority the program's description states (fetch_data.py _stated_priority)
             snaps = {}
             for name in ("nonzoned_snapshot.json", "ms_snapshot.json"):
                 if os.path.exists(os.path.join(DATA, name)):
