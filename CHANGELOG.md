@@ -11,6 +11,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ### Added
 - Behind the scenes: the MySchools directories can now be refreshed with one command (`fetch_data.py myschools`), without pasting a script into a browser.
 
+## 1.72.0 (2026-11-10)
+
+### Added
+- High schools now have their own "AP classes" section, on the map card and the school page: how many AP classes the school lists, and each one in a short sorted list under its subject (math and computer science, sciences, English, history and social sciences, world languages, arts, AP Capstone). Course names follow the College Board's current names, so "Pre-Calculus" and "Studio Art" show as "Precalculus" and "2-D Art and Design" or "Drawing". The AP classes are no longer repeated under "Classes, sports and activities".
+
 ## 1.71.0 (2026-11-10)
 
 ### Added

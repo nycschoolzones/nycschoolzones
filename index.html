@@ -27,7 +27,7 @@
 <meta name="twitter:title" content="NYC School Zones">
 <meta name="twitter:description" content="Every NYC elementary (kindergarten), middle and high school zone on one map, colored by DOE School Quality ratings and state test scores. Free for parents.">
 <meta name="twitter:image" content="https://nycschoolzones.com/preview.png">
-<!-- Copyright (C) 2026 NYC School Zones · SPDX-License-Identifier: AGPL-3.0-or-later · v1.71.0 · https://github.com/nycschoolzones/nycschoolzones -->
+<!-- Copyright (C) 2026 NYC School Zones · SPDX-License-Identifier: AGPL-3.0-or-later · v1.72.0 · https://github.com/nycschoolzones/nycschoolzones -->
 <title>NYC School Zone Map: Elementary, Middle &amp; High School Zones</title>
 <script>/* light / dark / auto, chosen in the footer (localStorage nsz-theme-v1); set before the page draws so it doesn't flash */
 try{const t=localStorage.getItem('nsz-theme-v1');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
@@ -195,6 +195,7 @@ aside>*{flex-shrink:0}
 .adm td:last-child{color:var(--muted);font-weight:500;min-width:3.2em}
 .adm .adm-note{margin:2px 0 0;font-size:.8rem}
 .ex{font-size:.85rem}.ex p{margin:2px 0 0}.ex-src{color:var(--muted);font-size:.75rem}
+.ap{font-size:.85rem}.ap ul{columns:2 10rem;column-gap:16px;margin:2px 0 8px;padding-left:1.1em}.ap li{break-inside:avoid;padding:1px 0}
 .jump{margin:4px 0 0;font-size:.85rem}.jump a{color:var(--hl)}.sec{scroll-margin-top:8px}
 .adm-p{font-weight:600;margin-top:8px}.adm-p small{font-weight:400;color:var(--muted)}
 .adm-t tr.all th,.adm-t tr.all td{font-weight:700}
@@ -489,7 +490,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <p><button type="button" class="link-btn" id="about-open">About this map</button> · <button type="button" class="link-btn" id="terms-open">Terms &amp; privacy</button></p>
       <p><a href="https://github.com/nycschoolzones/nycschoolzones" target="_blank" rel="noopener">Source code</a> (AGPL-3.0)</p>
       <p class="theme-pick" role="group" aria-label="Color theme">Theme: <button type="button" class="link-btn" data-theme-pick="auto">Auto</button> · <button type="button" class="link-btn" data-theme-pick="light">Light</button> · <button type="button" class="link-btn" data-theme-pick="dark">Dark</button></p>
-      <p class="asof">Zones: NYC DOE Find a School, Nov 2026 · Test scores: DOE, spring 2026 · Ratings and programs: DOE 2024–25 School Quality Snapshot · Updated Nov 2026 · <a href="https://github.com/nycschoolzones/nycschoolzones/blob/main/CHANGELOG.md" target="_blank" rel="noopener">v1.71.0</a></p>
+      <p class="asof">Zones: NYC DOE Find a School, Nov 2026 · Test scores: DOE, spring 2026 · Ratings and programs: DOE 2024–25 School Quality Snapshot · Updated Nov 2026 · <a href="https://github.com/nycschoolzones/nycschoolzones/blob/main/CHANGELOG.md" target="_blank" rel="noopener">v1.72.0</a></p>
       <details><summary>Data sources</summary>
         <p>School zones from the DOE’s <a href="https://schoolsearch.schools.nyc/" target="_blank" rel="noopener">Find a School</a> map. Thanks to Jimmy Chion’s <a href="https://schoolzones.nyc/" target="_blank" rel="noopener">schoolzones.nyc</a> for pointing the way to the DOE’s current zone data. School names and addresses from the 2019–20 DOE location list. State test results from the DOE’s <a href="https://infohub.nyced.org/reports/academics/test-results" target="_blank" rel="noopener">spring 2026 school results</a>; charter schools’ from the Snapshot, as the DOE’s results leave them out. Ratings, programs and current school names from the DOE’s <a href="https://tools.nycenet.edu/snapshot/" target="_blank" rel="noopener">2024–25 School Quality Snapshot</a>. Students’ race, ethnicity and family income from the DOE’s 2025–26 Demographic Snapshot. Shared zones show the combined result of all their schools. Address lookup by NYC Planning’s GeoSearch. Park outlines from NYC Parks’ <a href="https://data.cityofnewyork.us/d/enfh-gkve" target="_blank" rel="noopener">Parks Properties</a> on NYC Open Data.</p>
       </details>
@@ -742,7 +743,7 @@ async function loadLevel(lv){if(LV[lv])return true;if(!ASSETS[lv])return false;
   try{const x=await getAsset(lv);
     Object.entries(x.schools).forEach(([d,s])=>{S[d]=Object.assign({},s,S[d]||{})});snapNames(Object.keys(x.schools));
     if(x.O)Object.assign(O,x.O);if(x.Q)Object.assign(Q,x.Q);
-    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
+    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],AP:x.AP||{},APC:x.APC||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
   catch(e){alertLoad();return false}finally{document.body.style.cursor=''}}
 function alertLoad(){const m=document.getElementById('llmsg');if(m){m.textContent='Couldn’t load that part of the map. Check your connection and try again.';m.hidden=false}}
 const RK={ip:2,ss:3,rf:4},RNAME={ip:'Instruction and Performance',ss:'Safety and School Climate',rf:'Relationships with Families'};
@@ -814,7 +815,7 @@ function chBlock(o){const x=CHX[o.d]||[];
     ' Apply through the <a href="'+CH_APPLY+'" target="_blank" rel="noopener">common charter application ↗</a> or on the school’s own site, by April 1 for most schools. It’s separate from MySchools: applying doesn’t affect your MySchools application.'+
     (x[3]?' Formerly '+esc(x[3])+'.':'')+'</p></details>'}
 regNZ(NZ_ES);
-[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
+[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],AP:x.AP||{},APC:x.APC||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
   if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});regNZ(LV[lv].NZ)});
 function nzDistricts(o){const ds=o.pd.length?o.pd:[+o.d.slice(0,2)];return ds}
 function nzPriority(o){if(o.ch)return 'Admission is by lottery only. Charter schools can’t screen: no tests, grades, interviews or auditions. Lottery priority usually goes to siblings, then to families who live in District '+o.pd[0]+'.';if(o.hs){if(o.gt)return o.pr.some(p=>p[1]==='T')?'Admission is by SHSAT score only. Any NYC 8th or 9th grader can take the test.':'Admission is by audition. Students from anywhere in NYC can apply.';return o.pz||'Open to students from anywhere in NYC.'}if(o.gt)return 'Open to children found eligible for G&T, from anywhere in NYC.'+(o.pd.length?' Priority to eligible children in Districts '+o.pd.slice(0,-1).join(', ')+' and '+o.pd[o.pd.length-1]+'.':'');const ds=nzDistricts(o),t=ds.length>1?'Districts '+ds.slice(0,-1).join(', ')+' and '+ds[ds.length-1]:'District '+ds[0];
@@ -1433,6 +1434,12 @@ function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)r
   const sum=words.filter(g=>cnt[g[1]]).map(g=>cnt[g[1]]+' '+(cnt[g[1]]>1?g[2]:g[1])).join(' · ');
   const body=x.map((l,i)=>l.length&&lp.EXG[i]?'<div class="ex"><div class="adm-h">'+lp.EXG[i][0]+'</div><p>'+esc(l.map(k=>lp.EXV[k]).join(', '))+'</p></div>':'').join('');
   return sec('ex','<span class="st">Classes, sports &amp; activities<small>'+sum+'</small></span>',body+'<small class="ex-src">As the school lists them on MySchools.</small>')}
+// high school AP classes (MySchools; LV.hs.AP: indexes into the catalog LV.hs.APC, [[subject area, [names]]] counted
+// through in order, build.py ap_courses): how many up top, a sorted list per subject area inside
+function apSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.AP&&lp.AP[d];if(!x)return '';
+  const has=new Set(x);let i=0;
+  const body=lp.APC.map(([a,l])=>{const got=l.filter(()=>has.has(i++));return got.length?'<div class="ap"><div class="adm-h">'+esc(a)+' · '+got.length+'</div><ul>'+got.map(n=>'<li>'+esc(n)+'</li>').join('')+'</ul></div>':''}).join('');
+  return sec('ap','<span class="st">AP classes<small>'+x.length+' AP class'+(x.length>1?'es':'')+', by subject</small></span><span class="sa">'+x.length+'</span>',body+'<small class="ex-src">As the school lists them on MySchools, fall 2026, by the College Board’s subject areas. Ask the school which run every year.</small>')}
 // specialized high schools: last fall's SHSAT cutoff up top
 function cutSec(d){const c=LV.hs&&LV.hs.CUT;if(level!=='hs'||!c||!c.c[d])return '';
   return sec('cut','<span class="st">SHSAT cutoff<small>Lowest score offered a seat, fall '+c.y+'</small></span><span class="sa">'+c.c[d][0]+'</span>',cutHtml(d))}
@@ -1503,7 +1510,7 @@ function jumpLine(d,noJump){if(noJump||CHX[d])return '';const lv=level,o=nzGet(d
 function jumpLink(d){const pg=level==='es'?(KP[d]?'priority groups':'kindergarten admissions'):msProgs(d,level).length?'priority groups':'admissions';
   return '<a href="#" class="to-adm" data-d="'+esc(d)+'">See this school’s '+pg+' ↓</a>'}
 function schoolBlock(d,noJump){const s=S[d],e=dmEnroll(d),n=e!=null?e.toLocaleString()+' students':'',gs=G[d]||(s&&s.g),gr=gs?'Grades '+esc(grades(gs,d)):'',ch=!!CHX[d];
-  return '<div class="school" data-d="'+esc(d)+'"><span class="nm"><a class="nm-link" href="'+pageUrl(d)+'#'+level+'">'+esc(short(d))+'</a> <span class="dbn">('+esc(d)+')</span></span>'+addrHtml(d)+(gr||n?'<span class="meta">'+[gr,n].filter(Boolean).join(' · ')+'</span>':'')+tagsHtml(d)+(level==='hs'?zonedHtml(d):'')+jumpLine(d,noJump)+'<hr class="sep">'+rateSec(d)+(level==='hs'?outSec(d):testSec(d))+(level==='es'?esAdmHtml(d):admSec(d)+cutSec(d)+(msProgs(d,level).length?'':progSec(d))+exSec(d))+(factsHtml(d)?sec('facts','<span class="st">School details</span>',factsHtml(d)):'')+demoSec(d)+'<hr class="sep">'+'<div class="links">'+'<a href="'+pageUrl(d)+'"><b>Full school page →</b></a>'+(ch?'<a href="'+CH_APPLY+'" target="_blank" rel="noopener"><b>How to apply to charter schools ↗</b></a>':'<a href="'+mySchoolsUrl(d)+'" target="_blank" rel="noopener"><b>MySchools: apply &amp; see your chances ↗</b></a>')+snapLink(d)+'<a href="https://www.schools.nyc.gov/schools/'+esc(d.slice(2))+'" target="_blank" rel="noopener">School website ↗</a></div></div>'}
+  return '<div class="school" data-d="'+esc(d)+'"><span class="nm"><a class="nm-link" href="'+pageUrl(d)+'#'+level+'">'+esc(short(d))+'</a> <span class="dbn">('+esc(d)+')</span></span>'+addrHtml(d)+(gr||n?'<span class="meta">'+[gr,n].filter(Boolean).join(' · ')+'</span>':'')+tagsHtml(d)+(level==='hs'?zonedHtml(d):'')+jumpLine(d,noJump)+'<hr class="sep">'+rateSec(d)+(level==='hs'?outSec(d):testSec(d))+(level==='es'?esAdmHtml(d):admSec(d)+cutSec(d)+(msProgs(d,level).length?'':progSec(d))+apSec(d)+exSec(d))+(factsHtml(d)?sec('facts','<span class="st">School details</span>',factsHtml(d)):'')+demoSec(d)+'<hr class="sep">'+'<div class="links">'+'<a href="'+pageUrl(d)+'"><b>Full school page →</b></a>'+(ch?'<a href="'+CH_APPLY+'" target="_blank" rel="noopener"><b>How to apply to charter schools ↗</b></a>':'<a href="'+mySchoolsUrl(d)+'" target="_blank" rel="noopener"><b>MySchools: apply &amp; see your chances ↗</b></a>')+snapLink(d)+'<a href="https://www.schools.nyc.gov/schools/'+esc(d.slice(2))+'" target="_blank" rel="noopener">School website ↗</a></div></div>'}
 // the school's Snapshot report with the card's other links, as under "Overall rating" (rateSec), when it has ratings
 function snapLink(d){const r=R[d];if(!r||r.slice(2,5).every(x=>x==null))return '';
   return '<a href="https://tools.nycenet.edu/snapshot/2025/'+esc(d)+'/'+esc(r[5]||'EMS')+'/" target="_blank" rel="noopener">2024–25 School Quality Snapshot ↗</a>'}
