@@ -63,7 +63,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
 aside{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column;gap:18px;padding:18px 18px 24px;min-width:0}
 #map{background:var(--water);min-height:0}
 h1{font-family:var(--display);font-weight:700;font-size:1.55rem;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
-.h1-date{font-family:var(--body);font-weight:500;font-size:.8rem;letter-spacing:0;color:var(--muted);white-space:nowrap}
+.badge{display:inline-block;background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-bottom:8px}
 .browse{font-size:.9rem;margin:8px 0 0}.browse a{color:var(--hl);display:inline-block;padding:2px 0}
 label.lab{font-family:var(--display);font-weight:600;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
 .field{display:flex;gap:6px}
@@ -281,9 +281,14 @@ aside>*{flex-shrink:0}
 #map-legend.open .hint{display:block}
 .how p{margin:0}
 .how .must{font-weight:700}
-.how details{margin-top:6px}
-.how summary{cursor:pointer}
-.how details p{margin:6px 0 0}
+.mx-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline dotted;text-underline-offset:2px;padding:5px 0}
+.mx-btn:focus-visible{outline:2px solid var(--hl);outline-offset:1px}
+.mx-note{margin:2px 0 6px}
+.lvl-more{font-size:.85rem;margin-top:8px}
+.lvl-more .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;padding:4px 0;display:inline-block}
+.lvl-more summary{cursor:pointer;font-family:var(--display);font-weight:600}
+.lvl-more #lvl-note{margin-top:6px}.lvl-more p{margin:6px 0 0}.lvl-more #lvl-note>p:first-child{margin-top:0}.lvl-more ul{margin:6px 0 0;padding-left:18px}.lvl-more li{margin:3px 0}
+.lvl-more a{color:var(--hl)}
 .intro{max-width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;border:0;border-radius:14px;padding:22px 22px 18px;background:var(--panel);color:var(--fg);box-shadow:0 10px 40px rgba(0,0,0,.35);font-size:.95rem;line-height:1.5}
 .intro::backdrop{background:rgba(10,14,12,.55)}
 .intro h2{font-family:var(--display);font-weight:700;font-size:1.35rem;margin:0 0 10px}
@@ -294,6 +299,9 @@ aside>*{flex-shrink:0}
 .intro .tour{margin:0 0 14px}
 .intro .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .intro small{color:var(--muted)}
+.guide h3{font-family:var(--display);font-weight:700;font-size:1rem;margin:16px 0 4px}
+.guide p{margin:0 0 8px}
+.guide ul{margin:4px 0 8px}
 .intro .terms{margin:0 0 14px;border-top:1px solid var(--line,rgba(127,127,127,.3));padding-top:10px;font-size:.88rem}
 .intro .terms summary{cursor:pointer;font-weight:700;color:var(--hl)}
 .intro .terms p{margin:8px 0}
@@ -431,14 +439,15 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <input type="radio" name="level" id="lv-hs" value="hs"><label for="lv-hs">High <small>9–12</small></label>
     </div>
     <header>
-      <h1><span id="h1">NYC Elementary School Zones</span> <span class="h1-date" title="Zone lines as of Nov 2026">Nov 2026</span></h1>
+      <span class="badge" id="badge">Kindergarten zones · Nov 2026</span>
+      <h1>NYC School Zones</h1>
       <p class="browse">Browse schools <a href="districts/" id="dist-link">by district</a> · <a href="neighborhoods/">by neighborhood</a></p>
       <div class="note how" id="how">
         <p class="must">Always confirm an exact address on <a href="https://schoolsearch.schools.nyc/" target="_blank" rel="noopener">schoolsearch.schools.nyc</a> before applying.</p>
-        <details><summary id="lvl-sum">A zone gives priority, not a guaranteed seat</summary>
-          <p id="lvl-note">706 kindergarten zones from the NYC Department of Education. Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.</p>
-        </details>
       </div>
+      <details class="lvl-more"><summary id="lvl-sum">A zone gives priority, not a guaranteed seat</summary>
+        <div id="lvl-note">Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.</div>
+      </details>
     </header>
 
     <section id="search-sec">
@@ -462,7 +471,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <p class="msg" id="llmsg" hidden></p>
     </section>
 
-    <section class="card empty" id="card" aria-live="polite">Select a zone on the map, or search for a school, to see its zoned school.</section>
+    <section class="card empty" id="card" aria-live="polite">706 kindergarten zones from the NYC Department of Education. Click any block, or search an address or school, to see its zoned school.</section>
 
 
 
@@ -502,6 +511,27 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
   </details>
   <div class="row"><small>Questions or corrections? <a href="mailto:info@nycschoolzones.com?subject=NYC%20School%20Zones%20feedback">info@nycschoolzones.com</a></small>
     <button type="button" id="intro-ok" autofocus>Got it</button></div>
+</dialog>
+<dialog class="intro guide" id="hs-guide" aria-labelledby="hsg-h">
+  <h2 id="hsg-h">How high school admissions work</h2>
+  <p>Most of NYC has no zoned high school. Every 8th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and gets one offer.</p>
+  <h3>If you live in a high school zone</h3>
+  <p>You’re guaranteed a seat in that school’s zoned program, or at a few schools you get top priority. Last year every zoned student who applied got an offer. It only counts if you list the program on your application, but you can rank it anywhere, even last, as a backup. Ranking other schools above it doesn’t hurt your zoned seat.</p>
+  <h3>Every other high school</h3>
+  <p>These are open to students from all over the city. Unlike elementary and middle school, high schools almost never give priority by district. Some programs put students who live or go to school in their borough first, sometimes for a share of seats (the school’s card says so), and schools that start in 6th grade take their own 8th graders first.</p>
+  <h3>How programs choose</h3>
+  <ul>
+    <li><b>Ed. Opt.</b> (the most common): takes students across a range of 7th-grade grades, not only top students.</li>
+    <li><b>Screened:</b> ranks applicants by their 7th-grade course grades. Some also weigh an essay, interview or school assessment.</li>
+    <li><b>Open:</b> random among applicants, after any priorities.</li>
+    <li><b>Audition:</b> arts programs, by audition.</li>
+  </ul>
+  <p>On a school’s card, tap a program’s method to see what it means.</p>
+  <h3>Specialized high schools</h3>
+  <p>Eight admit only by the SHSAT, a test you sign up for separately in the fall. LaGuardia admits by audition. Students can get a specialized offer as well as their regular one.</p>
+  <h3>Seats for low-income students</h3>
+  <p>Some programs set aside a share of seats for students from low-income families. Each school’s card shows its programs and methods, and who got offers last year.</p>
+  <div class="row"><span></span><button type="button" class="guide-ok">Close</button></div>
 </dialog>
 <div id="map-ui" hidden>
   <div class="phone-bar" id="phone-bar">
@@ -619,10 +649,10 @@ const O=Object.assign({},HSD&&HSD.O||{});
 const Q=Object.assign({},HSD&&HSD.Q||{});
 let level='es',F=LV.es.F,T=LV.es.T;
 const LEVEL_TXT={
-  es:{sum:'A zone gives priority, not a guaranteed seat',note:'Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.',h1:'NYC Elementary School Zones',sub:n=>n+' kindergarten zones from the NYC Department of Education.',grades:'3–5',avg:'Citywide, grades 3–5: ELA 47%, Math 60%',miss:'That point is outside every elementary zone. Check the coordinates, or it may be in a park or outside NYC.',noZone:'No zoned elementary school'},
-  hs:{sum:'Most of NYC has no zoned high school',h1:'NYC Zoned High Schools',sub:n=>n+' high schools give priority to students who live in their zone.',grades:'9–12',avg:'',miss:'That point isn’t in a high school zone. Most of the city has no zoned high school; students apply citywide through MySchools.',noZone:'No zoned high school',
-      note:'Most of NYC has no zoned high school. Every 8th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>. Living in one of these zones gives you priority, or a guaranteed seat, at that school’s zoned program, but only if you list it on your application.'},
-  ms:{sum:'Most districts don’t zone middle schools',note:'Most districts don’t zone middle schools. In the uncolored areas, students apply to middle schools through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>. Even in zoned districts, many students also apply to other programs.',h1:'NYC Middle School Zones',sub:n=>'Zones for '+n+' middle schools, in the districts that have them.',grades:'6–8',avg:'NYC middle schools average ELA 55%, Math 53%',miss:'That point isn’t in a zoned middle school area. It may be in a district without zoned middle schools, a park, or outside NYC.',noZone:'No zoned middle school'}};
+  es:{sum:'A zone gives priority, not a guaranteed seat',badge:'Kindergarten zones · Nov 2026',note:'Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.',h1:'NYC Elementary School Zones',sub:n=>n+' kindergarten zones from the NYC Department of Education.',grades:'3–5',avg:'Citywide, grades 3–5: ELA 47%, Math 60%',miss:'That point is outside every elementary zone. Check the coordinates, or it may be in a park or outside NYC.',noZone:'No zoned elementary school'},
+  hs:{sum:'How high school zones work',badge:'High school zones · Nov 2026',h1:'NYC Zoned High Schools',sub:n=>n+' high schools give priority to students who live in their zone.',grades:'9–12',avg:'',miss:'That point isn’t in a high school zone. Most of the city has no zoned high school; students apply citywide through MySchools.',noZone:'No zoned high school',
+      note:'<p>Most of NYC has no zoned high school. Every 8th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and gets one offer.</p><p>If you live in a high school zone, list the zoned program anywhere on your application: last year every zoned student who did got an offer.</p><p><button type="button" class="link-btn" data-open="hs-guide">How high school admissions work →</button></p>'},
+  ms:{sum:'How middle school zones work',badge:'Middle school zones · Nov 2026',sub:n=>'Zones for '+n+' middle schools, in the districts that have them.',note:'Most districts don’t zone middle schools. In the uncolored areas, students apply to middle schools through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>. Even in zoned districts, many students also apply to other programs.',h1:'NYC Middle School Zones',grades:'6–8',avg:'NYC middle schools average ELA 55%, Math 53%',miss:'That point isn’t in a zoned middle school area. It may be in a district without zoned middle schools, a park, or outside NYC.',noZone:'No zoned middle school'}};
 let metric='comp';
 const R=D.R||{};
 // prefer current (2024-25) names and addresses from the School Quality Snapshot
@@ -735,6 +765,8 @@ function chOptions(dist,skip=[]){if(!dist)return '';const l=NZ.filter(o=>o.ch&&o
     l.map(o=>'<li><button type="button" data-nz="'+o.d+'"><span class="on">'+esc(o.n)+'<small>'+esc(CHX[o.d]&&CHX[o.d][0]?'Grades '+grades(CHX[o.d][0]):'Charter school')+'</small></span>'+chip(schoolRating(o.d,'comp'),1)+'</button></li>').join('')+'</ul></details>'}
 // middle school programs from the MySchools directory: how each admits students and last year's demand
 const MNAME={O:'Open',Z:'Zone priority',S:'Screened',SA:'Screened + assessment',A:'Audition',T:'Talent test',L:'Language program',D75:'District 75 special education',ASD:'Autism (ASD) or ACES program'};
+// high school admissions methods, one line each (settings.py HS_METHOD_HELP): tap a program's method on the card
+const HS_METHOD_HELP={"E":"Takes students across a range of 7th-grade grades, not only top students.","S":"Ranks applicants by their 7th-grade course grades.","SA":"Ranks applicants by 7th-grade grades plus the school’s own assessment, like an essay, interview or test.","SL":"Ranks applicants by 7th-grade grades and a language assessment, for bilingual or language-focused programs.","O":"Random among applicants, after any priorities.","A":"Admits by audition or portfolio, for arts programs.","L":"For students who speak, or are learning, the program’s language, such as English learners or dual-language programs.","T":"Admits only by SHSAT score. Students sign up for the test separately in the fall.","ZG":"Students who live in the zone and list the program are guaranteed a seat.","ZP":"Students who live in the zone get top priority.","TR":"A transfer school, for older students who are behind on credits or have left school; not part of 8th-grade admissions.","D75":"Seats for students whose IEP recommends a District 75 program.","ASD":"Seats for students whose IEP recommends an autism (ASD Nest or Horizon) or ACES program."};
 const HNAME={S:'Screened (grades)',SA:'Screened + assessment',SL:'Screened: language & academics',E:'Ed. Opt. (mixed academic levels)',A:'Audition',O:'Open',L:'Language program',T:'SHSAT test',ZG:'Zoned guarantee',ZP:'Zoned priority',TR:'Transfer school (older students)',D75:'District 75 special education',ASD:'Autism (ASD) or ACES program'};
 // admissions tables (MySchools, fall 2026): per program, a row for all students, then each priority group in the
 // order it gets offers (build.py priority_steps); the Local Law 72 table (admHtml) is the fallback and sits inside
@@ -771,13 +803,20 @@ const SPECIAL=c=>c==='D75'||c==='ASD';
 // the programs a middle or high school table covers: MySchools numbers or priority groups, not the SHSAT-only ones
 function msProgs(d,lv){const P=(LV[lv]&&LV[lv].P||{})[d]||[];return P.filter(p=>!SPECIAL(p[1])&&p[1]!=='T'&&(p[3]!=null||p[6]&&p[6].length))}
 function msAdm(d,lv){const P=(LV[lv]&&LV[lv].P||{})[d]||[],R=msProgs(d,lv);if(!R.length)return '';const N=lv==='hs'?HNAME:MNAME,solo=R.length===1;
-  const head=p=>'<div class="adm-p">'+(solo?'':esc(p[0]||'Main program')+' ')+'<small>'+[N[p[1]]||p[1],p[2]!=null?p[2]+' seats'+(p[4]?', all filled':''):'',p[5]?'diversity set-aside':''].filter(Boolean).join(' · ')+'</small></div>';
+  const mHelp=p=>lv==='hs'&&HS_METHOD_HELP[p[1]];
+  const head=p=>'<div class="adm-p">'+(solo?'':esc(p[0]||'Main program')+' ')+'<small>'+[mHelp(p)?'<button type="button" class="mx-btn" aria-expanded="false">'+esc(N[p[1]]||p[1])+'</button>':esc(N[p[1]]||p[1]),p[2]!=null?p[2]+' seats'+(p[4]?', all filled':''):'',p[5]?'diversity set-aside':''].filter(Boolean).join(' · ')+'</small></div>';
   const swdLine=p=>p[7]?'<p class="adm-note">Special ed seats: '+p[7]+(p[8]!=null?' · '+p[8]+' applied':'')+(p[9]?', all filled':'')+'</p>':'';
-  const one=p=>head(p)+admTable(d,lv,p[6]||[],p[3],'students')+swdLine(p);
+  // p[10]: a priority only the program's MySchools description states, often with its share of seats
+  const prio=p=>p[10]?'<p class="adm-note">'+esc(p[10])+' <small>(MySchools)</small></p>':'';
+  const mx=p=>mHelp(p)?'<p class="adm-note mx-note" hidden>'+esc(HS_METHOD_HELP[p[1]])+'</p>':'';
+  const one=p=>head(p)+mx(p)+prio(p)+admTable(d,lv,p[6]||[],p[3],'students')+swdLine(p);
   const top=R.slice(0,R.length>3?2:3),rest=R.slice(top.length),sp=P.filter(p=>SPECIAL(p[1])&&(p[7]||p[2]));
   return top.map(one).join('')+(rest.length?'<details class="more-progs"><summary>'+rest.length+' more program'+(rest.length>1?'s':'')+'</summary>'+rest.map(one).join('')+'</details>':'')+
     (sp.length?'<div class="adm-p">Special education programs</div><ul class="adm-sp">'+sp.map(p=>'<li>'+esc(p[0]||'Main program')+' <small>· '+esc(N[p[1]]||p[1])+' · '+(p[7]||p[2])+' seats'+(p[8]!=null?' · '+p[8]+' applied':'')+'</small></li>').join('')+'</ul>':'')}
 // does any table split a group into lunch-eligible applicants and others?
+document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('.mx-btn');if(!b)return;
+  const n=b.closest('.adm-p').nextElementSibling;if(!n||!n.classList.contains('mx-note'))return;
+  n.hidden=!n.hidden;b.setAttribute('aria-expanded',String(!n.hidden))});
 const hasLunch=steps=>(steps||[]).some(s=>Array.isArray(s[1])&&s[1][0]==='f');
 // a program's seats for students with disabilities, in the fallback program list: "64 seats · 42 listed it"
 const swd=p=>p[7]+' seats'+(p[8]!=null?' · '+p[8]+' listed it':'')+(p[9]?' · all filled':'');
@@ -1200,7 +1239,7 @@ function goBack(b){backTo=null;
   if(b.kind==='zone'||b.kind==='school'){if(b.kind==='zone')select(b.l,false);else selectNZ(b.nz,false,b.prev);
     const o=card.querySelectorAll('details.opts')[Math.max(0,b.di||0)];if(o)o.open=true;requestAnimationFrame(()=>{aside.scrollTop=b.top})}
   // search: what was selected before the search comes back, with the results open again
-  else{if(b.l)select(b.l,false);else if(b.nz)selectNZ(b.nz,false);else{clearNZSel();card.className='card empty';card.textContent='Select a zone on the map, or search for a school, to see its zoned school.';sheetDefault()}
+  else{if(b.l)select(b.l,false);else if(b.nz)selectNZ(b.nz,false);else{clearNZSel();emptyCard();sheetDefault()}
     if(phone.matches)setPop('search',true);document.getElementById('t-school').click();q.focus();q.dispatchEvent(new Event('input'))}}
 window.addEventListener('popstate',()=>{if(backTo){goBack(backTo);return}
   // otherwise follow the address, if it names a school on this level
@@ -1594,8 +1633,8 @@ async function setLevel(lv){if(lv===level)return;if(!LV[lv]&&!(await loadLevel(l
   zoneLines=L.geoJSON(F,{style:lineStyle,interactive:false}).addTo(map);syncZoneLines();
   chReports(lv);PAIR=null;nzSel=null;NZ=lv==='es'?NZ_ES:(LV[lv].NZ||[]);buildDots();sizeDots();buildIdx();buildNZ();syncLayerBoxes();res.hidden=true;llmsg.hidden=true;
   const tx=LEVEL_TXT[lv],nZ=lv==='es'?F.length:new Set(F.flatMap(f=>f.properties.dbns)).size;
-  document.getElementById('lvl-chip').textContent={es:'K–5',ms:'6–8',hs:'9–12'}[lv];document.getElementById('h1').textContent=tx.h1;
-  document.getElementById('lvl-sum').textContent=tx.sum;document.getElementById('lvl-note').innerHTML=tx.sub(nZ)+' '+(tx.note||'');
+  document.getElementById('lvl-chip').textContent={es:'K–5',ms:'6–8',hs:'9–12'}[lv];document.getElementById('badge').textContent=tx.badge;
+  document.getElementById('lvl-sum').textContent=tx.sum;document.getElementById('lvl-note').innerHTML=tx.note||'';
   // tests vs outcomes: elementary/middle use state tests, high school uses graduation and college data
   const hs=lv==='hs';['both','ela','math'].forEach(v=>{const i=document.querySelector('input[name=metric][value='+v+']');i.hidden=hs;document.querySelector('label[for='+i.id+']').hidden=hs});
   ['grad','coll','ccr','sat'].forEach(v=>{const i=document.querySelector('input[name=metric][value='+v+']');i.hidden=!hs;document.querySelector('label[for='+i.id+']').hidden=!hs});
@@ -1617,7 +1656,7 @@ async function setLevel(lv){if(lv===level)return;if(!LV[lv]&&!(await loadLevel(l
   if(noScr&&metric==='scr'){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
   if(noScr&&lastPick.programs==='scr')lastPick.programs='dl';
   showGroup(curGroup);
-  card.className='card empty';card.textContent='Select a zone on the map, or search for a school, to see its zoned school.';sheetDefault();
+  emptyCard();sheetDefault();
   try{history.replaceState(null,'',lv==='ms'?'#middle':lv==='hs'?'#high':location.pathname+location.search)}catch(e){}  // a selected zone replaces this below
   syncLegend();restyle();drawLabels();
   if(lastPoint)locate(lastPoint.a,lastPoint.b,lastPoint.label,true)}
@@ -1650,6 +1689,11 @@ intro.addEventListener('close',()=>{try{localStorage.setItem(INTRO_KEY,'1')}catc
 document.getElementById('intro-ok').addEventListener('click',()=>intro.close());
 intro.addEventListener('click',e=>{if(e.target===intro)intro.close()});  // tap outside the box
 document.getElementById('about-open').addEventListener('click',openIntro);
+// "How high school admissions work": a link in the level note (redrawn per level) opens it
+const hsGuide=document.getElementById('hs-guide');
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('[data-open="hs-guide"]')){try{hsGuide.showModal()}catch(err){hsGuide.setAttribute('open','')}}});
+hsGuide.querySelector('.guide-ok').addEventListener('click',()=>hsGuide.close());
+hsGuide.addEventListener('click',e=>{if(e.target===hsGuide)hsGuide.close()});
 const introTerms=document.getElementById('intro-terms');
 document.getElementById('terms-open').addEventListener('click',()=>{introTerms.open=true;openIntro();
   requestAnimationFrame(()=>introTerms.scrollIntoView({block:'start'}))});
@@ -1661,6 +1705,9 @@ function setSheet(open){if(!phone.matches||sheetOpen()===open)return;appEl.class
   if(!open){aside.scrollTo({top:0});const a=document.activeElement;if(a&&aside.contains(a))a.blur()}}
 // the bar that stays visible when the sheet is down: the selected school, or the map's title and a hint
 function sheetLabel(title,sub){document.getElementById('sheet-title').textContent=title;document.getElementById('sheet-sub').textContent=sub;syncSheetBtn()}
+// the card before anything is picked: how many zones this level has, and how to start (hidden in the phone sheet)
+function emptyCard(){const n=level==='es'?F.length:new Set(F.flatMap(f=>f.properties.dbns)).size;
+  card.className='card empty';card.textContent=LEVEL_TXT[level].sub(n)+' '+(phone.matches?'Tap':'Click')+' any block, or search an address or school, to see its zoned '+(level==='hs'?'high school.':'school.')}
 function sheetDefault(){sheetLabel(LEVEL_TXT[level].h1,'Tap any block to see its zoned school')}
 function syncSheetBtn(){const o=sheetOpen(),b=document.getElementById('sheet-close');
   document.getElementById('sheet-btn-txt').textContent=o?'Hide':card.classList.contains('empty')?'About':'Details';
@@ -1691,7 +1738,7 @@ function syncZoneLines(){byLayer.forEach(l=>{l.options.interactive=!!LAY.zones;i
 function applyLayers(){syncZoneLines();restyle();if(typeof syncDistricts==='function')syncDistricts();buildNZ();drawLabels();syncNames();syncParks();if(typeof syncDistricts==='function')syncDistricts()}
 // hiding zones also drops a selected zone (its outline and card); a selected school marker stays
 function clearZoneSel(){if(!selected)return;selected.setStyle(style(selected.feature,false));selected=null;buildZS();if(selLine){map.removeLayer(selLine);selLine=null}
-  card.className='card empty';card.textContent='Select a zone on the map, or search for a school, to see its zoned school.';sheetDefault();
+  emptyCard();sheetDefault();
   try{history.replaceState(null,'',level==='ms'?'#middle':level==='hs'?'#high':location.pathname+location.search)}catch(e){}}
 Object.keys(LAY).forEach(k=>{const b=document.getElementById('ly-'+k);if(b)b.addEventListener('change',()=>{LAY[k]=b.checked;saveLay();markEngaged();if(k==='zones'&&!b.checked)clearZoneSel();applyLayers()})});
 syncLayerBoxes();applyLayers();
@@ -1714,7 +1761,7 @@ document.querySelectorAll('input[name=level]').forEach(r=>r.addEventListener('ch
 const lvlSeg=document.querySelector('.seg.level'),searchSec=document.getElementById('search-sec'),lvlHome=document.createComment('level'),searchHome=document.createComment('search');
 lvlSeg.before(lvlHome);searchSec.before(searchHome);
 function placeUI(){if(phone.matches){lpop.appendChild(lvlSeg);sdlg.appendChild(searchSec)}else{closePops();lvlHome.after(lvlSeg);searchHome.after(searchSec)}}
-placeUI();sheetDefault();
+placeUI();sheetDefault();if(card.classList.contains('empty'))emptyCard();
 // iPhone Safari can leave the page scrolled after the keyboard closes; put it back
 function measurePeek(){const h=document.getElementById('sheet-head').offsetHeight;if(phone.matches&&h>30)document.documentElement.style.setProperty('--peek',h+'px')}
 measurePeek();addEventListener('resize',measurePeek);document.fonts?.ready.then(measurePeek);

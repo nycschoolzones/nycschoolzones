@@ -1366,7 +1366,12 @@ def _myschools_hs(schools, fetched):
                           "s": g.get("seats"), "ap": g.get("applicants"), "aps": g.get("applications_per_seat"),
                           "f": g.get("all_seats_filled"), "ws": w.get("seats"), "wa": w.get("applicants"), "wf": w.get("all_seats_filled"),
                           "pg": _priority_groups(q),
-                          "d1": q.get("diversity_in_admission_1"), "sc": [z.get("name") for z in q.get("selection_criteria") or []]})
+                          "d1": q.get("diversity_in_admission_1"), "sc": [z.get("name") for z in q.get("selection_criteria") or []],
+                          # a priority only the program's description states, often with its share of seats: "This program
+                          # gives a priority to Manhattan students or residents for up to 75% of the seats." (02M416)
+                          # (02M411's has no closing period; 28Q440 words it "Priority is given to ...")
+                          "bp": " ".join(m.strip().rstrip(".") + "." for m in
+                                         re.findall(r"(?:This program gives a priority to|Priority is given to)[^.]*", q.get("description") or ""))})
         out.append({"dbn": s["dbn"], "id": x.get("id"), "n": re.sub(r"\s*\(\w+\)$", "", x["name"]), "a": a.get("address_1"),
                     "boro": (s.get("district") or {}).get("borough"),
                     "lat": float(a.get("latitude") or 0), "lon": float(a.get("longitude") or 0), "p": progs,
