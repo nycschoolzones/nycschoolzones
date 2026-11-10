@@ -578,7 +578,7 @@ def ms_adm_html(dbn, lv, progs, eg=None):
             f'<li>{e(p[0] or "Main program")} <small>· {e(N.get(p[1], p[1]))} · {(p[7] if len(p) > 7 and p[7] else p[2])} seats'
             + (f" · {p[8]} applied" if len(p) > 8 and p[8] is not None else "") + "</small></li>" for p in sp) + "</ul>")
     lunch = any(has_lunch(p[6] if len(p) > 6 else []) for p in R)
-    return h + about_html("students", lunch)
+    return h + about_html("students", lunch, lv)
 
 
 def has_lunch(steps):
@@ -586,12 +586,16 @@ def has_lunch(steps):
     return any(len(s) > 1 and isinstance(s[1], list) and s[1][0] == "f" for s in steps or [])
 
 
-def about_html(who, lunch=False):
-    """"About this data" under the MySchools tables. The Local Law 72 numbers stay out: they're a year older."""
+def about_html(who, lunch=False, lv="es"):
+    """"About this data" under the MySchools tables. The Local Law 72 numbers stay out: they're a year older.
+    Middle and high school offers often top seats (Park East, 04M495: ~150 offers for 76 seats), so those say why."""
     return ('<details class="about"><summary>About this data</summary><p>Each priority group gets offers before the next. '
             f'From MySchools, {settings.MYSCHOOLS_LABEL}: general education seats, and every '
             f'{"family" if who == "families" else "student"} who listed the program anywhere on their application. '
-            f'MySchools rounds group counts (“~” about, “&lt;10” fewer than 10), so the “All {who}” offers add up the groups.</p>'
+            f'MySchools rounds group counts (“~” about, “&lt;10” fewer than 10), so the “All {who}” offers add up the groups.'
+            + ("" if lv == "es" else " Offers can top seats: the DOE offers more places than a program has, because some "
+               "students who get an offer go elsewhere, like " + ("a specialized high school, " if lv == "hs" else "")
+               + "a charter or a private school.") + '</p>'
             + ("<p>Lunch-eligible: students who qualify for free or reduced-price lunch. Programs with a diversity "
                "set-aside give them priority for a share of seats.</p>" if lunch else "")
             + "</details>")

@@ -63,9 +63,8 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
 aside{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column;gap:18px;padding:18px 18px 24px;min-width:0}
 #map{background:var(--water);min-height:0}
 h1{font-family:var(--display);font-weight:700;font-size:1.55rem;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
-.sub{color:var(--muted);font-size:.86rem;margin:4px 0 0}
+.h1-date{font-family:var(--body);font-weight:500;font-size:.8rem;letter-spacing:0;color:var(--muted);white-space:nowrap}
 .browse{font-size:.9rem;margin:8px 0 0}.browse a{color:var(--hl);display:inline-block;padding:2px 0}
-.badge{display:inline-block;background:var(--accent);color:var(--accent-ink);font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;margin-bottom:8px}
 label.lab{font-family:var(--display);font-weight:600;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
 .field{display:flex;gap:6px}
 input[type=text],select{flex:1;min-width:0;width:100%;font:inherit;font-size:.95rem;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg)}
@@ -432,14 +431,12 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <input type="radio" name="level" id="lv-hs" value="hs"><label for="lv-hs">High <small>9–12</small></label>
     </div>
     <header>
-      <span class="badge" id="badge">Kindergarten zones · Nov 2026</span>
-      <h1 id="h1">NYC Elementary School Zones</h1>
-      <p class="sub" id="sub">706 zones from the NYC Department of Education. Click any block, or search an address, to see its zoned school.</p>
+      <h1><span id="h1">NYC Elementary School Zones</span> <span class="h1-date" title="Zone lines as of Nov 2026">Nov 2026</span></h1>
       <p class="browse">Browse schools <a href="districts/" id="dist-link">by district</a> · <a href="neighborhoods/">by neighborhood</a></p>
       <div class="note how" id="how">
         <p class="must">Always confirm an exact address on <a href="https://schoolsearch.schools.nyc/" target="_blank" rel="noopener">schoolsearch.schools.nyc</a> before applying.</p>
         <details><summary id="lvl-sum">A zone gives priority, not a guaranteed seat</summary>
-          <p id="lvl-note">Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.</p>
+          <p id="lvl-note">706 kindergarten zones from the NYC Department of Education. Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.</p>
         </details>
       </div>
     </header>
@@ -622,10 +619,10 @@ const O=Object.assign({},HSD&&HSD.O||{});
 const Q=Object.assign({},HSD&&HSD.Q||{});
 let level='es',F=LV.es.F,T=LV.es.T;
 const LEVEL_TXT={
-  es:{sum:'A zone gives priority, not a guaranteed seat',note:'Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.',badge:'Kindergarten zones · Nov 2026',h1:'NYC Elementary School Zones',sub:n=>n+' zones from the NYC Department of Education. Click any block, or search an address, to see its zoned school.',grades:'3–5',avg:'Citywide, grades 3–5: ELA 47%, Math 60%',miss:'That point is outside every elementary zone. Check the coordinates, or it may be in a park or outside NYC.',noZone:'No zoned elementary school'},
-  hs:{sum:'Most of NYC has no zoned high school',badge:'High school zones · Nov 2026',h1:'NYC Zoned High Schools',sub:n=>n+' high schools give priority to students who live in their zone. Click any block to see its zoned high school.',grades:'9–12',avg:'',miss:'That point isn’t in a high school zone. Most of the city has no zoned high school; students apply citywide through MySchools.',noZone:'No zoned high school',
+  es:{sum:'A zone gives priority, not a guaranteed seat',note:'Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.',h1:'NYC Elementary School Zones',sub:n=>n+' kindergarten zones from the NYC Department of Education.',grades:'3–5',avg:'Citywide, grades 3–5: ELA 47%, Math 60%',miss:'That point is outside every elementary zone. Check the coordinates, or it may be in a park or outside NYC.',noZone:'No zoned elementary school'},
+  hs:{sum:'Most of NYC has no zoned high school',h1:'NYC Zoned High Schools',sub:n=>n+' high schools give priority to students who live in their zone.',grades:'9–12',avg:'',miss:'That point isn’t in a high school zone. Most of the city has no zoned high school; students apply citywide through MySchools.',noZone:'No zoned high school',
       note:'Most of NYC has no zoned high school. Every 8th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>. Living in one of these zones gives you priority, or a guaranteed seat, at that school’s zoned program, but only if you list it on your application.'},
-  ms:{sum:'Most districts don’t zone middle schools',note:'Most districts don’t zone middle schools. In the uncolored areas, students apply to middle schools through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>. Even in zoned districts, many students also apply to other programs.',badge:'Middle school zones · Nov 2026',h1:'NYC Middle School Zones',sub:n=>'Zones for '+n+' middle schools, in the districts that have them. Click any block to see its zoned school.',grades:'6–8',avg:'NYC middle schools average ELA 55%, Math 53%',miss:'That point isn’t in a zoned middle school area. It may be in a district without zoned middle schools, a park, or outside NYC.',noZone:'No zoned middle school'}};
+  ms:{sum:'Most districts don’t zone middle schools',note:'Most districts don’t zone middle schools. In the uncolored areas, students apply to middle schools through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>. Even in zoned districts, many students also apply to other programs.',h1:'NYC Middle School Zones',sub:n=>'Zones for '+n+' middle schools, in the districts that have them.',grades:'6–8',avg:'NYC middle schools average ELA 55%, Math 53%',miss:'That point isn’t in a zoned middle school area. It may be in a district without zoned middle schools, a park, or outside NYC.',noZone:'No zoned middle school'}};
 let metric='comp';
 const R=D.R||{};
 // prefer current (2024-25) names and addresses from the School Quality Snapshot
@@ -816,7 +813,8 @@ function admHtml(d,lv,noHead){lv=lv||'es';const src=lv==='es'?KA:(LV[lv]&&LV[lv]
 // MySchools', so they show only where MySchools has nothing for that grade.
 function msAdmHtml(d,lv,body,who){const lunch=lv==='es'?hasLunch(KP[d]):msProgs(d,lv).some(p=>hasLunch(p[6]));
   return '<div class="adm">'+body+'<details class="adm-about"><summary>About this data</summary><p>Each priority group gets offers before the next. '+
-  'From MySchools, fall 2026: general education seats, and every '+(who==='families'?'family':'student')+' who listed the program anywhere on their application. MySchools rounds group counts (“~” about, “&lt;10” fewer than 10), so the “All '+who+'” offers add up the groups.</p>'+
+  'From MySchools, fall 2026: general education seats, and every '+(who==='families'?'family':'student')+' who listed the program anywhere on their application. MySchools rounds group counts (“~” about, “&lt;10” fewer than 10), so the “All '+who+'” offers add up the groups.'+
+  (lv==='es'?'':' Offers can top seats: the DOE offers more places than a program has, because some students who get an offer go elsewhere, like '+(lv==='hs'?'a specialized high school, ':'')+'a charter or a private school.')+'</p>'+
   (lunch?'<p>Lunch-eligible: students who qualify for free or reduced-price lunch. Programs with a diversity set-aside give them priority for a share of seats.</p>':'')+
   '</details></div>'}
 function zoneProg(dbns,m){if(!dbns.some(d=>X[d]&&!(m==='dl'&&CHX[d]&&!dualLang(d))))return null;return dbns.some(d=>m==='gt'?hasGT(d):dualLang(d))}
@@ -1593,8 +1591,8 @@ async function setLevel(lv){if(lv===level)return;if(!LV[lv]&&!(await loadLevel(l
   zoneLines=L.geoJSON(F,{style:lineStyle,interactive:false}).addTo(map);syncZoneLines();
   chReports(lv);PAIR=null;nzSel=null;NZ=lv==='es'?NZ_ES:(LV[lv].NZ||[]);buildDots();sizeDots();buildIdx();buildNZ();syncLayerBoxes();res.hidden=true;llmsg.hidden=true;
   const tx=LEVEL_TXT[lv],nZ=lv==='es'?F.length:new Set(F.flatMap(f=>f.properties.dbns)).size;
-  document.getElementById('badge').textContent=tx.badge;document.getElementById('lvl-chip').textContent={es:'K–5',ms:'6–8',hs:'9–12'}[lv];document.getElementById('h1').textContent=tx.h1;document.getElementById('sub').textContent=tx.sub(nZ);
-  document.getElementById('lvl-sum').textContent=tx.sum;document.getElementById('lvl-note').innerHTML=tx.note||'';
+  document.getElementById('lvl-chip').textContent={es:'K–5',ms:'6–8',hs:'9–12'}[lv];document.getElementById('h1').textContent=tx.h1;
+  document.getElementById('lvl-sum').textContent=tx.sum;document.getElementById('lvl-note').innerHTML=tx.sub(nZ)+' '+(tx.note||'');
   // tests vs outcomes: elementary/middle use state tests, high school uses graduation and college data
   const hs=lv==='hs';['both','ela','math'].forEach(v=>{const i=document.querySelector('input[name=metric][value='+v+']');i.hidden=hs;document.querySelector('label[for='+i.id+']').hidden=hs});
   ['grad','coll','ccr','sat'].forEach(v=>{const i=document.querySelector('input[name=metric][value='+v+']');i.hidden=!hs;document.querySelector('label[for='+i.id+']').hidden=!hs});
