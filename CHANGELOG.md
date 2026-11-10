@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Fixed
+- A card section you close now stays closed as you click from school to school, even when the link you opened colors the map by something (like "?c=sat", which kept reopening "Graduation rate"). Picking a Color by yourself still opens its section.
+
 ## 1.69.0 (2026-11-10)
 
 ### Changed
