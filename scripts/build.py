@@ -70,6 +70,7 @@ def fill_settings(template):
                  "__DEMO_GROUPS__": json.dumps(settings.DEMO_GROUPS, separators=(",", ":"), ensure_ascii=False),
                  "__HS_METHOD_HELP__": json.dumps(settings.HS_METHOD_HELP, separators=(",", ":"), ensure_ascii=False),
                  "__MS_METHOD_HELP__": json.dumps(settings.MS_METHOD_HELP, separators=(",", ":"), ensure_ascii=False),
+                 "__APPLY_DATES__": json.dumps(settings.APPLY_DATES, separators=(",", ":"), ensure_ascii=False),
                  "__TEST_GRADIENT__": gradient, "__TEST_TICKS__": ticks,
                  "__RAMP_COLORS__": json.dumps(settings.RAMP_COLORS, separators=(",", ":")), "__RAMP_CSS__": ramp_css}.items():
         template = template.replace(k, v)
@@ -1071,6 +1072,10 @@ def main(standalone_path=None, pages=None):
     template = template.replace("__MS_UNZONED__", district_list(sorted(set(range(1, 33)) - ms_districts)))
     template = template.replace("__K_ROOM__", str(k_room(d)))
     template = fill_settings(template)
+    # application dates (settings.APPLY_DATES): once a level's offers are out, its line hides; say it's time to update
+    for lv, a in settings.APPLY_DATES.items():
+        if a["offers"] < datetime.date.today().isoformat():
+            print(f"apply dates: {lv} offers came out {a['offers']}; set the next round's dates in settings.py APPLY_DATES")
 
     full = dict(d)
     # For the website, middle school, high school, the all-streets layer and the parks load on demand from

@@ -115,3 +115,19 @@ AP_COURSES = (
 # MySchools spellings that differ from the College Board's (older course names), without "AP "
 AP_ALIASES = {"Pre-Calculus": "Precalculus", "Studio Art - 2D": "2-D Art and Design", "Studio Art - 3D": "3-D Art and Design",
               "Studio Art - Drawing": "Drawing"}
+
+# Application dates for the next admissions round, one per level: the line under the panel title ("Apply by Fri, Dec 4
+# · 24 days left") and "Key dates" in each "How … admissions work" window. Dates are YYYY-MM-DD. "offers_text", when
+# set, is shown instead of the offer date (the DOE hadn't posted the high school one); "offers" still decides when the
+# line goes away. "more": other deadlines listed in the window. Update these each fall from the pages in "source";
+# once a round's offers are out, the line hides itself and the build reminds you.
+APPLY_DATES = {
+    "es": {"opens": "2026-12-09", "closes": "2027-01-22", "offers": "2027-03-30",
+           "source": "https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten"},
+    "ms": {"opens": "2026-10-14", "closes": "2026-12-11", "offers": "2027-04-07",
+           "source": "https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/middle-school"},
+    "hs": {"opens": "2026-10-06", "closes": "2026-12-04", "offers": "2027-03-15", "offers_text": "early March",
+           "more": [["SHSAT sign-up closed", "2026-10-30"], ["Audition and assessment materials due", "2026-12-04"],
+                    ["LaGuardia application closes", "2026-12-04"]],
+           "source": "https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/high-school"},
+}

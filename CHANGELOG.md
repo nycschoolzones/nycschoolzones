@@ -11,6 +11,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ### Added
 - High schools now have their own "AP classes" section, on the map card and the school page: how many AP classes the school lists, and each one in a short sorted list under its subject (math and computer science, sciences, English, history and social sciences, world languages, arts, AP Capstone). Course names follow the College Board's current names, so "Pre-Calculus" and "Studio Art" show as "Precalculus" and "2-D Art and Design" or "Drawing". The AP classes are no longer repeated under "Classes, sports and activities".
 
+## 1.71.0 (2026-11-10)
+
+### Added
+- Application dates: a line under the panel title shows where this year's application stands for the level you're looking at, like "Apply by Fri, Dec 4 · 24 days left" (yellow in the last week), "Applications open Wed, Dec 9" or "Offers come out Tue, Mar 30". Each "How … admissions work" window lists the key dates, including the high school SHSAT and audition deadlines.
+
 ## 1.70.1 (2026-11-10)
 
 ### Added
