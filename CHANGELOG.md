@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.68.0 (2026-11-10)
 
 ### Added
 - High school cards and school pages now have a "Classes, sports and activities" section, like middle schools: AP and IB classes, college courses, languages, arts courses, PSAL teams for boys, girls and coed, other sports, and clubs, as each school lists them on MySchools. The folded line counts AP classes, PSAL teams and activities.
