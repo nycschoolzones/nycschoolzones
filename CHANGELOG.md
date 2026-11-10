@@ -6,6 +6,18 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- On a high school's card, tap a program's admissions method ("Screened (grades)", "Ed. Opt.", …) to see in one line what it means. School pages show that line under each program.
+- High school admissions now show a program's priority when MySchools only states it in the program's description, often with its share of seats. For example, six Manhattan schools (Eleanor Roosevelt, Baruch College Campus, Millennium, NYC Lab, NYC Museum School and the Clinton School) give Manhattan students or residents priority for up to 75% of their seats.
+
+### Changed
+- The side panel's title is now "NYC School Zones" at every level, with the yellow label above it back, showing the level and the zone date ("High school zones · Nov 2026").
+- "Always confirm an exact address" now has the yellow box to itself; the note about how zones work sits under it, and for middle and high schools its heading says so ("How high school zones work") instead of repeating its first sentence.
+- "How high school zones work" is now a short note with the two things most families need, plus a "How high school admissions work" link. It opens a window that spells out what living in a zone guarantees, that high schools almost never give district priority (some give borough priority), and how Ed. Opt., screened, open, audition and specialized high school programs choose students.
+- Before you pick anything, the card tells you how many zones the level has ("28 high schools give priority to students who live in their zone") and how to start. That line used to be under the title, and since 1.69.0 was folded into the "Always confirm an exact address" note.
+
 ## 1.69.0 (2026-11-10)
 
 ### Changed

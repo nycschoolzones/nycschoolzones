@@ -59,3 +59,21 @@ OUT_STOPS = {"grad": [[65, "red"], [80, "yellow"], [95, "green"]],     # 4-year 
 # Categorical (no group is "better"), so none of the ramp colors above; checked for color blindness side by side.
 DEMO_GROUPS = [["Asian or Pacific Islander", "#2a78d6"], ["Black", "#eb6834"], ["Hispanic", "#1baf7a"], ["White", "#eda100"],
                ["Multiracial, Native American or not reported", "#9aa5a0"]]
+
+# High school admissions methods, one line each: the map card shows it when you tap a program's method, the school
+# pages under each program. Keys are the method codes in build.py MCODE.
+HS_METHOD_HELP = {
+    "E": "Takes students across a range of 7th-grade grades, not only top students.",
+    "S": "Ranks applicants by their 7th-grade course grades.",
+    "SA": "Ranks applicants by 7th-grade grades plus the school’s own assessment, like an essay, interview or test.",
+    "SL": "Ranks applicants by 7th-grade grades and a language assessment, for bilingual or language-focused programs.",
+    "O": "Random among applicants, after any priorities.",
+    "A": "Admits by audition or portfolio, for arts programs.",
+    "L": "For students who speak, or are learning, the program’s language, such as English learners or dual-language programs.",
+    "T": "Admits only by SHSAT score. Students sign up for the test separately in the fall.",
+    "ZG": "Students who live in the zone and list the program are guaranteed a seat.",
+    "ZP": "Students who live in the zone get top priority.",
+    "TR": "A transfer school, for older students who are behind on credits or have left school; not part of 8th-grade admissions.",
+    "D75": "Seats for students whose IEP recommends a District 75 program.",
+    "ASD": "Seats for students whose IEP recommends an autism (ASD Nest or Horizon) or ACES program.",
+}

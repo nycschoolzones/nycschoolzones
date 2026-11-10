@@ -68,6 +68,7 @@ def fill_settings(template):
                  "__TEST_STOPS__": json.dumps(settings.TEST_STOPS, separators=(",", ":")),
                  "__OUT_STOPS__": json.dumps(settings.OUT_STOPS, separators=(",", ":")),
                  "__DEMO_GROUPS__": json.dumps(settings.DEMO_GROUPS, separators=(",", ":"), ensure_ascii=False),
+                 "__HS_METHOD_HELP__": json.dumps(settings.HS_METHOD_HELP, separators=(",", ":"), ensure_ascii=False),
                  "__TEST_GRADIENT__": gradient, "__TEST_TICKS__": ticks,
                  "__RAMP_COLORS__": json.dumps(settings.RAMP_COLORS, separators=(",", ":")), "__RAMP_CSS__": ramp_css}.items():
         template = template.replace(k, v)
@@ -832,7 +833,8 @@ def main(standalone_path=None, pages=None):
         # High school programs and every high school without a zone (MySchools high school directory).
         # P: programs per school, [name, method code, seats, applicants, all seats filled, diversity set-aside,
         #   priority steps (priority_steps), seats for students with disabilities, their applicants, all filled],
-        #   as for middle school. NZ rows match the elementary/middle ones; the trailing flag marks the
+        #   as for middle school, and when the program's MySchools description states one, a priority sentence
+        #   ("... Manhattan students or residents for up to 75% of the seats."). NZ rows match the elementary/middle ones; the trailing flag marks the
         #   9 specialized high schools (8 SHSAT schools + LaGuardia), and one more field holds a priority summary.
         if os.path.exists(os.path.join(DATA, "hs_directory.json")):
             hsdir = load("hs_directory.json")["schools"]
@@ -850,7 +852,7 @@ def main(standalone_path=None, pages=None):
                 for q in o["p"]:
                     code = MCODE.get(q["m"], q["m"])
                     progs.append([q["n"], code, q["s"], q["ap"], 1 if q["f"] else 0, 1 if q["d1"] else 0, priority_steps(q["pg"], dbn),
-                                  q.get("ws"), q.get("wa"), None if q.get("wf") is None else int(q["wf"])])
+                                  q.get("ws"), q.get("wa"), None if q.get("wf") is None else int(q["wf"])] + ([q["bp"]] if q.get("bp") else []))
                 progs.sort(key=lambda p: p[1] in SPECIAL)  # special education programs last
                 d["HS"]["P"][dbn] = progs
                 # ratings and outcomes from MySchools for schools the Snapshot files don't cover
