@@ -1271,6 +1271,55 @@ def _ms_extras(x):
             "ac": tidy(split(x.get("activities_description")))}
 
 
+def _hs_extras(x):
+    """A high school's classes, sports and activities from its MySchools record, each list sorted A-Z: {"ap": AP
+    classes, "ib": IB classes, "col": college courses, "adv": other advanced classes, "lang": languages, "art": arts
+    courses, "el": electives, "psb"/"psg"/"psc": PSAL teams (boys, girls, coed), "sp": other sports and teams (not
+    already a PSAL team), "ac": clubs and activities}. MySchools also lists subject categories ("Math (Advanced
+    Placement)"); every school that has one names the courses too, so they're left out. A description written as
+    prose (sentences, or over a quarter of its pieces longer than ten words) stays whole, as one entry."""
+    import re
+    def tidy(names):  # one of each, ignoring case; the first spelling wins, capitalized
+        out = {}
+        for n in names:
+            n = re.sub(r"^(and\s+|&\s+|\d+[.)]\s*)", "", n.strip().strip(".").strip(), flags=re.I)
+            if n and n.lower() not in ("-", "none", "n/a") and n.lower() not in out:
+                out[n.lower()] = n[:1].upper() + n[1:]
+        return sorted(out.values(), key=str.lower)
+    def split(t):  # on commas, semicolons and line breaks outside parentheses
+        t = (t or "").strip()
+        out, cur, depth = [], "", 0
+        for ch in t:
+            depth += (ch == "(") - (ch == ")")
+            if ch in ",;\n" and depth <= 0:
+                out.append(cur)
+                cur, depth = "", 0
+            else:
+                cur += ch
+        out.append(cur)
+        if re.search(r"[a-z)]{2}[.!?]\s+[A-Z]", t) or sum(len(p.split()) > 10 for p in out) * 4 > len(out):
+            return [" ".join(t.split())]
+        return out
+    names = lambda k: [z["name"] for z in x.get(k) or []]
+    adv = names("advanced_placement_courses")
+    college = [re.sub(r" \(College Course \[(Credited|Uncredited)\]\)$",
+                      lambda m: " (for college credit)" if m.group(1) == "Credited" else "", n)
+               for n in adv if "(College Course" in n and not n.startswith("Other ")]  # "Other (College Course ...)" says nothing
+    psal = {k: tidy(names(f"sports_{s}")) for k, s in (("psb", "boys"), ("psg", "girls"), ("psc", "coed"))}
+    in_psal = {n.lower() for v in psal.values() for n in v}
+    return {"ap": tidy(n for n in adv if n.startswith("AP ")),
+            "ib": tidy(n for n in adv if n.startswith("IB ")),
+            "col": tidy(college),
+            "adv": tidy(re.sub(r" \(Advanced (Math|Science|World Languages)\)$", "", n)
+                        for n in adv if re.search(r"\(Advanced (Math|Science|World Languages)\)$", n)),
+            "lang": tidy(names("language_classes")),
+            "art": tidy(names("art_courses")),
+            "el": tidy(split(x.get("electives_description"))),
+            **psal,
+            "sp": [n for n in tidy(names("school_sports") + split(x.get("sports_description"))) if n.lower() not in in_psal],
+            "ac": tidy(split(x.get("activities_description")))}
+
+
 def _myschools_ms(schools):
     """ms_directory.json rows: [dbn, name, address, lat, lon,
     programs [[name ('' = the school's main program), method code, seats, applicants, all seats filled, diversity set-aside,
@@ -1300,7 +1349,8 @@ def _myschools_ms(schools):
 
 def _myschools_hs(schools, fetched):
     """hs_directory.json: every high school with its programs (method, seats, applicants, priority groups),
-    ratings, graduation and college rates and enrollment, as read by build.py."""
+    ratings, graduation and college rates, enrollment and "x": classes, sports and activities (_hs_extras), as read
+    by build.py."""
     import re
     out = []
     for x in schools:
@@ -1324,7 +1374,8 @@ def _myschools_hs(schools, fetched):
                           r("relationships_with_families_rating")],
                     "gr": x.get("stat_graduation"), "cc": x.get("stat_enroll_college_career"),
                     "en": int(x["total_enrollment"]) if str(x.get("total_enrollment") or "").isdigit() else None,
-                    "g": x.get("grades_description"), "div": x.get("diversity_in_admissions") or ""})
+                    "g": x.get("grades_description"), "div": x.get("diversity_in_admissions") or "",
+                    "x": _hs_extras(x)})
     save("hs_directory.json", {"source": f"MySchools high school directory API (process 1), fetched {fetched}",
                                "schools": out})
     print(f"  high school: {len(out)} schools")

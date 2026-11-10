@@ -580,6 +580,36 @@ def short_group(nm):
     return nm
 
 
+# Classes, sports and activities on the card and the school page, per level: (key in the directory file, heading,
+# what the folded summary counts it as: singular, plural; groups with the same word are added up, "" not counted)
+EX_GROUPS = {
+    "ms": (("acc", "Accelerated and honors classes", "advanced class", "advanced classes"), ("art", "Arts courses", "", ""),
+           ("el", "Electives", "", ""), ("sp", "Sports", "sport", "sports"),
+           ("ac", "Clubs and activities", "activity", "activities")),
+    "hs": (("ap", "AP classes", "AP class", "AP classes"), ("ib", "IB classes", "IB class", "IB classes"),
+           ("col", "College courses", "", ""), ("adv", "Other advanced classes", "", ""), ("lang", "Languages", "", ""),
+           ("art", "Arts courses", "", ""), ("el", "Electives", "", ""),
+           ("psb", "PSAL teams, boys", "PSAL team", "PSAL teams"), ("psg", "PSAL teams, girls", "PSAL team", "PSAL teams"),
+           ("psc", "PSAL teams, coed", "PSAL team", "PSAL teams"), ("sp", "Other sports and teams", "", ""),
+           ("ac", "Clubs and activities", "activity", "activities")),
+}
+
+
+def extras(lv, rows):
+    """{"EX": {dbn: [[indexes into EXV] per group]}, "EXV": every name once, "EXG": [[heading, one, many] per group]}
+    for a level's classes, sports and activities (EX_GROUPS), from {dbn: {group key: [names]}} (fetch_data.py
+    _ms_extras, _hs_extras). Schools with nothing listed are left out."""
+    exv, exi = [], {}
+    def ix(n):
+        if n not in exi:
+            exi[n] = len(exv)
+            exv.append(n)
+        return exi[n]
+    keys = [g[0] for g in EX_GROUPS[lv]]
+    ex = {dbn: [[ix(n) for n in x.get(k, [])] for k in keys] for dbn, x in rows.items() if any(x.values())}
+    return {"EX": ex, "EXV": exv, "EXG": [list(g[1:]) for g in EX_GROUPS[lv]]}
+
+
 def priority_steps(groups, dbn):
     """MySchools priority groups [[name, outcome sentence]] -> the steps the map and pages show, in order.
     A step is [group, applicants, offers]: group "S" siblings, "C" continuing students, "B" the school's borough,
@@ -770,17 +800,7 @@ def main(standalone_path=None, pages=None):
                 if os.path.exists(os.path.join(DATA, name)):
                     snaps.update(load(name))
             d["MS"]["P"] = {r[0]: r[5] for r in msdir}
-            # EX: classes, sports and activities per school as indexes into EXV (each name once): [accelerated and honors
-            #   classes, arts courses, electives, sports, clubs and activities]
-            exv, exi = [], {}
-            def ex_ix(n):
-                if n not in exi:
-                    exi[n] = len(exv)
-                    exv.append(n)
-                return exi[n]
-            d["MS"]["EX"] = {r[0]: [[ex_ix(n) for n in r[6][k]] for k in ("acc", "art", "el", "sp", "ac")]
-                             for r in msdir if len(r) > 6 and any(r[6].values())}
-            d["MS"]["EXV"] = exv
+            d["MS"].update(extras("ms", {r[0]: r[6] for r in msdir if len(r) > 6}))
             d["MS"]["NZ"] = []
             # citywide middle schools (open to students from anywhere in the city) are marked with a trailing 1
             citywide = set(load("citywide_ms.json")["dbns"]) if os.path.exists(os.path.join(DATA, "citywide_ms.json")) else set()
@@ -857,6 +877,7 @@ def main(standalone_path=None, pages=None):
                     pz += " Continuing 8th graders get priority."
                 d["HS"]["NZ"].append([dbn, o["n"], o["a"], o["lat"], o["lon"], [], 0, [p[:6] for p in progs], 1 if shs else 0, pz])
             d["HS"]["O"] = outcomes
+            d["HS"].update(extras("hs", {o["dbn"]: o["x"] for o in hsdir if o.get("x")}))
             # SAT, college readiness, where graduates went and advanced courses (2024-25 Snapshot, high school report).
             # Q: [average SAT, college & career readiness score, % in any advanced course, % in AP,
             #     [CUNY 4-year, CUNY 2-year, NY public (SUNY etc.), NY private, out of state, for-profit, other] % of graduates,

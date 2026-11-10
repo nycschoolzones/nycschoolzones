@@ -597,15 +597,25 @@ def about_html(who, lunch=False):
             + "</details>")
 
 
-def extras_html(ex, vocab):
-    """Middle school classes, sports and activities, as the map card shows them (src/template.html exSec).
-    ex: [accelerated and honors classes, arts courses, electives, sports, clubs and activities] as indexes into vocab."""
+def extras_html(ex, vocab, groups):
+    """Middle and high school classes, sports and activities, as the map card shows them (src/template.html exSec).
+    ex: one list per group, as indexes into vocab; groups: [heading, one, many] each (build.py EX_GROUPS)."""
     if not ex:
         return ""
-    groups = ("Accelerated and honors classes", "Arts courses", "Electives", "Sports", "Clubs and activities")
-    h = "".join(f'<h3 class="ex-h">{g}</h3><p>{e(", ".join(vocab[k] for k in l))}</p>' for g, l in zip(groups, ex) if l)
+    h = "".join(f'<h3 class="ex-h">{g[0]}</h3><p>{e(", ".join(vocab[k] for k in l))}</p>' for g, l in zip(groups, ex) if l)
     return ("<h2>Classes, sports and activities</h2>" + h +
             '<p class="src">As the school lists them on MySchools.</p>')
+
+
+def extras_summary(ex, vocab, groups):
+    """The folded card's line: "12 AP classes · 22 PSAL teams · 15 activities", groups that count as the same word
+    added up; an entry over 80 characters is a description written as prose, not one activity."""
+    cnt = {}
+    for g, l in zip(groups, ex or []):
+        if g[1]:
+            cnt.setdefault((g[1], g[2]), 0)
+            cnt[(g[1], g[2])] += sum(1 for k in l if len(vocab[k]) <= 80)
+    return " · ".join(f"{n} {one if n == 1 else many}" for (one, many), n in cnt.items() if n)
 
 
 def of_all(n, x, i, j):
@@ -1055,12 +1065,10 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                 " · ".join(x2 for x2 in (f"{students} students" if students else "", f"{attend} attendance" if attend else "") if x2), False))
         cards.append((demo_html(dm, d.get("DMC"), ch, of_all(d.get("XN", {}).get(dbn), x, 2, 6),
                                 of_all(d.get("XN", {}).get(dbn), x, 1, 5)), demo_summary(dm), False))
-        if lv == "ms":
-            ex = (MS.get("EX") or {}).get(dbn)
-            cards.append((extras_html(ex, MS.get("EXV") or []), " · ".join(
-                f"{len(ex[i])} {one if len(ex[i]) == 1 else many}" for i, one, many in
-                ((0, "advanced class", "advanced classes"), (3, "sport", "sports"), (4, "activity", "activities")) if ex[i])
-                if ex else "", False))
+        if lv in ("ms", "hs"):
+            LD = MS if lv == "ms" else HS
+            ex, exv, exg = (LD.get("EX") or {}).get(dbn), LD.get("EXV") or [], LD.get("EXG") or []
+            cards.append((extras_html(ex, exv, exg), extras_summary(ex, exv, exg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)
 
         # nearby options: other schools at this level in the same district
