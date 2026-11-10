@@ -644,7 +644,7 @@ async function loadLevel(lv){if(LV[lv])return true;if(!ASSETS[lv])return false;
   try{const x=await getAsset(lv);
     Object.entries(x.schools).forEach(([d,s])=>{S[d]=Object.assign({},s,S[d]||{})});snapNames(Object.keys(x.schools));
     if(x.O)Object.assign(O,x.O);if(x.Q)Object.assign(Q,x.Q);
-    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
+    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
   catch(e){alertLoad();return false}finally{document.body.style.cursor=''}}
 function alertLoad(){const m=document.getElementById('llmsg');if(m){m.textContent='Couldn’t load that part of the map. Check your connection and try again.';m.hidden=false}}
 const RK={ip:2,ss:3,rf:4},RNAME={ip:'Instruction and Performance',ss:'Safety and School Climate',rf:'Relationships with Families'};
@@ -716,7 +716,7 @@ function chBlock(o){const x=CHX[o.d]||[];
     ' Apply through the <a href="'+CH_APPLY+'" target="_blank" rel="noopener">common charter application ↗</a> or on the school’s own site, by April 1 for most schools. It’s separate from MySchools: applying doesn’t affect your MySchools application.'+
     (x[3]?' Formerly '+esc(x[3])+'.':'')+'</p></details>'}
 regNZ(NZ_ES);
-[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
+[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
   if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});regNZ(LV[lv].NZ)});
 function nzDistricts(o){const ds=o.pd.length?o.pd:[+o.d.slice(0,2)];return ds}
 function nzPriority(o){if(o.ch)return 'Admission is by lottery only. Charter schools can’t screen: no tests, grades, interviews or auditions. Lottery priority usually goes to siblings, then to families who live in District '+o.pd[0]+'.';if(o.hs){if(o.gt)return o.pr.some(p=>p[1]==='T')?'Admission is by SHSAT score only. Any NYC 8th or 9th grader can take the test.':'Admission is by audition. Students from anywhere in NYC can apply.';return o.pz||'Open to students from anywhere in NYC.'}if(o.gt)return 'Open to children found eligible for G&T, from anywhere in NYC.'+(o.pd.length?' Priority to eligible children in Districts '+o.pd.slice(0,-1).join(', ')+' and '+o.pd[o.pd.length-1]+'.':'');const ds=nzDistricts(o),t=ds.length>1?'Districts '+ds.slice(0,-1).join(', ')+' and '+ds[ds.length-1]:'District '+ds[0];
@@ -1316,12 +1316,13 @@ function admSec(d){const eg=level==='ms'&&LV.ms.EG&&LV.ms.EG[d],g=eg?String(eg):
     return sec('adm-'+g,'<span class="st">Admissions, grade '+g+'<small>'+sub+'</small></span>'+(sa?'<span class="sa">'+sa+'</span>':''),msAdmHtml(d,level,note+msAdm(d,level),'students'))}
   if(!r)return '';
   return sec('adm-'+g,'<span class="st">Admissions, grade '+g+'<small>Seats / applied, fall '+y+'</small></span><span class="sa">'+r[0].toLocaleString()+' / '+r[1].toLocaleString()+'</span>',admHtml(d,level,true))}
-// middle school classes, sports and activities (MySchools, LV.ms.EX as indexes into EXV): counts up top, the lists inside
-const EX_GROUPS=['Accelerated and honors classes','Arts courses','Electives','Sports','Clubs and activities'];
-function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level!=='ms'||!x)return '';
-  const n=(i,one,many)=>x[i].length?x[i].length+' '+(x[i].length>1?many:one):'';
-  const sum=[n(0,'advanced class','advanced classes'),n(3,'sport','sports'),n(4,'activity','activities')].filter(Boolean).join(' · ');
-  const body=x.map((l,i)=>l.length?'<div class="ex"><div class="adm-h">'+EX_GROUPS[i]+'</div><p>'+esc(l.map(k=>lp.EXV[k]).join(', '))+'</p></div>':'').join('');
+// middle and high school classes, sports and activities (MySchools, LV[level].EX as indexes into EXV; EXG: each
+// group's heading and what the summary counts it as, build.py EX_GROUPS): counts up top, the lists inside
+function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)return '';
+  const cnt={},words=[];x.forEach((l,i)=>{const g=lp.EXG[i];if(!g||!g[1])return;
+    const k=l.filter(j=>lp.EXV[j].length<=80).length;if(!(g[1] in cnt)){cnt[g[1]]=0;words.push(g)}cnt[g[1]]+=k});
+  const sum=words.filter(g=>cnt[g[1]]).map(g=>cnt[g[1]]+' '+(cnt[g[1]]>1?g[2]:g[1])).join(' · ');
+  const body=x.map((l,i)=>l.length&&lp.EXG[i]?'<div class="ex"><div class="adm-h">'+lp.EXG[i][0]+'</div><p>'+esc(l.map(k=>lp.EXV[k]).join(', '))+'</p></div>':'').join('');
   return sec('ex','<span class="st">Classes, sports &amp; activities<small>'+sum+'</small></span>',body+'<small class="ex-src">As the school lists them on MySchools.</small>')}
 // specialized high schools: last fall's SHSAT cutoff up top
 function cutSec(d){const c=LV.hs&&LV.hs.CUT;if(level!=='hs'||!c||!c.c[d])return '';
