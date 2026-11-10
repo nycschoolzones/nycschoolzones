@@ -77,3 +77,16 @@ HS_METHOD_HELP = {
     "D75": "Seats for students whose IEP recommends a District 75 program.",
     "ASD": "Seats for students whose IEP recommends an autism (ASD Nest or Horizon) or ACES program.",
 }
+
+# Middle school admissions methods, the same way (keys: the method codes in src/template.html MNAME).
+MS_METHOD_HELP = {
+    "Z": "Students who live in the zone get priority, after siblings and, at K–8 schools, the school’s own 5th graders.",
+    "O": "Random among applicants, after any priorities.",
+    "S": "Ranks applicants by their course grades.",
+    "SA": "Ranks applicants by the school’s own assessment, and in some cases their course grades.",
+    "A": "Ranks applicants by audition, for arts programs.",
+    "T": "Admits by District 21’s Mark Twain talent test score.",
+    "L": "Ranks applicants by English proficiency or home language, for English learners and dual-language programs.",
+    "D75": "Seats for students whose IEP recommends a District 75 program.",
+    "ASD": "Seats for students whose IEP recommends an autism (ASD Nest or Horizon) or ACES program.",
+}
