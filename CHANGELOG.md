@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- Behind the scenes: the MySchools directories can now be refreshed with one command (`fetch_data.py myschools`), without pasting a script into a browser.
+
 ## 1.71.0 (2026-11-10)
 
 ### Added

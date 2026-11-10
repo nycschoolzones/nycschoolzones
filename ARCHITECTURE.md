@@ -32,7 +32,7 @@ fetch_data.py ──> data/*.json   (yearly refresh; MySchools + Snapshot go thr
   `TABS_JS`), the sitemap and shared CSS. It reads the same trimmed data `build.py` builds. `LOCAL_FIX` and `relative()`
   make links work from `file://`.
 - `scripts/neighborhoods.py`: one page per neighborhood, listing the zones that cover it.
-- `scripts/fetch_data.py`: one command per source (`zones`, `myschools`, `snapshot-job`, `snapshot-raw`, `snapshot-counts`, `colocation`, `accessibility`, `admissions`, `charters`, `zips`, `demographics`, `charter-snapshot`, …).
+- `scripts/fetch_data.py`: one command per source (`zones`, `myschools` (no files: `fetch_myschools`, straight from the MySchools API; with files: browser downloads), `snapshot-job`, `snapshot-raw`, `snapshot-counts`, `colocation`, `accessibility`, `admissions`, `charters`, `zips`, `demographics`, `charter-snapshot`, …).
   The README's "Refresh the data" section is the checklist.
 - `scripts/release.sh`: bumps `VERSION`, dates the changelog, rebuilds, commits, tags and pushes. `.github/workflows/release.yml` (Actions → Release) runs it on GitHub with a patch/minor/major choice; its push starts the Pages deploy like any other.
 

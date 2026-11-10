@@ -1412,6 +1412,42 @@ def import_accessibility(paths):
     print(f"  accessibility: {len(acc)} schools")
 
 
+MYSCHOOLS_API = "https://www.myschools.nyc/en/api/v2/schools/process/{}/?page={}"
+MYSCHOOLS_PROCESSES = {"k": 4, "ms": 6, "hs": 1}   # MySchools "admission process" ids, as in scripts/browser/myschools.js
+
+
+def fetch_myschools(levels=("k", "ms", "hs")):
+    """The MySchools directories straight from its API, as scripts/browser/myschools.js downloads them in a browser:
+    every page of each level's directory, a few at a time, saved as data/myschools_<level>_raw.json (gitignored), then
+    imported with import_myschools. MySchools answered scripted requests in fall 2026 but has blocked them before; if
+    it refuses, this stops and the browser script is the way (README "Refresh the data", step 2)."""
+    import datetime
+    import urllib.error
+    def page(pid, n):
+        try:
+            return get_json(MYSCHOOLS_API.format(pid, n))
+        except (urllib.error.HTTPError, urllib.error.URLError, ValueError) as e:  # ValueError: a block page, not JSON
+            sys.exit(f"  MySchools refused the download ({e}). Use scripts/browser/myschools.js instead "
+                     "(README, Refresh the data, step 2).")
+    paths = []
+    for lv in levels:
+        pid = MYSCHOOLS_PROCESSES[lv]
+        first = page(pid, 1)
+        n = math.ceil(first["count"] / max(1, len(first["results"])))
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:  # gently, like the browser script
+            rest = list(pool.map(lambda k: page(pid, k)["results"], range(2, n + 1)))
+        schools = first["results"] + [x for r in rest for x in r]
+        if len(schools) != first["count"]:
+            sys.exit(f"  {lv}: got {len(schools)} of {first['count']} schools; try again later")
+        path = os.path.join(DATA, f"myschools_{lv}_raw.json")
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({"source": f"MySchools directory, process {pid}", "fetched": datetime.date.today().isoformat(),
+                       "schools": schools}, f)
+        print(f"  {lv}: {len(schools)} schools -> {os.path.relpath(path, ROOT)}")
+        paths.append(path)
+    import_myschools(paths)
+
+
 def import_myschools(paths):
     """Turn myschools_k.json / myschools_ms.json / myschools_hs.json (from scripts/browser/myschools.js) into
     nonzoned_k.json + citywide_gt_k.json, ms_directory.json and hs_directory.json."""
@@ -1678,6 +1714,10 @@ if __name__ == "__main__":
         fetch_k_admissions(args[1:])
         fetch_k_admissions(args[1:], "Grade 6", "ms_admissions.json")
         fetch_k_admissions(args[1:], "Grade 9", "hs_admissions.json")
+        sys.exit()
+    if args[:1] == ["myschools"] and set(args[1:]) <= set(MYSCHOOLS_PROCESSES):  # straight from MySchools: all, or k ms hs
+        print("-- myschools (from the MySchools API)")
+        fetch_myschools(args[1:] or ("k", "ms", "hs"))
         sys.exit()
     if args[:1] == ["myschools"] and len(args) >= 2:  # files from scripts/browser/myschools.js
         print("-- myschools (from browser downloads)")

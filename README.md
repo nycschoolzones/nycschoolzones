@@ -148,10 +148,14 @@ If the DOE servers block you, download the three layers in a browser (URLs in `f
 
 Programs, admissions methods, seats and applicants, priorities, schools without zones, and high school ratings.
 
+`python3 scripts/fetch_data.py myschools` downloads all three directories straight from MySchools (about two minutes) and imports them; `myschools ms hs` does only those levels. The downloads are kept as `data/myschools_<level>_raw.json` (not committed).
+
+If MySchools refuses (it has blocked scripts before; the command says so and stops), use a browser instead:
+
 1. Open any page on [myschools.nyc](https://www.myschools.nyc/), open the console, paste all of `scripts/browser/myschools.js` and press Enter. About a minute later you have `myschools_k.json`, `myschools_ms.json` and `myschools_hs.json` in Downloads.
 2. `python3 scripts/fetch_data.py myschools ~/Downloads/myschools_*.json`
 
-This writes `nonzoned_k.json`, `citywide_gt_k.json`, `k_priority.json`, `ms_directory.json`, `hs_directory.json` and `accessibility.json` (each school's building accessibility, merged across the directories you pass; `python3 scripts/fetch_data.py accessibility <files>` updates only that). Then set `MYSCHOOLS_LABEL` in `scripts/settings.py` to the admissions round the directory's "last year" numbers describe (the 2026–27 directory: "fall 2026"); the import warns when it doesn't match. If MySchools hasn't opened the next year's kindergarten applications yet, pass only the middle and high school files.
+This writes `nonzoned_k.json`, `citywide_gt_k.json`, `k_priority.json`, `ms_directory.json`, `hs_directory.json` and `accessibility.json` (each school's building accessibility, merged across the directories you pass; `python3 scripts/fetch_data.py accessibility <files>` updates only that). Then set `MYSCHOOLS_LABEL` in `scripts/settings.py` to the admissions round the directory's "last year" numbers describe (the 2026–27 directory: "fall 2026"); the import warns when it doesn't match. If MySchools hasn't opened the next year's kindergarten applications yet, do only the middle and high school directories (`myschools ms hs`, or pass only those files).
 
 ### 3. School Quality Snapshot (when a new year appears at [tools.nycenet.edu/snapshot](https://tools.nycenet.edu/snapshot/))
 
