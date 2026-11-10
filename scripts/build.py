@@ -68,6 +68,7 @@ def fill_settings(template):
                  "__TEST_STOPS__": json.dumps(settings.TEST_STOPS, separators=(",", ":")),
                  "__OUT_STOPS__": json.dumps(settings.OUT_STOPS, separators=(",", ":")),
                  "__DEMO_GROUPS__": json.dumps(settings.DEMO_GROUPS, separators=(",", ":"), ensure_ascii=False),
+                 "__HS_METHOD_HELP__": json.dumps(settings.HS_METHOD_HELP, separators=(",", ":"), ensure_ascii=False),
                  "__TEST_GRADIENT__": gradient, "__TEST_TICKS__": ticks,
                  "__RAMP_COLORS__": json.dumps(settings.RAMP_COLORS, separators=(",", ":")), "__RAMP_CSS__": ramp_css}.items():
         template = template.replace(k, v)
