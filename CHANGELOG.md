@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- High schools can now be colored by AP classes (Color by → Programs → AP classes): each school by how many AP classes it lists, from none to 15 or more. Pick a course in the color key, like "Calculus BC", to see just the schools that offer it. A link to the map keeps the course you picked.
+
 ## 1.72.0 (2026-11-10)
 
 ### Added
