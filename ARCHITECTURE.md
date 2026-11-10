@@ -59,10 +59,9 @@ The script runs top to bottom in roughly this order:
 | Links | `pageUrl`/`pageLink` (school pages; the card's name link adds `#es`/`#ms`/`#hs` for the tab), `distPage` ("All District N schools", opening the district page on the level's tab), `zoneUrl`/`setZoneHash`, `mySchoolsUrl`, `copyLink`, `drillIn`/`goBack` (history; a Back step is `kind` `zone`, `school` (from a non-zoned school's lists, with `prev` holding that school's own Back step) or `search`) |
 | Search | `buildIdx` (school names), `geo`/`GEO` (NYC Planning GeoSearch, no key), `locate` (point in zone), `listKeys` |
 | Color by | `METRIC_NAME`, `GROUP_SRC`, `showGroup`, `Legend`, `syncLegend`, `setColorParam`/`applyColorParam` (`?c=` in the URL) |
-| Level switch | `setLevel` (es / ms / hs) |
+| Level switch | `setLevel` (es / ms / hs); `LEVEL_TXT` per level: `badge` (the level and zone date over the fixed "NYC School Zones" title), `sum`/`note` (the folded note under "Always confirm an exact address"), `sub` (the zone count `emptyCard` puts in the card before anything is picked), `h1` (the phone sheet title) |
 | Opening from a link | `openFromHash`: `#es-15K321`, `#ms-02M104`, `#hs-28Q440`, `#es-d15` (district), `#middle`, `#high` |
 | Theme | `THEME_KEY` (localStorage `nsz-theme-v1`: `light`/`dark`, absent = auto), the inline script after `<title>` that sets `data-theme` before drawing, `syncThemePick`, `retheme`. The generated pages share the key: `THEME_HEAD`/`THEME_FOOT` in pages.py, and `INTRO["theme"]` writes `data-theme` rules into `schools/style.css` |
-| Panel header (desktop) | while the card shows a zone or school, `aside.picked` folds the header to its title line (`#hd-extra`: browse links and the confirm-address note hide); `#hd-more` "More"/"Less" toggles `aside.hd-open`. A `MutationObserver` on the card's `empty` class drives it, so every way of selecting or clearing follows. Phones keep the full header in the sheet's About view |
 | Phones | `setSheet`/`sheetOpen` (bottom sheet), `PhoneBar`, `POPS`/`setPop`, `placeUI`, `measurePeek` |
 
 ## Gotchas we learned the hard way
