@@ -9,7 +9,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ## Unreleased
 
 ### Added
-- High school admissions now show a program's priority when MySchools only states it in the program's description, often with its share of seats. For example, Eleanor Roosevelt High School: "This program gives a priority to Manhattan students or residents for up to 75% of the seats."
+- High school admissions now show a program's priority when MySchools only states it in the program's description, often with its share of seats. For example, six Manhattan schools (Eleanor Roosevelt, Baruch College Campus, Millennium, NYC Lab, NYC Museum School and the Clinton School) give Manhattan students or residents priority for up to 75% of their seats.
 
 ### Changed
 - The side panel's title is now "NYC School Zones" at every level, with the yellow label above it back, showing the level and the zone date ("High school zones · Nov 2026").
