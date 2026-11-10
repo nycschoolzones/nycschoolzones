@@ -10,7 +10,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 
 ### Changed
 - On a computer, once you pick a zone or school, the top of the side panel folds down to just its title, so the school card starts higher. "More" next to the title opens it again; it comes back on its own when nothing is selected.
-- The top of the side panel is shorter, so the search box and school card sit higher: the zone date now sits next to the title, and the line counting each level's zones moved into the note under "Always confirm an exact address".
+- The top of the side panel is shorter, so the search box and school card sit higher: the date label above the title is gone (the zone date is still at the bottom of the panel, with the other data dates), and the line counting each level's zones moved into the note under "Always confirm an exact address".
 
 ### Fixed
 - Middle and high school admissions now explain why offers can be more than seats (Park East High School: about 150 offers for 76 seats): the DOE offers more places than a program has, because some students who get an offer go elsewhere. See "About this data" under the admissions table.

@@ -30,7 +30,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px
 aside{background:var(--panel);border-right:1px solid var(--line);overflow-y:auto;display:flex;flex-direction:column;gap:18px;padding:18px 18px 24px;min-width:0}
 #map{background:var(--water);min-height:0}
 h1{font-family:var(--display);font-weight:700;font-size:1.55rem;line-height:1.1;margin:0;text-wrap:balance;letter-spacing:-.01em}
-.h1-date{font-family:var(--body);font-weight:500;font-size:.8rem;letter-spacing:0;color:var(--muted);white-space:nowrap}
+
 .browse{font-size:.9rem;margin:8px 0 0}.browse a{color:var(--hl);display:inline-block;padding:2px 0}
 label.lab{font-family:var(--display);font-weight:600;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
 .field{display:flex;gap:6px}
@@ -341,7 +341,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 .hd-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .hd-more{flex-shrink:0;background:none;border:0;padding:4px 2px;font:inherit;font-size:.84rem;color:var(--hl);cursor:pointer;white-space:nowrap}
 .hd-more:hover{text-decoration:underline}
-@media (min-width:761px){aside.picked:not(.hd-open) #hd-extra,aside.picked:not(.hd-open) .h1-date{display:none}aside.picked h1{font-size:1.2rem}}
+@media (min-width:761px){aside.picked:not(.hd-open) #hd-extra{display:none}aside.picked h1{font-size:1.2rem}}
 @media (max-width:760px){
   .hd-more{display:none}
   /* phones: full-screen map; search, level and color are buttons on the map; details slide up in a sheet */
@@ -402,7 +402,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <input type="radio" name="level" id="lv-hs" value="hs"><label for="lv-hs">High <small>9–12</small></label>
     </div>
     <header>
-      <div class="hd-top"><h1><span id="h1">NYC Elementary School Zones</span> <span class="h1-date" title="Zone lines as of __ZONES_DATE__">__ZONES_DATE__</span></h1><button type="button" class="hd-more" id="hd-more" aria-expanded="false" aria-controls="hd-extra" hidden>More <span aria-hidden="true">▾</span></button></div>
+      <div class="hd-top"><h1><span id="h1">NYC Elementary School Zones</span></h1><button type="button" class="hd-more" id="hd-more" aria-expanded="false" aria-controls="hd-extra" hidden>More <span aria-hidden="true">▾</span></button></div>
       <div id="hd-extra">
       <p class="browse">Browse schools <a href="districts/" id="dist-link">by district</a> · <a href="neighborhoods/">by neighborhood</a></p>
       <div class="note how" id="how">
