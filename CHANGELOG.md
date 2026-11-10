@@ -9,6 +9,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ## Unreleased
 
 ### Changed
+- On a computer, once you pick a zone or school, the top of the side panel folds down to just its title, so the school card starts higher. "More" next to the title opens it again; it comes back on its own when nothing is selected.
 - The top of the side panel is shorter, so the search box and school card sit higher: the zone date now sits next to the title, and the line counting each level's zones moved into the note under "Always confirm an exact address".
 
 ### Fixed

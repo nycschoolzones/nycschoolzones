@@ -62,6 +62,7 @@ The script runs top to bottom in roughly this order:
 | Level switch | `setLevel` (es / ms / hs) |
 | Opening from a link | `openFromHash`: `#es-15K321`, `#ms-02M104`, `#hs-28Q440`, `#es-d15` (district), `#middle`, `#high` |
 | Theme | `THEME_KEY` (localStorage `nsz-theme-v1`: `light`/`dark`, absent = auto), the inline script after `<title>` that sets `data-theme` before drawing, `syncThemePick`, `retheme`. The generated pages share the key: `THEME_HEAD`/`THEME_FOOT` in pages.py, and `INTRO["theme"]` writes `data-theme` rules into `schools/style.css` |
+| Panel header (desktop) | while the card shows a zone or school, `aside.picked` folds the header to its title line (`#hd-extra`: browse links and the confirm-address note, and the zone date hide); `#hd-more` "More"/"Less" toggles `aside.hd-open`. A `MutationObserver` on the card's `empty` class drives it, so every way of selecting or clearing follows. Phones keep the full header in the sheet's About view |
 | Phones | `setSheet`/`sheetOpen` (bottom sheet), `PhoneBar`, `POPS`/`setPop`, `placeUI`, `measurePeek` |
 
 ## Gotchas we learned the hard way

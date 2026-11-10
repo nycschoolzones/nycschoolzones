@@ -337,7 +337,13 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 .leaflet-control-attribution{font-size:10px;line-height:1.4;padding:1px 6px;margin:0!important;background:color-mix(in srgb,var(--panel) 75%,transparent);color:var(--muted);border-radius:4px 0 0 0}
 .leaflet-control-attribution a{color:inherit}
 .zl{font-family:var(--display);font-weight:700;font-size:11px;color:var(--fg);text-align:center;white-space:nowrap;text-shadow:var(--zl-halo);pointer-events:none;line-height:1}
+/* desktop: once a zone or school is picked, the header folds to its title line; "More" opens it again */
+.hd-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.hd-more{flex-shrink:0;background:none;border:0;padding:4px 2px;font:inherit;font-size:.84rem;color:var(--hl);cursor:pointer;white-space:nowrap}
+.hd-more:hover{text-decoration:underline}
+@media (min-width:761px){aside.picked:not(.hd-open) #hd-extra,aside.picked:not(.hd-open) .h1-date{display:none}aside.picked h1{font-size:1.2rem}}
 @media (max-width:760px){
+  .hd-more{display:none}
   /* phones: full-screen map; search, level and color are buttons on the map; details slide up in a sheet */
   html,body{overflow:hidden}
   :root{--peek:58px;--sheet:62vh}
@@ -396,13 +402,15 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <input type="radio" name="level" id="lv-hs" value="hs"><label for="lv-hs">High <small>9–12</small></label>
     </div>
     <header>
-      <h1><span id="h1">NYC Elementary School Zones</span> <span class="h1-date" title="Zone lines as of __ZONES_DATE__">__ZONES_DATE__</span></h1>
+      <div class="hd-top"><h1><span id="h1">NYC Elementary School Zones</span> <span class="h1-date" title="Zone lines as of __ZONES_DATE__">__ZONES_DATE__</span></h1><button type="button" class="hd-more" id="hd-more" aria-expanded="false" aria-controls="hd-extra" hidden>More <span aria-hidden="true">▾</span></button></div>
+      <div id="hd-extra">
       <p class="browse">Browse schools <a href="districts/" id="dist-link">by district</a> · <a href="neighborhoods/">by neighborhood</a></p>
       <div class="note how" id="how">
         <p class="must">Always confirm an exact address on <a href="https://schoolsearch.schools.nyc/" target="_blank" rel="noopener">schoolsearch.schools.nyc</a> before applying.</p>
         <details><summary id="lvl-sum">A zone gives priority, not a guaranteed seat</summary>
           <p id="lvl-note">__ES_ZONES__ kindergarten zones from the NYC Department of Education. Living in a zone gives your child top priority at that school. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools make kindergarten offers to all students living in the zone who apply on time, but a few crowded schools can’t. List your zoned school on your <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> kindergarten application. You can rank it anywhere; your priority is the same. Each school’s “My Chances” section on MySchools shows which priority groups got offers last year.</p>
         </details>
+      </div>
       </div>
     </header>
 
@@ -1515,6 +1523,12 @@ function applyColorParam(){let c=null;try{c=new URLSearchParams(location.search)
   quietColor=true;r.checked=true;r.dispatchEvent(new Event('change'));quietColor=false}
 // "Color by" button (top right) opens the picker; the color key sits bottom left
 const phone=matchMedia('(max-width:760px)'),cpanel=document.getElementById('color-panel');
+// desktop header folds while the card shows a zone or school (aside.picked); "More"/"Less" toggles it (aside.hd-open)
+{const as=document.querySelector('aside'),btn=document.getElementById('hd-more');
+  const sync=()=>{const p=!card.classList.contains('empty'),o=as.classList.contains('hd-open');as.classList.toggle('picked',p);btn.hidden=!p;
+    btn.setAttribute('aria-expanded',String(o));btn.firstChild.textContent=o?'Less ':'More ';btn.lastChild.textContent=o?'▴':'▾'};
+  btn.addEventListener('click',()=>{as.classList.toggle('hd-open');sync()});
+  new MutationObserver(sync).observe(card,{attributes:true,attributeFilter:['class']});sync()}
 const Legend=L.Control.extend({options:{position:'bottomleft'},onAdd(){const d=document.getElementById('map-legend');d.classList.add('leaflet-control');
   L.DomEvent.disableClickPropagation(d);L.DomEvent.disableScrollPropagation(d);return d}});
 new Legend().addTo(map);
