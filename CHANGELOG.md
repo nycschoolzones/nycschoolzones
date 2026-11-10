@@ -17,6 +17,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - Middle school admissions data is refreshed from MySchools (November 10), with a few small updates: 03M243 now shows its seats and applicants, and two programs MySchools no longer lists are gone (28Q072's Haitian Creole dual-language program and 24Q087's screened program).
 
 ### Fixed
+- A card section you close now stays closed as you click from school to school, even when the link you opened colors the map by something (like "?c=sat", which kept reopening "Graduation rate"). Picking a Color by yourself still opens its section.
 - The middle school note said most districts don't zone middle schools. In fact 20 of the 32 districts zone some or all of them; the note now says so and names the districts that don't.
 
 ## 1.70.0 (2026-11-10)
@@ -30,9 +31,6 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - "Always confirm an exact address" now has the yellow box to itself; the note about how zones work sits under it, and for middle and high schools its heading says so ("How high school zones work") instead of repeating its first sentence.
 - "How high school zones work" is now a short note with the two things most families need, plus a "How high school admissions work" link. It opens a window that spells out what living in a zone guarantees, that high schools almost never give district priority (some give borough priority), and how Ed. Opt., screened, open, audition and specialized high school programs choose students.
 - Before you pick anything, the card tells you how many zones the level has ("28 high schools give priority to students who live in their zone") and how to start. That line used to be under the title, and since 1.69.0 was folded into the "Always confirm an exact address" note.
-
-### Fixed
-- A card section you close now stays closed as you click from school to school, even when the link you opened colors the map by something (like "?c=sat", which kept reopening "Graduation rate"). Picking a Color by yourself still opens its section.
 
 ## 1.69.0 (2026-11-10)
 
