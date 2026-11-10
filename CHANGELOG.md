@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- Application dates: a line under the panel title shows where this year's application stands for the level you're looking at, like "Apply by Fri, Dec 4 · 24 days left" (yellow in the last week), "Applications open Wed, Dec 9" or "Offers come out Tue, Mar 30". Each "How … admissions work" window lists the key dates, including the high school SHSAT and audition deadlines.
+
 ## 1.70.1 (2026-11-10)
 
 ### Added
