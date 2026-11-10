@@ -284,6 +284,13 @@ aside>*{flex-shrink:0}
 .mx-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline dotted;text-underline-offset:2px;padding:5px 0}
 .mx-btn:focus-visible{outline:2px solid var(--hl);outline-offset:1px}
 .mx-note{margin:2px 0 6px}
+.apply-line{margin:6px 0 0;font-size:.86rem}
+.apply-line a,.apply-line span{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);color:var(--fg);text-decoration:none;font-weight:600}
+.apply-line a:hover{border-color:var(--fg)}
+.apply-line .soon{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.apply-line svg{flex-shrink:0}
+.key-dates ul{margin:4px 0 8px}
+.key-dates .past{color:var(--muted)}
 .lvl-more{font-size:.85rem;margin-top:8px}
 .lvl-more .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;padding:4px 0;display:inline-block}
 .lvl-more summary{cursor:pointer;font-family:var(--display);font-weight:600}
@@ -441,6 +448,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
     <header>
       <span class="badge" id="badge">Kindergarten zones · Nov 2026</span>
       <h1>NYC School Zones</h1>
+      <p class="apply-line" id="apply-line" hidden></p>
       <p class="browse">Browse schools <a href="districts/" id="dist-link">by district</a> · <a href="neighborhoods/">by neighborhood</a></p>
       <div class="note how" id="how">
         <p class="must">Always confirm an exact address on <a href="https://schoolsearch.schools.nyc/" target="_blank" rel="noopener">schoolsearch.schools.nyc</a> before applying.</p>
@@ -515,6 +523,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 <dialog class="intro guide" id="es-guide" aria-labelledby="esg-h">
   <h2 id="esg-h">How kindergarten admissions work</h2>
   <p>Families apply for kindergarten through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> in the winter before their child starts, the year the child turns 5. You rank up to 12 programs and get one offer.</p>
+  <div class="key-dates" data-lv="es"></div>
   <h3>If you live in a school zone</h3>
   <p>Living in a zone gives your child top priority at that school, and siblings of current students often come first. <a href="https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten" target="_blank" rel="noopener">Per the DOE</a>, most zoned schools offer a seat to every zoned family who applies on time, but a few crowded schools can’t. Last fall, 85% of zoned schools also had room for families from other districts. List your zoned school anywhere on your application, even last, as a backup. Ranking other schools above it doesn’t hurt your priority there.</p>
   <h3>Other schools in your district</h3>
@@ -528,6 +537,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 <dialog class="intro guide" id="ms-guide" aria-labelledby="msg-h">
   <h2 id="msg-h">How middle school admissions work</h2>
   <p>Every 5th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a> in the fall, ranking up to 12 programs, and gets one offer.</p>
+  <div class="key-dates" data-lv="ms"></div>
   <h3>If you live in a middle school zone</h3>
   <p>20 of NYC’s 32 districts zone some or all of their middle schools. Living in a zone gives you priority at that school, after siblings of current students and, at K–8 schools, the school’s own 5th graders. Last year zoned students who applied got an offer at almost every zoned school. List the zoned school anywhere on your application, even last, as a backup. Ranking other schools above it doesn’t hurt your priority there.</p>
   <p>These districts have no zoned middle schools: 1, 3, 4 and 5 in Manhattan; 7, 9 and 12 in the Bronx; 13, 14, 15, 16 and 23 in Brooklyn. There, every student chooses among programs in their district and beyond.</p>
@@ -550,6 +560,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 <dialog class="intro guide" id="hs-guide" aria-labelledby="hsg-h">
   <h2 id="hsg-h">How high school admissions work</h2>
   <p>Most of NYC has no zoned high school. Every 8th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and gets one offer.</p>
+  <div class="key-dates" data-lv="hs"></div>
   <h3>If you live in a high school zone</h3>
   <p>You’re guaranteed a seat in that school’s zoned program, or at a few schools you get top priority. Last year every zoned student who applied got an offer. It only counts if you list the program on your application, but you can rank it anywhere, even last, as a backup. Ranking other schools above it doesn’t hurt your zoned seat.</p>
   <h3>Every other high school</h3>
@@ -690,6 +701,29 @@ const LEVEL_TXT={
   ms:{sum:'How middle school zones work',badge:'Middle school zones · Nov 2026',sub:n=>'Zones for '+n+' middle schools, in the districts that have them.',note:'<p>20 of NYC’s 32 districts zone some or all of their middle schools. Every 5th grader applies through <a href="https://www.myschools.nyc/" target="_blank" rel="noopener">MySchools</a>, ranking up to 12 programs, and gets one offer.</p><p>If you live in a middle school zone, list the zoned school anywhere on your application: last year zoned students who did got an offer at almost every zoned school.</p><p><button type="button" class="link-btn" data-open="ms-guide">How middle school admissions work →</button></p>',h1:'NYC Middle School Zones',grades:'6–8',avg:'NYC middle schools average ELA 55%, Math 53%',miss:'That point isn’t in a zoned middle school area. It may be in a district without zoned middle schools, a park, or outside NYC.',noZone:'No zoned middle school'}};
 // the page opens on elementary: its note comes from here too, so the copy in the header can't go stale
 document.getElementById('lvl-sum').textContent=LEVEL_TXT.es.sum;document.getElementById('lvl-note').innerHTML=LEVEL_TXT.es.note;
+// application dates for the next round (settings.py APPLY_DATES): the line under the title follows today's date,
+// and each "How … admissions work" window lists them under "Key dates"
+const APPLY={"es":{"opens":"2026-12-09","closes":"2027-01-22","offers":"2027-03-30","source":"https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/kindergarten"},"ms":{"opens":"2026-10-14","closes":"2026-12-11","offers":"2027-04-07","source":"https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/middle-school"},"hs":{"opens":"2026-10-06","closes":"2026-12-04","offers":"2027-03-15","offers_text":"early March","more":[["SHSAT sign-up closed","2026-10-30"],["Audition and assessment materials due","2026-12-04"],["LaGuardia application closes","2026-12-04"]],"source":"https://www.schools.nyc.gov/enrollment/enroll-grade-by-grade/high-school"}},MYSCHOOLS='https://www.myschools.nyc/';
+const dOf=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const dTxt=(s,yr)=>dOf(s).toLocaleDateString('en-US',Object.assign({weekday:'short',month:'short',day:'numeric'},yr?{year:'numeric'}:{}));
+const CAL='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+function applyLine(lv){const el=document.getElementById('apply-line'),a=APPLY[lv];el.hidden=true;el.innerHTML='';if(!a)return;
+  const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate()),day=864e5;
+  const open=dOf(a.opens),close=dOf(a.closes),offers=dOf(a.offers),left=Math.round((close-today)/day);
+  const offTxt=a.offers_text||dTxt(a.offers);
+  let h;
+  if(today<open)h='<a href="'+esc(a.source)+'" target="_blank" rel="noopener">'+CAL+'Applications open '+dTxt(a.opens)+'</a>';
+  else if(left>=0)h='<a class="'+(left<=7?'soon':'')+'" href="'+MYSCHOOLS+'" target="_blank" rel="noopener">'+CAL+(left===0?'Applications close today':'Apply by '+dTxt(a.closes)+' · '+left+' day'+(left===1?'':'s')+' left')+' →</a>';
+  else if(today<=offers)h='<span>'+CAL+'Applications closed · offers come out '+(a.offers_text?'in ':'')+offTxt+'</span>';
+  else return;  // offers are out: nothing to say until next round's dates are in settings.py
+  el.innerHTML=h;el.hidden=false}
+document.querySelectorAll('.key-dates').forEach(k=>{const a=APPLY[k.dataset.lv];if(!a)return;
+  const now=new Date(),today=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const row=(t,d,txt)=>'<li'+(dOf(d)<today?' class="past"':'')+'>'+t+': '+(txt||dTxt(d,true))+'</li>';
+  const rows=[['Applications open',a.opens],['Applications close',a.closes],...(a.more||[])].sort((x,y)=>x[1]<y[1]?-1:x[1]>y[1]?1:0);  // by date
+  k.innerHTML='<h3>Key dates</h3><ul>'+rows.map(r=>row(r[0],r[1])).join('')+row('Offers come out',a.offers,a.offers_text)+'</ul>'+
+    '<p><a href="'+esc(a.source)+'" target="_blank" rel="noopener">Dates from NYC Public Schools ↗</a></p>'});
+applyLine('es');
 let metric='comp';
 const R=D.R||{};
 // prefer current (2024-25) names and addresses from the School Quality Snapshot
@@ -1671,7 +1705,7 @@ async function setLevel(lv){if(lv===level)return;if(!LV[lv]&&!(await loadLevel(l
   chReports(lv);PAIR=null;nzSel=null;NZ=lv==='es'?NZ_ES:(LV[lv].NZ||[]);buildDots();sizeDots();buildIdx();buildNZ();syncLayerBoxes();res.hidden=true;llmsg.hidden=true;
   const tx=LEVEL_TXT[lv],nZ=lv==='es'?F.length:new Set(F.flatMap(f=>f.properties.dbns)).size;
   document.getElementById('lvl-chip').textContent={es:'K–5',ms:'6–8',hs:'9–12'}[lv];document.getElementById('badge').textContent=tx.badge;
-  document.getElementById('lvl-sum').textContent=tx.sum;document.getElementById('lvl-note').innerHTML=tx.note||'';
+  document.getElementById('lvl-sum').textContent=tx.sum;document.getElementById('lvl-note').innerHTML=tx.note||'';applyLine(lv);
   // tests vs outcomes: elementary/middle use state tests, high school uses graduation and college data
   const hs=lv==='hs';['both','ela','math'].forEach(v=>{const i=document.querySelector('input[name=metric][value='+v+']');i.hidden=hs;document.querySelector('label[for='+i.id+']').hidden=hs});
   ['grad','coll','ccr','sat'].forEach(v=>{const i=document.querySelector('input[name=metric][value='+v+']');i.hidden=!hs;document.querySelector('label[for='+i.id+']').hidden=!hs});
