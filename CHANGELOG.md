@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.70.1 (2026-11-10)
 
 ### Added
 - Elementary and middle school notes now match the high school one: a short note under the yellow box, plus a "How kindergarten admissions work" or "How middle school admissions work" window that spells out what a zone gives you, district priority, G&T (kindergarten) and how middle school programs choose students.
