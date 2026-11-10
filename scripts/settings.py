@@ -90,3 +90,28 @@ MS_METHOD_HELP = {
     "D75": "Seats for students whose IEP recommends a District 75 program.",
     "ASD": "Seats for students whose IEP recommends an autism (ASD Nest or Horizon) or ACES program.",
 }
+
+# ---------- AP classes ----------
+
+# Every College Board AP course, by the College Board's subject areas, as high school cards and pages list them
+# (build.py ap_courses). The names are the College Board's, without "AP "; a school's list from MySchools
+# (hs_directory.json, "x" "ap") is matched to these, so schools can be compared course by course. The build warns
+# about a course it can't match: add it here, or to AP_ALIASES when MySchools spells it another way.
+AP_COURSES = (
+    ("Math and computer science", ("Calculus AB", "Calculus BC", "Computer Science A", "Computer Science Principles",
+                                   "Precalculus", "Statistics")),
+    ("Sciences", ("Biology", "Chemistry", "Environmental Science", "Physics 1", "Physics 2",
+                  "Physics C: Electricity and Magnetism", "Physics C: Mechanics")),
+    ("English", ("English Language and Composition", "English Literature and Composition")),
+    ("History and social sciences", ("African American Studies", "Comparative Government and Politics", "European History",
+                                     "Human Geography", "Macroeconomics", "Microeconomics", "Psychology",
+                                     "United States Government and Politics", "United States History", "World History: Modern")),
+    ("World languages", ("Chinese Language and Culture", "French Language and Culture", "German Language and Culture",
+                         "Italian Language and Culture", "Japanese Language and Culture", "Latin",
+                         "Spanish Language and Culture", "Spanish Literature and Culture")),
+    ("Arts", ("2-D Art and Design", "3-D Art and Design", "Art History", "Drawing", "Music Theory")),
+    ("AP Capstone (research and seminar)", ("Research", "Seminar")),
+)
+# MySchools spellings that differ from the College Board's (older course names), without "AP "
+AP_ALIASES = {"Pre-Calculus": "Precalculus", "Studio Art - 2D": "2-D Art and Design", "Studio Art - 3D": "3-D Art and Design",
+              "Studio Art - Drawing": "Drawing"}
