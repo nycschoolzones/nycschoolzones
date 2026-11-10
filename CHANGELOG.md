@@ -10,6 +10,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 
 ### Changed
 - The side panel's title is now "NYC School Zones" at every level, with the yellow label above it back, showing the level and the zone date ("High school zones · Nov 2026").
+- "Always confirm an exact address" now has the yellow box to itself; the note about how zones work sits under it, and for middle and high schools its heading says so ("How high school zones work") instead of repeating its first sentence.
 - Before you pick anything, the card tells you how many zones the level has ("28 high schools give priority to students who live in their zone") and how to start. That line used to be under the title, and since 1.69.0 was folded into the "Always confirm an exact address" note.
 
 ## 1.69.0 (2026-11-10)
