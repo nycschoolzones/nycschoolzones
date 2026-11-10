@@ -9,7 +9,10 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ## Unreleased
 
 ### Added
-- High schools can now be colored by AP classes (Color by → Programs → AP classes): each school by how many AP classes it lists, from none to 15 or more. Pick a course in the color key, like "Calculus BC", to see just the schools that offer it. A link to the map keeps the course you picked.
+- High schools can now be colored by AP classes (Color by → Programs → AP classes): each school by how many AP classes it lists, from none to 15 or more. Pick a course in the color key, like "Calculus BC", to see just the schools that offer it. A link to the map keeps the course you picked. Charter high schools don't list their AP courses on MySchools, so the ones whose School Quality Snapshot shows students taking AP classes or passing AP exams get their own color, and their card says what the Snapshot reports (like "66% of students took an AP course").
+
+### Fixed
+- Some high schools' "AP exams seniors passed" line read just "Exams", where the Snapshot names no subject. That line is now left out.
 
 ## 1.72.0 (2026-11-10)
 

@@ -715,7 +715,7 @@ async function loadLevel(lv){if(LV[lv])return true;if(!ASSETS[lv])return false;
   try{const x=await getAsset(lv);
     Object.entries(x.schools).forEach(([d,s])=>{S[d]=Object.assign({},s,S[d]||{})});snapNames(Object.keys(x.schools));
     if(x.O)Object.assign(O,x.O);if(x.Q)Object.assign(Q,x.Q);
-    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],AP:x.AP||{},APC:x.APC||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
+    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
   catch(e){alertLoad();return false}finally{document.body.style.cursor=''}}
 function alertLoad(){const m=document.getElementById('llmsg');if(m){m.textContent='Couldn’t load that part of the map. Check your connection and try again.';m.hidden=false}}
 const RK={ip:2,ss:3,rf:4},RNAME={ip:'Instruction and Performance',ss:'Safety and School Climate',rf:'Relationships with Families'};
@@ -727,15 +727,18 @@ const CS=D.CS||{},G=D.G||{};  // G: this year's grades from LCGMS, for every dis
 const IEP_BINS=[[17,'#e0f1ee'],[22,'#a6dbd0'],[27,'#5fb8a8'],[32,'#2a8a7e'],[Infinity,'#0f5a54']];
 const iepColor=v=>IEP_BINS.find(b=>v<b[0])[1];
 // high school AP classes (MySchools, LV.hs.AP / APC, build.py ap_courses). apCourse -1: color by how many the school
-// lists (AP_BINS: [up to, color, legend label]; none is --off); else an index into the catalog: offers it or not.
-// null when the school isn't in the MySchools directory (charters). Shared zones show the school with the most.
-const AP_BINS=[[1,'var(--off)','None'],[5,'#dfe3f6','1–4'],[10,'#a5b2e6','5–9'],[15,'#6478cc','10–14'],[Infinity,'#2f4096','15 or more']],AP_YES='#2f4096';
+// lists (AP_BINS: [up to, color, legend label], a yellow -> blue spectrum, no red: more isn't a rating; none is --off);
+// else an index into the catalog: offers it or not. Charters aren't in MySchools: -1 when their Snapshot shows AP
+// classes (LV.hs.APCH, build.py snapshot_has_ap), which courses unknown; else null (no data), as in course mode.
+// Shared zones show the school with the most.
+const AP_BINS=[[1,'var(--off)','None'],[5,'#f2d35b','1–4'],[10,'#8cc26a','5–9'],[15,'#2b9c8e','10–14'],[Infinity,'#2c5aa0','15 or more']],AP_YES='#2c5aa0',AP_CH='#a26bbf';
 let apCourse=-1;
 const apNames=()=>LV.hs&&LV.hs.APC?LV.hs.APC.flatMap(a=>a[1]):[];
-function apCount(d){const lp=LV.hs;if(!lp)return null;const a=lp.AP&&lp.AP[d];return a?a.length:lp.P&&lp.P[d]?0:null}
-function apVal(d){const n=apCount(d);return n==null||apCourse<0?n:LV.hs.AP[d]&&LV.hs.AP[d].includes(apCourse)?1:0}
+const apCharter=d=>!!(LV.hs&&LV.hs.APCH&&LV.hs.APCH.includes(d));
+function apCount(d){const lp=LV.hs;if(!lp)return null;const a=lp.AP&&lp.AP[d];return a?a.length:lp.P&&lp.P[d]?0:apCharter(d)?-1:null}
+function apVal(d){const n=apCount(d);if(n===-1)return apCourse<0?-1:null;return n==null||apCourse<0?n:LV.hs.AP[d]&&LV.hs.AP[d].includes(apCourse)?1:0}
 function zoneAp(dbns){const v=dbns.map(apVal).filter(x=>x!=null);return v.length?Math.max(...v):null}
-const apColor=v=>apCourse<0?AP_BINS.find(b=>v<b[0])[1]:v?AP_YES:'var(--off)';
+const apColor=v=>v===-1?AP_CH:apCourse<0?AP_BINS.find(b=>v<b[0])[1]:v?AP_YES:'var(--off)';
 // yes-or-no colorings (G&T, dual language, one AP course): labels and tooltips name only the schools that have it
 const isYes=()=>isProg(metric)||metric==='ap'&&apCourse>=0;
 const hasGT=d=>!!(X[d]&&X[d][8]&&X[d][8].includes('G&T'));
@@ -799,7 +802,7 @@ function chBlock(o){const x=CHX[o.d]||[];
     ' Apply through the <a href="'+CH_APPLY+'" target="_blank" rel="noopener">common charter application ↗</a> or on the school’s own site, by April 1 for most schools. It’s separate from MySchools: applying doesn’t affect your MySchools application.'+
     (x[3]?' Formerly '+esc(x[3])+'.':'')+'</p></details>'}
 regNZ(NZ_ES);
-[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],AP:x.AP||{},APC:x.APC||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
+[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
   if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});regNZ(LV[lv].NZ)});
 function nzDistricts(o){const ds=o.pd.length?o.pd:[+o.d.slice(0,2)];return ds}
 function nzPriority(o){if(o.ch)return 'Admission is by lottery only. Charter schools can’t screen: no tests, grades, interviews or auditions. Lottery priority usually goes to siblings, then to families who live in District '+o.pd[0]+'.';if(o.hs){if(o.gt)return o.pr.some(p=>p[1]==='T')?'Admission is by SHSAT score only. Any NYC 8th or 9th grader can take the test.':'Admission is by audition. Students from anywhere in NYC can apply.';return o.pz||'Open to students from anywhere in NYC.'}if(o.gt)return 'Open to children found eligible for G&T, from anywhere in NYC.'+(o.pd.length?' Priority to eligible children in Districts '+o.pd.slice(0,-1).join(', ')+' and '+o.pd[o.pd.length-1]+'.':'');const ds=nzDistricts(o),t=ds.length>1?'Districts '+ds.slice(0,-1).join(', ')+' and '+ds[ds.length-1]:'District '+ds[0];
@@ -988,7 +991,7 @@ function short(d){const s=S[d];if(!s)return 'School '+d;return s.n}
 function schoolVal(d){if(isRate(metric))return zoneRating([d],metric);if(metric==='iep')return zoneIep([d]);
   if(metric==='pk')return pkCat(d);if(metric==='scr')return scrCat(d);if(metric==='ap')return zoneAp([d]);if(isOut(metric))return zoneOut([d],metric);if(isProg(metric)){const v=zoneProg([d],metric);return v==null?null:v?1:0}if(metric==='none')return null;return pct([d],metric)}
 function fmtVal(v,short){if(v==null)return '–';if(isRate(metric))return metric==='comp'||!Number.isInteger(v)?v.toFixed(1):String(v);  // numbers, never the DOE's words
-  if(metric==='pk')return ['no pre-K','pre-K','pre-K + 3-K'][v];if(metric==='scr')return SCR_LAB[v];if(isOut(metric)&&OUT[metric].abs)return String(Math.round(v));if(metric==='iep')return Math.round(v)+'%';if(metric==='ap')return apCourse<0?(v?v+' AP':'no AP'):v?'yes':'no';if(isProg(metric))return v?'yes':'no';return Math.round(v)+'%'}
+  if(metric==='pk')return ['no pre-K','pre-K','pre-K + 3-K'][v];if(metric==='scr')return SCR_LAB[v];if(isOut(metric)&&OUT[metric].abs)return String(Math.round(v));if(metric==='iep')return Math.round(v)+'%';if(metric==='ap')return v===-1?'offers AP':apCourse<0?(v?v+' AP':'no AP'):v?'yes':'no';if(isProg(metric))return v?'yes':'no';return Math.round(v)+'%'}
 function distTag(p){const d=p.dist&&String(p.dist).split(',').map(Number).filter(Boolean);return d&&d.length?'District '+d.join(' / '):''}
 const NONRES=/park|cemeter|golf|airport|island|beach|zoo|garden|reservoir/i;
 function noZoneHere(p){return !p.dbns.length&&!NONRES.test(p.remarks||'')}
@@ -1420,7 +1423,10 @@ function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)r
   return sec('ex','<span class="st">Classes, sports &amp; activities<small>'+sum+'</small></span>',body+'<small class="ex-src">As the school lists them on MySchools.</small>')}
 // high school AP classes (MySchools; LV.hs.AP: indexes into the catalog LV.hs.APC, [[subject area, [names]]] counted
 // through in order, build.py ap_courses): how many up top, a sorted list per subject area inside
-function apSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.AP&&lp.AP[d];if(!x)return '';
+function apSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.AP&&lp.AP[d];
+  if(!x&&level==='hs'&&apCharter(d)){const q=Q[d]||[];
+    return sec('ap','<span class="st">AP classes<small>Courses not listed</small></span>','<div class="ex"><p>'+(q[3]?q[3]+'% of students took an AP course. ':'')+(q[5]&&q[5].length?'Seniors passed AP exams in '+esc(q[5].join(', '))+'. ':'')+(q[3]||q[5]&&q[5].length?'':'The school’s students took AP classes or exams. ')+'Charter schools aren’t in the MySchools directory, so the courses aren’t listed here: ask the school or see its website.</p></div><small class="ex-src">__SNAPSHOT__ School Quality Snapshot.</small>')}
+  if(!x)return '';
   const has=new Set(x);let i=0;
   const body=lp.APC.map(([a,l])=>{const got=l.filter(()=>has.has(i++));return got.length?'<div class="ap"><div class="adm-h">'+esc(a)+' · '+got.length+'</div><ul>'+got.map(n=>'<li>'+esc(n)+'</li>').join('')+'</ul></div>':''}).join('');
   return sec('ap','<span class="st">AP classes<small>'+x.length+' AP class'+(x.length>1?'es':'')+', by subject</small></span><span class="sa">'+x.length+'</span>',body+'<small class="ex-src">As the school lists them on MySchools, __MYSCHOOLS__, by the College Board’s subject areas. Ask the school which run every year.</small>')}
@@ -1628,11 +1634,12 @@ function syncAp(){const la=document.getElementById('leg-ap');la.hidden=metric!==
   sel.value=String(apCourse);
   const all=Object.keys(LV.hs.P||{}),ns=all.map(apCount).filter(n=>n!=null).sort((a,b)=>a-b);
   document.getElementById('grp-src').textContent='MySchools high school directory · __MYSCHOOLS__';
-  if(apCourse<0){document.getElementById('ap-sw').innerHTML=AP_BINS.map(b=>'<span><i'+(b[1].startsWith('var(')?' class="off"':' style="background:'+b[1]+'"')+'></i>'+b[2]+'</span>').join('');
-    document.getElementById('ap-hint').innerHTML='How many AP classes each high school lists on MySchools. Half of NYC high schools list '+(ns[Math.floor(ns.length/2)]||0)+' or more; the most list '+(ns[ns.length-1]||0)+'. Pick a course above to see which schools offer it. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. <span class="nd"></span> No data (charter schools aren’t in the directory).'}
+  if(apCourse<0){const sw=b=>'<span><i'+(b[1].startsWith('var(')?' class="off"':' style="background:'+b[1]+'"')+'></i>'+b[2]+'</span>';
+    document.getElementById('ap-sw').innerHTML=AP_BINS.slice(1).concat([AP_BINS[0]]).map(sw).join('')+sw([0,AP_CH,'Charter, offers AP'])+'<span><i class="na"></i>No data</span>';
+    document.getElementById('ap-hint').innerHTML='How many AP classes each high school lists on MySchools. Half of NYC high schools list '+(ns[Math.floor(ns.length/2)]||0)+' or more; the most list '+(ns[ns.length-1]||0)+'. Pick a course above to see which schools offer it. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. Charter schools aren’t in the MySchools directory: “Charter, offers AP” means the __SNAPSHOT__ School Quality Snapshot shows students taking AP classes or passing AP exams there, without saying which or how many. <span class="nd"></span> No data: a charter school whose Snapshot shows no AP classes, or that has no Snapshot yet.'}
   else{const nm=apNames()[apCourse],k=all.filter(d=>LV.hs.AP[d]&&LV.hs.AP[d].includes(apCourse)).length;
-    document.getElementById('ap-sw').innerHTML='<span><i style="background:'+AP_YES+'"></i>Offers AP '+esc(nm)+'</span><span><i class="off"></i>Doesn’t</span>';
-    document.getElementById('ap-hint').innerHTML=k+' of '+ns.length+' high schools list AP '+esc(nm)+' on MySchools. Ask the school whether it runs every year. <span class="nd"></span> No data (charter schools aren’t in the directory).'}}
+    document.getElementById('ap-sw').innerHTML='<span><i style="background:'+AP_YES+'"></i>Offers AP '+esc(nm)+'</span><span><i class="off"></i>Doesn’t</span><span><i class="na"></i>No data</span>';
+    document.getElementById('ap-hint').innerHTML=k+' of '+ns.length+' high schools list AP '+esc(nm)+' on MySchools. Ask the school whether it runs every year. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'}}
 document.getElementById('ap-course').addEventListener('change',e=>{apCourse=+e.target.value;markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel()});
 function syncLegend(){syncName();syncAp();const lo=document.getElementById('leg-out');lo.hidden=!isOut(metric);
   if(isOut(metric)){const o=OUT[metric],s=o.stops,pct=v=>outPos(metric,v)+'%',rv=n=>'var(--r-'+n+')';

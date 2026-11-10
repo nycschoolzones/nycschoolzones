@@ -630,6 +630,18 @@ def ap_html(ix, areas):
             "subject areas. Ask the school which run every year.</p>")
 
 
+def ap_charter_html(q):
+    """A charter high school's AP classes, which MySchools doesn't list: what its Snapshot says (build.py Q row:
+    q[3] % of students in an AP course, q[5] AP exams seniors passed), as the map card's apSec does."""
+    q = q or []
+    pct_ap, exams = (q[3] if len(q) > 3 else None), (q[5] if len(q) > 5 else None)
+    said = ((f"{pct_ap}% of students took an AP course. " if pct_ap else "")
+            + (f"Seniors passed AP exams in {e(', '.join(exams))}. " if exams else ""))
+    return ("<h2>AP classes</h2><p>" + (said or "The school’s students took AP classes or exams. ")
+            + "Charter schools aren’t in the MySchools directory, so the courses aren’t listed here: ask the school "
+            f'or see its website.</p><p class="src">{SNAPSHOT_LABEL} School Quality Snapshot.</p>')
+
+
 def extras_summary(ex, vocab, groups):
     """The folded card's line: "12 AP classes · 22 PSAL teams · 15 activities", groups that count as the same word
     added up; an entry over 80 characters is a description written as prose, not one activity."""
@@ -1094,7 +1106,10 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
             ex, exv, exg = (LD.get("EX") or {}).get(dbn), LD.get("EXV") or [], LD.get("EXG") or []
             if lv == "hs":
                 ap = (HS.get("AP") or {}).get(dbn)
-                cards.append((ap_html(ap, HS.get("APC") or []), f"{len(ap)} AP class{'es' if len(ap) > 1 else ''}" if ap else "", False))
+                if ap:
+                    cards.append((ap_html(ap, HS.get("APC") or []), f"{len(ap)} AP class{'es' if len(ap) > 1 else ''}", False))
+                elif dbn in (HS.get("APCH") or []):
+                    cards.append((ap_charter_html((HS.get("Q") or {}).get(dbn)), "Courses not listed", False))
             cards.append((extras_html(ex, exv, exg), extras_summary(ex, exv, exg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)
 
