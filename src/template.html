@@ -1289,7 +1289,8 @@ function demoSec(d){const m=DM[d]&&DM[d][0]?DM[d]:null,x=X[d]||[],c=DMC,k=DEMO_G
 // lists on zone and school cards (opts-nz, opts-ch) are remembered the same way.
 const SEC_KEY='nsz-card-v1',SEC={},SEC_FOR={scr:'adm-',ip:'rate',ss:'rate',rf:'rate',ela:'tests',math:'tests',coll:'out',ccr:'out',sat:'out',iep:'demo'};
 try{Object.assign(SEC,JSON.parse(localStorage.getItem(SEC_KEY)||'{}'))}catch(e){}
-function sec(k,sum,body){return '<details class="sec" data-sec="'+k+'"'+(SEC[k]||SEC_FOR[metric]&&k.startsWith(SEC_FOR[metric])?' open':'')+'><summary>'+sum+'</summary><div class="sec-b">'+body+'</div></details>'}
+// a section you opened or closed stays that way; one you haven't touched opens when Color by shows its measure (SEC_FOR)
+function sec(k,sum,body){return '<details class="sec" data-sec="'+k+'"'+((k in SEC?SEC[k]:SEC_FOR[metric]&&k.startsWith(SEC_FOR[metric]))?' open':'')+'><summary>'+sum+'</summary><div class="sec-b">'+body+'</div></details>'}
 card.addEventListener('click',e=>{const a=e.target.closest('.to-adm');if(!a)return;e.preventDefault();
   const sec=card.querySelector('.school[data-d="'+a.dataset.d+'"] .sec[data-sec^="adm"]');if(!sec)return;sec.open=true;
   const go=()=>sec.scrollIntoView({behavior:'smooth',block:'start'});if(phone.matches&&!sheetOpen()){setSheet(true);setTimeout(go,350)}else go()});
@@ -1546,7 +1547,9 @@ function showGroup(g){curGroup=g;
 let quietColor=false;
 document.querySelectorAll('input[name=metric]').forEach(r=>r.addEventListener('change',()=>{const s=r.closest('.seg[data-g]');if(s){lastPick[s.dataset.g]=r.value;showGroup(s.dataset.g)}
   if(!quietColor)markEngaged();metric=r.value;syncLegend();restyle();drawLabels();setColorParam();placePanel();
-  if(SEC_FOR[metric])card.querySelectorAll('.sec[data-sec^="'+SEC_FOR[metric]+'"]').forEach(x=>{x.open=true})}));
+  // picking a Color by opens its section on the card; a ?c= link loading (quietColor) opens it only if you've never
+  // opened or closed that section yourself (SEC)
+  if(SEC_FOR[metric])card.querySelectorAll('.sec[data-sec^="'+SEC_FOR[metric]+'"]').forEach(x=>{if(!quietColor||!(x.dataset.sec in SEC))x.open=true})}));
 // the color choice rides along in the URL (?c=ela), so a shared link opens with the same coloring
 function setColorParam(){try{const u=new URL(location.href);if(metric==='comp')u.searchParams.delete('c');else u.searchParams.set('c',metric);history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}}
 function applyColorParam(){let c=null;try{c=new URLSearchParams(location.search).get('c')}catch(e){}if(!c||c===metric)return;
