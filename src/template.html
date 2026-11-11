@@ -377,8 +377,9 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 .zl{font-family:var(--display);font-weight:700;font-size:11px;color:var(--fg);text-align:center;white-space:nowrap;text-shadow:var(--zl-halo);pointer-events:none;line-height:1}
 @media (max-width:760px){
   #ap-pop{top:58px;left:10px;right:10px;width:auto;max-height:calc(100% - 70px);border-radius:12px}
-  /* phones: whole groups two to a row, so the list reads straight down (columns would mean scrolling back up) */
-  #ap-boxes{columns:auto;display:grid;grid-template-columns:1fr 1fr;column-gap:16px;align-items:start}
+  /* phones: one column, reading straight down; full width keeps most names on one line (two columns meant gaps
+     beside the shorter group, or scrolling back up for the second column) */
+  #ap-boxes{columns:auto}
   #ap-boxes .chk{padding:7px 0}
   /* phones: full-screen map; search, level and color are buttons on the map; details slide up in a sheet */
   html,body{overflow:hidden}
