@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.76.0 (2026-11-11)
 
 ### Added
 - High schools can now be colored by their sports, in a new "Sports" group under Color by. **Team count** colors each school by how many PSAL teams it lists on MySchools (boys', girls' and coed added up), from none to 20 or more. **Teams** opens a checklist of every PSAL team, grouped into boys, girls and coed, each with how many high schools have it: tick the ones you want, like Girls Soccer and Girls Volleyball, and the map shows which schools have all of them, in blue, and which have some ("1 of 2"). Tooltips list the teams a school has and is missing; its card ticks them in the Sports section and says which are missing, and a link to the map keeps your picks. Charter schools aren't in the MySchools directory, so they show as no data.
