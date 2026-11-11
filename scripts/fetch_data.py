@@ -71,6 +71,7 @@ HISTORY_PERIODS = {
     "utilization.json": BLUE_BOOK_LABEL.replace("–", "-"),
     # zones change a little each fall: dated by the month they were fetched
     **{n: "zones" for n in ("elem_zones.json", "ms_zones.json", "hs_zones.json")},
+    "psal_campuses.json": "zones",  # the PSAL's campus lists, by the month they were fetched
 }
 # state_tests.json isn't listed: fetch_tests writes every year in the DOE file to history/state_tests/<year>.json itself.
 
@@ -1393,6 +1394,46 @@ def _myschools_hs(schools, fetched):
     print(f"  high school: {len(out)} schools")
 
 
+def import_psal(path):
+    """psal_campuses.json from scripts/browser/psal.js: the PSAL's campuses, each a set of schools whose students play
+    on one shared set of teams, as each campus's "Campus Schools List" shows it. Writes {"source", "fetched",
+    "campuses": [[PSAL name ("John Jay Campus"), [[DBN, PSAL's school name, 1 if the main campus school else 0], ...]],
+    ...]}, campuses with at least two schools, A-Z. A member whose ATS code isn't a DBN is left out, with a line."""
+    import re
+    with open(path, encoding="utf-8") as f:
+        raw = json.load(f)
+    out, bad = [], []
+    for c in raw.get("campuses", []):
+        if c.get("error"):
+            print(f"  psal: {c.get('name')}: the browser couldn't get its list ({c['error']})")
+        members, seen = [], set()
+        for m in c.get("schools") or []:
+            dbn = (m.get("atsschool") or "").strip().upper()
+            if not re.fullmatch(r"\d{2}[MXKQR]\d{3}", dbn):
+                bad.append(f"{c.get('name')}: {m.get('location_name')} ({dbn or 'no code'})")
+                continue
+            if dbn not in seen:
+                seen.add(dbn)
+                members.append([dbn, " ".join((m.get("location_name") or "").split()),
+                                1 if str(m.get("campus_school")).lower() == "true" else 0])
+        if len(members) > 1:
+            out.append([" ".join(c["name"].split()), sorted(members, key=lambda x: (-x[2], x[1].lower()))])
+    # the browser step asks every school, so a campus can come back under several names: one per list of schools,
+    # named "… Campus" when one of its names is
+    by = {}
+    for name, members in out:
+        k = tuple(sorted(m[0] for m in members))
+        if k not in by or "campus" in name.lower() and "campus" not in by[k][0].lower():
+            by[k] = [name, members]
+    out = list(by.values())
+    for b in sorted(set(bad)):
+        print(f"  psal: no DBN for {b}")
+    out.sort(key=lambda c: c[0].lower())
+    save("psal_campuses.json", {"source": f"{raw.get('source', 'PSAL campus school lists')}, fetched {raw.get('fetched', '')}",
+                                "campuses": out})
+    print(f"  psal: {len(out)} campuses, {sum(len(c[1]) for c in out)} schools")
+
+
 def import_accessibility(paths):
     """Building accessibility from MySchools directory downloads (any of kindergarten, middle, high school), merged into
     accessibility.json: {dbn: "F" fully accessible, "P" partially, "N" not accessible}. Merged, not replaced, so
@@ -1682,6 +1723,15 @@ if __name__ == "__main__":
     if args[:1] == ["myschools"] and len(args) >= 2:  # files from scripts/browser/myschools.js
         print("-- myschools (from browser downloads)")
         import_myschools(args[1:])
+        sys.exit()
+    if args[:1] == ["status"]:  # which data files are due for their yearly refresh (scripts/data_status.py)
+        import data_status
+        data_status.print_report({**{n: history_period(n) for n in HISTORY_PERIODS if HISTORY_PERIODS[n] != "zones"},
+                                  "state_tests.json": f"spring {TESTS_YEAR}"})
+        sys.exit()
+    if args[:1] == ["psal"] and len(args) == 2:  # the file scripts/browser/psal.js downloaded
+        print("-- psal (from browser download)")
+        import_psal(args[1])
         sys.exit()
     if args[:1] == ["accessibility"] and len(args) >= 2:  # just building accessibility, from the same downloads
         print("-- accessibility (from browser downloads)")

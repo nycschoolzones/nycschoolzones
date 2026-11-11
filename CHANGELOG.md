@@ -6,6 +6,20 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- High schools can now be colored by their sports, in a new "Sports" group under Color by. **Team count** colors each school by how many PSAL teams it lists on MySchools (boys', girls' and coed added up), from none to 20 or more. **Teams** opens a checklist of every PSAL team, grouped into boys, girls and coed, each with how many high schools have it: tick the ones you want, like Girls Soccer and Girls Volleyball, and the map shows which schools have all of them, in blue, and which have some ("1 of 2"). Tooltips list the teams a school has and is missing; its card ticks them in the Sports section and says which are missing, and a link to the map keeps your picks. Charter schools aren't in the MySchools directory, so they show as no data.
+- A high school whose students play on teams shared with other schools now says so in its Sports section, from the PSAL's own lists: "Shares its PSAL teams with Central Park East High School, Frederick Douglass Academy II, The Heritage School and Park East High School, as East Harlem Pride." That covers 113 shared programs and 300 high schools, including some in different buildings or boroughs, like Millennium High School in Manhattan with the John Jay Campus in Park Slope.
+
+### Changed
+- Behind the scenes: the yearly refresh checklist now says how to tell the PSAL download found every shared program.
+- Behind the scenes: `fetch_data.py status` lists every data file with when it was last refreshed and whether it's due, and the build says when something is.
+
+### Fixed
+- On the map, the card of a school with both middle and high school grades (like Young Women's Leadership School, grades 6–12) had an empty Demographics section when opened from the high school map, and showed only its middle grades' student count ("93 students" instead of 361). It now shows the whole school, as its school page does.
+- At an all-girls or all-boys high school, MySchools can list teams for the other gender: they belong to a sports program the school shares with others, like East Harlem Pride for Young Women's Leadership School in Manhattan. Its Sports section now lists those teams apart, saying they're most likely shared teams its students don't play on. They don't count toward the school's PSAL teams or the new Sports coloring.
+
 ## 1.75.0 (2026-11-11)
 
 ### Added

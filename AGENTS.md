@@ -39,6 +39,7 @@ python3 -m http.server 8000           # preview at http://localhost:8000
 - Some sources only work in a real browser: nyccharterschools.org and suny.edu sit behind Cloudflare's bot check, and www.nysed.gov serves an incomplete certificate chain. Ask the maintainer to look there rather than trying to get around it.
 - `data/*_raw.json` is gitignored; don't commit raw downloads.
 - Keep a dated copy of every yearly dataset in `data/history/<name>/<period>.json`, for trends later. `fetch_data.py` `save()` writes it for the files in `HISTORY_PERIODS`; when you add a yearly source, add it there. Never overwrite or delete an older period's file.
+- Every file in `data/` has a row in `scripts/data_status.py` `DATASETS` (its README step and when its source publishes), so `fetch_data.py status` and the build can say when it's due. Add one for a new file; the build names any file without one.
 - After refreshing the zones, read the build's `zones:` lines: each is a zone it left in pieces. A note that only rewords another belongs in `note_key()` (ARCHITECTURE.md gotchas).
 
 ## Testing

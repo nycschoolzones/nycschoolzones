@@ -626,6 +626,34 @@ def extras(groups, rows, key="EX"):
     return {key: ex, key + "V": exv, key + "G": [list(g[1:]) for g in groups]}
 
 
+def single_sex(dm):
+    """{dbn: "g" all girls, "b" all boys} from the Demographic Snapshot (demographics.json schools: [enrollment, five
+    groups, poverty, girls, boys, ...])."""
+    return {k: "g" if not v[8] else "b" for k, v in dm.items() if len(v) > 8 and v[7] is not None and v[8] is not None
+            and (v[7] or v[8]) and not (v[7] and v[8])}
+
+
+def psal_teams(rows, sex=None):
+    """{"SPT": {dbn: [indexes into the catalog]}, "SPC": [[group, [sports]] per group]} for each high school's PSAL teams,
+    the same shape as ap_courses, for the map's Color by "Teams": the groups are SP_GROUPS' PSAL ones (Boys, Girls,
+    Coed), each with the sports some school lists in it, A-Z. rows: {dbn: {group key: [sports]}} (fetch_data.py
+    _hs_extras). sex: single_sex(); an all-girls school's boys' teams (and the other way round) are left out: they're
+    shared teams its students don't play on (03M610 lists East Harlem Pride's, the PSAL team of several schools).
+    The card lists them apart (template.html spSec). Schools with no PSAL team are left out."""
+    sex = sex or {}
+    rows = {dbn: {k: v for k, v in x.items() if not (k == "psb" and sex.get(dbn) == "g" or k == "psg" and sex.get(dbn) == "b")}
+            for dbn, x in rows.items()}
+    groups = [g for g in SP_GROUPS if g[2] == "PSAL team"]
+    cat = [[g[1], sorted({n for x in rows.values() for n in x.get(g[0], [])}, key=str.lower)] for g in groups]
+    flat, i = {}, 0
+    for g, (_, names) in zip(groups, cat):
+        for n in names:
+            flat[(g[0], n)] = i
+            i += 1
+    spt = {dbn: sorted(flat[(g[0], n)] for g in groups for n in x.get(g[0], [])) for dbn, x in rows.items()}
+    return {"SPT": {d: v for d, v in spt.items() if v}, "SPC": cat}
+
+
 def ap_courses(rows):
     """{"AP": {dbn: [indexes into the catalog]}, "APC": [[subject area, [course names]] per area]} for each high
     school's AP classes, from {dbn: [MySchools names ("AP Calculus AB")]} (fetch_data.py _hs_extras "ap"). The catalog
@@ -952,6 +980,20 @@ def main(standalone_path=None, pages=None):
             d["HS"]["O"] = outcomes
             d["HS"].update(extras(EX_GROUPS["hs"], {o["dbn"]: o["x"] for o in hsdir if o.get("x")}))
             d["HS"].update(extras(SP_GROUPS, {o["dbn"]: o["x"] for o in hsdir if o.get("x")}, "SP"))
+            # the PSAL's campuses (fetch_data.py psal, from scripts/browser/psal.js): schools whose students play on
+            # one shared set of teams. PCA: [[PSAL name ("John Jay Campus"), [[dbn, PSAL's school name], ...]], ...]
+            # The name is "" when it's only a member school's own (Francis Lewis High School): the card then names
+            # just the schools
+            if os.path.exists(os.path.join(DATA, "psal_campuses.json")):
+                def bare(n):  # "The Heritage School" ~ "Heritage School, The"; "HS" ~ "High School"
+                    n = re.sub(r"\bh\.?\s?s\.?(?=\s|$)", "high school", n.lower())
+                    return re.sub(r"\bthe\b|[^a-z0-9]", "", n)
+                d["HS"]["PCA"] = [["" if any(bare(c[0]) == bare(m[1]) for m in c[1]) else c[0], [m[:2] for m in c[1]]]
+                                  for c in load("psal_campuses.json")["campuses"]]
+                print(f"PSAL campuses: {len(d['HS']['PCA'])}")
+            d["HS"].update(psal_teams({o["dbn"]: o["x"] for o in hsdir if o.get("x")},
+                                      single_sex(load("demographics.json")["schools"])
+                                      if os.path.exists(os.path.join(DATA, "demographics.json")) else None))
             d["HS"].update(ap_courses({o["dbn"]: o["x"].get("ap", []) for o in hsdir if o.get("x")}))
             print(f"high school AP classes: {len(d['HS']['AP'])} schools")
             # SAT, college readiness, where graduates went and advanced courses (2024-25 Snapshot, high school report).
@@ -1052,21 +1094,22 @@ def main(standalone_path=None, pages=None):
     # Who goes to each school (DOE Demographic Snapshot, settings.DEMOGRAPHICS_LABEL): DM {dbn: [enrollment, Asian
     # and Pacific Islander, Black, Hispanic, White, everyone else, % in poverty (whole % or ">95" / "<5"),
     # girls, boys, students with IEPs, English language learners]}. d["DM"] has the elementary map's
-    # schools; MS.DM and HS.DM the rest of their level's, loaded with it. DMC: the same row for every NYC public
+    # schools; MS.DM and HS.DM the rest of their level's, loaded with it. A 6-12 school is in both MS.DM and HS.DM:
+    # either level can load without the other, and its card needs the row. DMC: the same row for every NYC public
     # school student
     if os.path.exists(os.path.join(DATA, "demographics.json")):
         dm = load("demographics.json")
-        done, n = set(), 0
+        es, done = None, set()
         for lv in (d, d.get("MS"), d.get("HS")):
             if lv is None:
                 continue
             shown = {x for f in lv["features"] for x in f["properties"]["dbns"]}
             shown |= {r[0] for r in lv.get("NZ", []) + lv.get("CH", [])}
-            lv["DM"] = {k: v for k, v in dm["schools"].items() if k in shown - done}
+            es = shown if es is None else es  # the elementary map's, always loaded
+            lv["DM"] = {k: v for k, v in dm["schools"].items() if k in (shown if lv is d else shown - es)}
             done |= shown
-            n += len(lv["DM"])
         d["DMC"] = dm["city"]
-        print(f"demographics: {n} of {len(done)} schools")
+        print(f"demographics: {len(done & set(dm['schools']))} of {len(done)} schools")
 
     apply_school_fixes(d)
     fix_addresses(d)
@@ -1152,6 +1195,10 @@ def main(standalone_path=None, pages=None):
         print(f"middle school: {len(d['MS']['features'])} zones, {len(d['MS']['T'])} schools with test results")
     print(f"wrote {out} ({os.path.getsize(out) / 1e6:.2f} MB) + " +
           ", ".join(f"{p} ({os.path.getsize(os.path.join(ROOT, p)) / 1e6:.2f} MB)" for p in assets.values()))
+    import data_status  # one line when a data file is due for its yearly refresh
+    line = data_status.summary()
+    if line:
+        print(line)
 
 
 def write_page(template, d, out):
