@@ -11,7 +11,7 @@
 //   4. It saves psal_campuses.json to your Downloads folder.
 //   5. Then: python3 scripts/fetch_data.py psal ~/Downloads/psal_campuses.json
 //
-// Left out: coaches, phone numbers and email addresses.
+// Left out: coaches and other staff, phone numbers and email addresses.
 (async () => {
   const API = "/SportDisplay.svc";
   const get = (url) => fetch(API + url, { headers: { Accept: "application/json" } }).then((r) => {
@@ -30,7 +30,9 @@
     const id = String(s.cschool).trim().padStart(5, "0");
     const rec = { psal: id, name: s.newname, row: keep(s) };
     try {
-      rec.profile = (await get(`/GetSchoolProfile?schid='${id}'`)).map(keep)[0] || null;
+      // only what matches a school: its name, address and whether it's a campus (the profile also has staff names)
+      const pr = (await get(`/GetSchoolProfile?schid='${id}'`))[0];
+      rec.profile = pr ? { newname: pr.newname, cs38addr: pr.cs38addr, ccity: pr.ccity, czip: pr.czip, campus: pr.campus } : null;
       const seasons = [...new Set((await get(`/vw_School_Profile?$filter=${q(`cschool eq'${id}'`)}&$select=season&$orderby=season desc`))
         .map((x) => x.season))].slice(0, 2);
       rec.teams = [];
