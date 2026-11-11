@@ -14,6 +14,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 
 ### Changed
 - Behind the scenes: the yearly refresh checklist now says how to tell the PSAL download found every shared program.
+- Behind the scenes: the PSAL browser step now also saves each school's teams, for charter schools' sports next.
 - Behind the scenes: `fetch_data.py status` lists every data file with when it was last refreshed and whether it's due, and the build says when something is.
 
 ### Fixed
