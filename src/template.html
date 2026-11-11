@@ -266,7 +266,7 @@ aside>*{flex-shrink:0}
 #ap-boxes .chk{break-inside:avoid;padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
 .ap-picked{margin:0 0 6px;font-size:.85rem}.tip-ap{display:inline-block;white-space:normal;width:max-content;max-width:280px;font-size:.92em;color:var(--muted)}.tip-ap b{color:var(--fg);font-weight:600}.ap-k{color:var(--muted);font-variant-numeric:tabular-nums}
-.ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
+.ap-miss{margin:0 0 6px;font-size:.85rem}.ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
 #map-legend .hint{display:none;max-height:28vh;overflow:auto}
 #map-legend.open .hint{display:block}
 .how p{margin:0}
@@ -1478,7 +1478,10 @@ function apSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.AP&&lp.AP[d];
   const has=new Set(x),pick=metric==='apc'?new Set(apSet):new Set();let i=0;
   const body=lp.APC.map(([a,l])=>{const got=l.map(n=>[n,i++]).filter(([,k])=>has.has(k));return got.length?'<div class="ap"><div class="adm-h">'+esc(a)+' · '+got.length+'</div><ul>'+got.map(([n,k])=>'<li'+(pick.has(k)?' class="pick"':'')+'>'+esc(n)+'</li>').join('')+'</ul></div>':''}).join('');
   const mine=pick.size?' · '+x.filter(k=>pick.has(k)).length+' of your '+pick.size:'';
-  return sec('ap','<span class="st">AP classes<small>'+x.length+' AP class'+(x.length>1?'es':'')+(mine||', by subject')+'</small></span><span class="sa">'+x.length+'</span>',body+'<small class="ex-src">As the school lists them on MySchools, __MYSCHOOLS__, by the College Board’s subject areas. Ask the school which run every year.</small>')}
+  // AP courses: your picked courses the school doesn't list, first (the tooltip's "Missing:", for phones too)
+  const miss=apSet.filter(k=>pick.has(k)&&!has.has(k)),nm=apNames();
+  const missing=miss.length?'<p class="ap-miss"><b>Missing:</b> '+miss.map(k=>esc(nm[k])).join(', ')+'</p>':'';
+  return sec('ap','<span class="st">AP classes<small>'+x.length+' AP class'+(x.length>1?'es':'')+(mine||', by subject')+'</small></span><span class="sa">'+x.length+'</span>',missing+body+'<small class="ex-src">As the school lists them on MySchools, __MYSCHOOLS__, by the College Board’s subject areas. Ask the school which run every year.</small>')}
 // specialized high schools: last fall's SHSAT cutoff up top
 function cutSec(d){const c=LV.hs&&LV.hs.CUT;if(level!=='hs'||!c||!c.c[d])return '';
   return sec('cut','<span class="st">SHSAT cutoff<small>Lowest score offered a seat, fall '+c.y+'</small></span><span class="sa">'+c.c[d][0]+'</span>',cutHtml(d))}
