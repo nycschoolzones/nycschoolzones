@@ -293,10 +293,10 @@ aside>*{flex-shrink:0}
 #ap-pop .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;padding:6px 0}#ap-pop .link-btn[hidden]{display:none}
 .ap-done{font:inherit;font-family:var(--display);font-weight:600;font-size:.85rem;padding:6px 16px;border-radius:6px;border:0;background:var(--fg);color:var(--panel);cursor:pointer}
 #ap-boxes{columns:3 190px;column-gap:24px}
-.ap-grp{break-inside:avoid;padding-top:6px}
-#ap-boxes .grp-h{margin:0 0 2px}
-#ap-boxes .layers{gap:0}
-#ap-boxes .chk{padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
+.ap-grp{padding-top:6px}  /* a group may continue in the next column, so the columns come out even */
+#ap-boxes .grp-h{margin:0 0 2px;break-after:avoid}
+#ap-boxes .layers{display:block}
+#ap-boxes .chk{break-inside:avoid;padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
 .ap-picked{margin:0 0 6px;font-size:.85rem;min-height:2.8em}
 .sw-pad{visibility:hidden}
@@ -411,7 +411,8 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 .zl{font-family:var(--display);font-weight:700;font-size:11px;color:var(--fg);text-align:center;white-space:nowrap;text-shadow:var(--zl-halo);pointer-events:none;line-height:1}
 @media (max-width:760px){
   #ap-pop{top:58px;left:10px;right:10px;width:auto;max-height:calc(100% - 70px);border-radius:12px}
-  #ap-boxes{columns:2 150px;column-gap:16px}
+  /* phones: whole groups two to a row, so the list reads straight down (columns would mean scrolling back up) */
+  #ap-boxes{columns:auto;display:grid;grid-template-columns:1fr 1fr;column-gap:16px;align-items:start}
   #ap-boxes .chk{padding:7px 0}
   /* phones: full-screen map; search, level and color are buttons on the map; details slide up in a sheet */
   html,body{overflow:hidden}
