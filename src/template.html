@@ -757,7 +757,7 @@ const apCharter=d=>!!(LV.hs&&LV.hs.APCH&&LV.hs.APCH.includes(d));
 function apCount(d){const lp=LV.hs;if(!lp)return null;const a=lp.AP&&lp.AP[d];return a?a.length:lp.P&&lp.P[d]?0:apCharter(d)?-1:null}
 function apVal(d){const n=apCount(d);if(metric!=='apc')return n;if(n==null||n===-1||!apSet.length)return null;const a=LV.hs.AP[d]||[];return apSet.filter(i=>a.includes(i)).length}
 // [label, at least this many of the picked courses, color]: one band per count up to 4 picks, then all / half or more / fewer
-const AP_PART=['#c9dcf2','#93b6e2','#5f8fd0'];
+const AP_PART=[AP_BINS[1][1],AP_BINS[2][1],AP_BINS[3][1]];  // the AP count spectrum: yellow (few of them), green, teal; all of them is AP_YES blue
 function apcBins(){const N=apSet.length;if(N<2)return [[N?'Offers it':'',1,AP_YES]];
   if(N<=4){const P=N===2?[AP_PART[2]]:N===3?[AP_PART[0],AP_PART[2]]:AP_PART;return [['All '+N,N,AP_YES]].concat(P.map((c,i)=>[(N-1-i)+' of '+N,N-1-i,P[P.length-1-i]]))}
   return [['All '+N,N,AP_YES],['Half or more',Math.ceil(N/2),AP_PART[2]],['Fewer than half',1,AP_PART[0]]]}
