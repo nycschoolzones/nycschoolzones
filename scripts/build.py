@@ -979,7 +979,20 @@ def main(standalone_path=None, pages=None):
                 d["HS"]["NZ"].append([dbn, o["n"], o["a"], o["lat"], o["lon"], [], 0, [p[:6] for p in progs], 1 if shs else 0, pz])
             d["HS"]["O"] = outcomes
             d["HS"].update(extras(EX_GROUPS["hs"], {o["dbn"]: o["x"] for o in hsdir if o.get("x")}))
-            d["HS"].update(extras(SP_GROUPS, {o["dbn"]: o["x"] for o in hsdir if o.get("x")}, "SP"))
+            # sports: MySchools' lists, and for schools MySchools doesn't list (charters) the PSAL's own teams this
+            # season (fetch_data.py psal, psal_teams.json), as the same groups. SPP: those schools; SPY: the season
+            sports = {o["dbn"]: o["x"] for o in hsdir if o.get("x")}
+            if os.path.exists(os.path.join(DATA, "psal_teams.json")):
+                pt, key = load("psal_teams.json"), {"Boys": "psb", "Girls": "psg", "Coed": "psc"}
+                spp = set()
+                for _, dbns, teams in pt["programs"]:
+                    for dbn in dbns:
+                        if dbn not in sports and dbn not in spp:
+                            spp.add(dbn)
+                            sports[dbn] = {k: sorted(t for t, g in teams if key.get(g) == k) for k in key.values()}
+                d["HS"]["SPP"], d["HS"]["SPY"] = sorted(spp), pt["season"]
+                print(f"PSAL teams: {len(spp)} schools MySchools doesn't list, {pt['season']}")
+            d["HS"].update(extras(SP_GROUPS, sports, "SP"))
             # the PSAL's campuses (fetch_data.py psal, from scripts/browser/psal.js): schools whose students play on
             # one shared set of teams. PCA: [[PSAL name ("John Jay Campus"), [[dbn, PSAL's school name], ...]], ...]
             # The name is "" when it's only a member school's own (Francis Lewis High School): the card then names
@@ -991,7 +1004,7 @@ def main(standalone_path=None, pages=None):
                 d["HS"]["PCA"] = [["" if any(bare(c[0]) == bare(m[1]) for m in c[1]) else c[0], [m[:2] for m in c[1]]]
                                   for c in load("psal_campuses.json")["campuses"]]
                 print(f"PSAL campuses: {len(d['HS']['PCA'])}")
-            d["HS"].update(psal_teams({o["dbn"]: o["x"] for o in hsdir if o.get("x")},
+            d["HS"].update(psal_teams(sports,
                                       single_sex(load("demographics.json")["schools"])
                                       if os.path.exists(os.path.join(DATA, "demographics.json")) else None))
             d["HS"].update(ap_courses({o["dbn"]: o["x"].get("ap", []) for o in hsdir if o.get("x")}))

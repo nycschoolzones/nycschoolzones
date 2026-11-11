@@ -11,10 +11,10 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ### Added
 - High schools can now be colored by their sports, in a new "Sports" group under Color by. **Team count** colors each school by how many PSAL teams it lists on MySchools (boys', girls' and coed added up), from none to 20 or more. **Teams** opens a checklist of every PSAL team, grouped into boys, girls and coed, each with how many high schools have it: tick the ones you want, like Girls Soccer and Girls Volleyball, and the map shows which schools have all of them, in blue, and which have some ("1 of 2"). Tooltips list the teams a school has and is missing; its card ticks them in the Sports section and says which are missing, and a link to the map keeps your picks. Charter schools aren't in the MySchools directory, so they show as no data.
 - A high school whose students play on teams shared with other schools now says so in its Sports section, from the PSAL's own lists: "Shares its PSAL teams with Central Park East High School, Frederick Douglass Academy II, The Heritage School and Park East High School, as East Harlem Pride." That covers 113 shared programs and 300 high schools, including some in different buildings or boroughs, like Millennium High School in Manhattan with the John Jay Campus in Park Slope.
+- Charter high schools now have a Sports section too, with their PSAL teams for 2026–27 from the PSAL's own lists, since charter schools aren't in the MySchools directory. That covers 47 charter high schools, like KIPP NYC College Prep and the Uncommon high schools. They also count in Team count and Teams on the map, where they used to show as no data. Charter schools the PSAL lists no teams for still show as no data.
 
 ### Changed
 - Behind the scenes: the yearly refresh checklist now says how to tell the PSAL download found every shared program.
-- Behind the scenes: the PSAL browser step now also saves each school's teams, for charter schools' sports next.
 - Behind the scenes: `fetch_data.py status` lists every data file with when it was last refreshed and whether it's due, and the build says when something is.
 
 ### Fixed

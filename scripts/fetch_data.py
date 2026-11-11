@@ -71,7 +71,8 @@ HISTORY_PERIODS = {
     "utilization.json": BLUE_BOOK_LABEL.replace("–", "-"),
     # zones change a little each fall: dated by the month they were fetched
     **{n: "zones" for n in ("elem_zones.json", "ms_zones.json", "hs_zones.json")},
-    "psal_campuses.json": "zones",  # the PSAL's campus lists, by the month they were fetched
+    "psal_campuses.json": "zones",  # the PSAL's campus lists and teams, by the month they were fetched
+    "psal_teams.json": "zones",
 }
 # state_tests.json isn't listed: fetch_tests writes every year in the DOE file to history/state_tests/<year>.json itself.
 
@@ -1432,6 +1433,57 @@ def import_psal(path):
     save("psal_campuses.json", {"source": f"{raw.get('source', 'PSAL campus school lists')}, fetched {raw.get('fetched', '')}",
                                 "campuses": out})
     print(f"  psal: {len(out)} campuses, {sum(len(c[1]) for c in out)} schools")
+    if raw.get("schools"):
+        _psal_teams(raw, {c["psal"]: c for c in raw.get("campuses", []) if c.get("schools")})
+
+
+def _psal_teams(raw, campuses):
+    """psal_teams.json: each PSAL program's schools and its teams this season, for schools MySchools doesn't list
+    (charters; build.py). {"source", "season": "2026-27", "programs": [[PSAL name, [DBNs], [[sport, "Boys" | "Girls" |
+    "Coed"], ...]], ...]}. A program's schools: its campus list (the PSAL's own, with DBNs), else the one school
+    whose name is the PSAL's exactly (charters.json, hs_directory.json: lower case, without "the", punctuation and
+    a bracketed short name like "(TYWLS)").
+    Programs it can't place that way are left out and listed: an address alone doesn't do (a shared building's
+    schools have the same one). Teams: the latest season's, one per sport and gender, without the inactive (D) and
+    suspended (S) ones and the few middle school teams; the sport as MySchools writes it ("Outdoor Track")."""
+    import re
+    norm = lambda n: re.sub(r"\bthe\b|[^a-z0-9]", "", re.sub(r"\(.*?\)", "", (n or "").lower().replace("&", "and")))
+    names = {}
+    for o in _load("hs_directory.json", {}).get("schools", []):
+        names.setdefault(norm(o["n"]), set()).add(o["dbn"])
+    for c in _load("charters.json", {}).get("schools", []):
+        names.setdefault(norm(c[1]), set()).add(c[0])
+    team = re.compile(r"^(.*?)\s+(boys|girls|coed)\b", re.I)
+    seasons, programs, unplaced = set(), [], []
+    for s in raw["schools"]:
+        rows = [t for t in s.get("teams") or [] if t.get("status") not in ("D", "S")]
+        if not rows:
+            continue
+        season = max(t["season"] for t in rows)
+        got = set()
+        for t in rows:
+            m = team.match((t.get("team") or "").strip())
+            if t["season"] == season and m and "middle school" not in m.group(1).lower():
+                got.add((" ".join(w.capitalize() for w in m.group(1).split()), m.group(2).capitalize()))
+        if not got:
+            continue
+        if s["psal"] in campuses:
+            dbns = sorted({(m.get("atsschool") or "").strip().upper() for m in campuses[s["psal"]]["schools"]} - {""})
+        else:
+            dbns = sorted(names.get(norm(s["name"]), ()))
+            if len(dbns) != 1:
+                unplaced.append(s["name"])
+                continue
+        seasons.add(season)
+        programs.append([" ".join(s["name"].split()), dbns, sorted(got)])
+    for n in sorted(unplaced):
+        print(f"  psal: no school matches the PSAL's name {n!r}; its teams are left out")
+    yr = max(seasons) if seasons else ""
+    save("psal_teams.json", {"source": f"{raw.get('source', 'PSAL school profiles')}, fetched {raw.get('fetched', '')}",
+                             "season": f"{int(yr) - 1}-{yr[2:]}" if yr else "",
+                             "programs": sorted(programs, key=lambda p: p[0].lower())})
+    print(f"  psal: teams for {len(programs)} programs, {sum(len(p[1]) for p in programs)} schools, "
+          f"{len(unplaced)} not placed")
 
 
 def import_accessibility(paths):
