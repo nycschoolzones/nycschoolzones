@@ -289,7 +289,7 @@ def more(*links):
 FOLD_KEYS = (("DOE ratings", "rate"), ("High school ratings", "rate"), ("State test scores", "tests"),
              ("Graduation and college", "grad"), ("Advanced courses", "grad"), ("Kindergarten admissions", "adm"),
              ("Grade ", "adm"), ("High school programs", "adm"), ("Pre-K", "prek"),
-             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Classes", "ex"), ("Other ", "near"))
+             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
 
 
 def fold_card(html, summary="", start_open=False):
@@ -604,14 +604,56 @@ def about_html(who, lunch=False, lv="es"):
             + "</details>")
 
 
-def extras_html(ex, vocab, groups):
+def extras_html(ex, vocab, groups, title="Classes, sports and activities"):
     """Middle and high school classes, sports and activities, as the map card shows them (src/template.html exSec).
-    ex: one list per group, as indexes into vocab; groups: [heading, one, many] each (build.py EX_GROUPS)."""
+    ex: one list per group, as indexes into vocab; groups: [heading, one, many] each (build.py EX_GROUPS). High schools'
+    are titled "Classes and activities": their sports have a section of their own (sports_html)."""
     if not ex:
         return ""
     h = "".join(f'<h3 class="ex-h">{g[0]}</h3><p>{e(", ".join(vocab[k] for k in l))}</p>' for g, l in zip(groups, ex) if l)
-    return ("<h2>Classes, sports and activities</h2>" + h +
+    if not h:
+        return ""
+    return (f"<h2>{title}</h2>" + h +
             '<p class="src">As the school lists them on MySchools.</p>')
+
+
+def _sports(sp, vocab, groups):
+    """A high school's sports (build.py SP, SPV, SPG): ({sport: [who plays it, "Boys", "Girls", "Coed"]} for its PSAL
+    teams, how many PSAL teams, [other sports and teams])."""
+    by, n, other = {}, 0, []
+    for g, l in zip(groups, sp or []):
+        if g[1] == "PSAL team":
+            n += len(l)
+            for k in l:
+                by.setdefault(vocab[k], []).append(g[0])
+        else:
+            other += [vocab[k] for k in l]
+    return by, n, other
+
+
+def sports_html(sp, vocab, groups):
+    """A high school's sports, as the map card shows them (src/template.html spSec): its PSAL teams a sport to a row
+    with who plays it, then other sports and teams as the school writes them."""
+    by, n, other = _sports(sp, vocab, groups)
+    if not by and not other:
+        return ""
+    h = ""
+    if by:
+        h += (f'<h3 class="ex-h">PSAL teams · {n}</h3><table class="spt">'
+              + "".join(f"<tr><td>{e(s)}</td><td>{' · '.join(by[s])}</td></tr>" for s in sorted(by, key=str.lower))
+              + "</table>")
+    if other:
+        h += f'<h3 class="ex-h">Other sports and teams</h3><p>{e(", ".join(other))}</p>'
+    return ("<h2>Sports</h2>" + h + '<p class="src">As the school lists them on MySchools. PSAL is the public schools’ '
+            "league; some teams are shared by the schools in one building.</p>")
+
+
+def sports_summary(sp, vocab, groups):
+    """The folded card's line: "18 PSAL teams · 3 other sports" (an entry over 80 characters is prose, not a sport)."""
+    by, n, other = _sports(sp, vocab, groups)
+    no = sum(1 for x in other if len(x) <= 80)
+    return " · ".join(x for x in (f"{n} PSAL team{'s' if n != 1 else ''}" if n else "",
+                                  f"{no} other sport{'s' if no != 1 else ''}" if no else "") if x)
 
 
 def ap_html(ix, areas):
@@ -643,7 +685,7 @@ def ap_charter_html(q):
 
 
 def extras_summary(ex, vocab, groups):
-    """The folded card's line: "12 AP classes · 22 PSAL teams · 15 activities", groups that count as the same word
+    """The folded card's line: "8 advanced classes · 12 sports · 20 activities", groups that count as the same word
     added up; an entry over 80 characters is a description written as prose, not one activity."""
     cnt = {}
     for g, l in zip(groups, ex or []):
@@ -831,6 +873,7 @@ table.dm{width:100%;border-collapse:collapse;margin-top:12px;font-size:.95rem;fo
 .dm tr.pov>*{border-top:1px solid var(--line);padding-top:8px}
 .progs{list-style:none;margin:0;padding:0}
 h3.ex-h{font-size:.95rem;margin:14px 0 2px}h3.ex-h+p{margin:0}
+table.spt{border-collapse:collapse}table.spt td{padding:2px 18px 2px 0;vertical-align:top}table.spt td+td{color:var(--muted)}
 ul.ap{columns:2 12rem;column-gap:24px;margin:0;padding-left:1.2em}ul.ap li{break-inside:avoid;padding:2px 0}
 .adm-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin:6px 0 4px;font-size:.95rem}
 .adm-t th,.adm-t td{padding:6px 0 6px 10px;text-align:right;font-weight:400;white-space:nowrap}
@@ -1110,7 +1153,12 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                     cards.append((ap_html(ap, HS.get("APC") or []), f"{len(ap)} AP class{'es' if len(ap) > 1 else ''}", False))
                 elif dbn in (HS.get("APCH") or []):
                     cards.append((ap_charter_html((HS.get("Q") or {}).get(dbn)), "Courses not listed", False))
-            cards.append((extras_html(ex, exv, exg), extras_summary(ex, exv, exg), False))
+                sp = (HS.get("SP") or {}).get(dbn)
+                if sp:
+                    spv, spg = HS.get("SPV") or [], HS.get("SPG") or []
+                    cards.append((sports_html(sp, spv, spg), sports_summary(sp, spv, spg), False))
+            cards.append((extras_html(ex, exv, exg, "Classes and activities" if lv == "hs" else "Classes, sports and activities"),
+                          extras_summary(ex, exv, exg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)
 
         # nearby options: other schools at this level in the same district
