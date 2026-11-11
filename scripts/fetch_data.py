@@ -1418,7 +1418,15 @@ def import_psal(path):
                                 1 if str(m.get("campus_school")).lower() == "true" else 0])
         if len(members) > 1:
             out.append([" ".join(c["name"].split()), sorted(members, key=lambda x: (-x[2], x[1].lower()))])
-    for b in bad:
+    # the browser step asks every school, so a campus can come back under several names: one per list of schools,
+    # named "… Campus" when one of its names is
+    by = {}
+    for name, members in out:
+        k = tuple(sorted(m[0] for m in members))
+        if k not in by or "campus" in name.lower() and "campus" not in by[k][0].lower():
+            by[k] = [name, members]
+    out = list(by.values())
+    for b in sorted(set(bad)):
         print(f"  psal: no DBN for {b}")
     out.sort(key=lambda c: c[0].lower())
     save("psal_campuses.json", {"source": f"{raw.get('source', 'PSAL campus school lists')}, fetched {raw.get('fetched', '')}",

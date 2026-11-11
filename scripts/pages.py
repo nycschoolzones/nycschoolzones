@@ -1183,10 +1183,13 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                     spv, spg = HS.get("SPV") or [], HS.get("SPG") or []
                     camp = next((c for c in HS.get("PCA") or [] if any(m[0] == dbn for m in c[1])), None)
                     if camp:
-                        def label(m, pn):
-                            n = nice_name((R.get(m) or [None])[0] or S.get(m, {}).get("n") or pn)
+                        # by name the schools the site knows; the rest (YABC evening programs, District 75) as a count
+                        def label(m):
+                            n = nice_name((R.get(m) or [None])[0] or S.get(m, {}).get("n"))
                             return f'<a href="/schools/{e(m)}/">{e(n)}</a>' if m in page_dbns(d) else e(n)
-                        camp = (camp[0], [label(m, pn) for m, pn in camp[1] if m != dbn])
+                        known = [m for m, _ in camp[1] if m != dbn and ((R.get(m) or [None])[0] or S.get(m, {}).get("n"))]
+                        k = sum(1 for m, _ in camp[1] if m != dbn) - len(known)
+                        camp = (camp[0], [label(m) for m in known] + ([f"{k} other school{'s' if k > 1 else ''}"] if k else []))
                     cards.append((sports_html(sp, spv, spg, dm, camp), sports_summary(sp, spv, spg, dm), False))
             cards.append((extras_html(ex, exv, exg, "Classes and activities" if lv == "hs" else "Classes, sports and activities"),
                           extras_summary(ex, exv, exg), False))

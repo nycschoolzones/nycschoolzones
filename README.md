@@ -157,12 +157,12 @@ This writes `nonzoned_k.json`, `citywide_gt_k.json`, `k_priority.json`, `ms_dire
 
 ### 2b. PSAL campuses (each fall, after the MySchools directories)
 
-Which high schools share their PSAL teams. The PSAL calls each shared program a "… Campus" (John Jay Campus: Park Slope Collegiate, Cyberarts Studio Academy, John Jay School for Law, Millennium Brooklyn and Millennium High School), and a high school's Sports section names its campus and the other schools on it.
+Which high schools share their PSAL teams. The PSAL calls most shared programs a "… Campus" (John Jay Campus: Park Slope Collegiate, Cyberarts Studio Academy, John Jay School for Law, Millennium Brooklyn and Millennium High School), and a high school's Sports section names its campus and the other schools on it.
 
-1. Open [psal.org/profiles/profile.aspx](https://www.psal.org/profiles/profile.aspx), wait for the school list, open the console, paste all of `scripts/browser/psal.js` and press Enter. A minute or two later you have `psal_campuses.json` in Downloads.
+1. Open [psal.org/profiles/profile.aspx](https://www.psal.org/profiles/profile.aspx), wait for the school list, open the console, paste all of `scripts/browser/psal.js` and press Enter. It asks every PSAL school for its campus list, so a few minutes later you have `psal_campuses.json` in Downloads.
 2. `python3 scripts/fetch_data.py psal ~/Downloads/psal_campuses.json`
 
-It prints a `psal:` line for each campus the browser couldn't get and each school without a DOE code. Without the file, the build leaves the campus line out.
+The import merges a campus found under several names, and prints a `psal:` line for each school the browser couldn't get and each member without a DOE code. Without the file, the build leaves the campus line out.
 
 ### 3. School Quality Snapshot (when a new year appears at [tools.nycenet.edu/snapshot](https://tools.nycenet.edu/snapshot/))
 

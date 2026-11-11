@@ -10,9 +10,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 
 ### Added
 - High schools can now be colored by their sports, in a new "Sports" group under Color by. **Team count** colors each school by how many PSAL teams it lists on MySchools (boys', girls' and coed added up), from none to 20 or more. **Teams** opens a checklist of every PSAL team, grouped into boys, girls and coed, each with how many high schools have it: tick the ones you want, like Girls Soccer and Girls Volleyball, and the map shows which schools have all of them, in blue, and which have some ("1 of 2"). Tooltips list the teams a school has and is missing; its card ticks them in the Sports section and says which are missing, and a link to the map keeps your picks. Charter schools aren't in the MySchools directory, so they show as no data.
-
-### Changed
-- Behind the scenes: a new browser step reads the PSAL's own campus lists (which high schools share one set of teams, like the John Jay Campus). Once it's run, a high school's Sports section will name its campus and the other schools on it.
+- A high school whose students play on teams shared with other schools now says so in its Sports section, from the PSAL's own campus lists: "Plays on the PSAL’s John Jay Campus teams, with Park Slope Collegiate, Cyberarts Studio Academy, John Jay School for Law and Millennium Brooklyn High School." That covers 43 campuses, about 150 high schools, including some in different buildings, like Millennium High School in Manhattan with the John Jay Campus in Park Slope.
 
 ### Fixed
 - On the map, the card of a school with both middle and high school grades (like Young Women's Leadership School, grades 6–12) had an empty Demographics section when opened from the high school map, and showed only its middle grades' student count ("93 students" instead of 361). It now shows the whole school, as its school page does.

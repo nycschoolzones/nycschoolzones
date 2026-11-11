@@ -1492,9 +1492,11 @@ function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)r
 // school's boys' teams (or the other way round, by the Demographic Snapshot) are listed apart and not counted: they're
 // shared teams its students don't play on (build.py psal_teams leaves them out of Color by too). A school on one of
 // the PSAL's campuses (LV.hs.PCA, the PSAL's own lists) gets a line naming the campus and its other schools
+// (by name the schools the map knows; the rest, like YABC evening programs and District 75 schools, as a count)
 function spCampus(d){const c=(LV.hs&&LV.hs.PCA||[]).find(c=>c[1].some(m=>m[0]===d));if(!c)return '';
-  const others=c[1].filter(m=>m[0]!==d).map(m=>S[m[0]]?short(m[0]):m[1]);
-  return '<p class="sp-camp">Plays on the PSAL’s <b>'+esc(c[0])+'</b> teams'+(others.length?', with '+esc(others.length>1?others.slice(0,-1).join(', ')+' and '+others[others.length-1]:others[0]):'')+'.</p>'}
+  const o=c[1].filter(m=>m[0]!==d),nm=o.filter(m=>S[m[0]]).map(m=>short(m[0])),k=o.length-nm.length;
+  if(k)nm.push(k+' other school'+(k>1?'s':''));
+  return '<p class="sp-camp">Plays on the PSAL’s <b>'+esc(c[0])+'</b> teams'+(nm.length?', with '+esc(nm.length>1?nm.slice(0,-1).join(', ')+' and '+nm[nm.length-1]:nm[0]):'')+'.</p>'}
 function spSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.SP&&lp.SP[d];if(!x)return '';
   const K=KINDS.sp,pick=metric==='spt'?K.set:[],nm=kNames(K),by={},other=[],dm=DM[d],kk=DEMO_GROUPS.length;let n=0;
   const only=dm&&dm[kk+2]!=null&&dm[kk+3]!=null&&!(dm[kk+2]&&dm[kk+3])&&(dm[kk+2]||dm[kk+3])?(dm[kk+2]?'Girls':'Boys'):'',not=only==='Girls'?'Boys':only?'Girls':'',apart=[];
