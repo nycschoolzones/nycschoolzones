@@ -287,8 +287,8 @@ aside>*{flex-shrink:0}
 /* AP courses: a wide pop-up over the map, the subject groups flowing into columns (phones: two, full width) */
 #ap-pop{scrollbar-gutter:stable;position:absolute;top:10px;left:54px;z-index:1150;background:var(--panel);color:var(--fg);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);padding:10px 16px 10px;width:min(720px,calc(100% - 64px));max-height:calc(100% - 20px);overflow:auto;box-sizing:border-box;font-size:15px}
 #ap-pop[hidden]{display:none}
-#ap-pop .cp-head{margin-bottom:4px}
-.ap-list-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:4px}
+#ap-pop .cp-head{margin-bottom:0}
+.ap-list-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:2px}
 .ap-acts{display:flex;align-items:center;gap:14px;flex:none}
 #ap-pop .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;padding:6px 0}#ap-pop .link-btn[hidden]{display:none}
 .ap-done{font:inherit;font-family:var(--display);font-weight:600;font-size:.85rem;padding:6px 16px;border-radius:6px;border:0;background:var(--fg);color:var(--panel);cursor:pointer}
@@ -298,8 +298,7 @@ aside>*{flex-shrink:0}
 #ap-boxes .layers{display:block}
 #ap-boxes .chk{break-inside:avoid;padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
-.ap-picked{margin:0 0 6px;font-size:.85rem;min-height:2.8em}
-.sw-pad{visibility:hidden}
+.ap-picked{margin:0 0 6px;font-size:.85rem}
 .ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
 #map-legend .hint{display:none;max-height:28vh;overflow:auto}
 #map-legend.open .hint{display:block}
@@ -1715,10 +1714,16 @@ function apBoxes(){const box=document.getElementById('ap-boxes');if(box.childEle
     return '<label class="chk"><input type="checkbox" value="'+k+'"> <span>'+esc(nm)+'</span><small title="High schools that list it">'+(n[k]||0)+'</small></label>'}).join('')+'</div></div>').join('');
   box.addEventListener('change',e=>{const b=e.target;if(b.type!=='checkbox')return;const k=+b.value;
     apSet=b.checked?apSet.concat([k]).sort((x,y)=>x-y):apSet.filter(x=>x!==k);apChanged()})}
-function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec();placeApPop()}
+function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec()}
 // the open card's AP section marks the picked courses
 function refreshApSec(){const o=card.querySelector('.sec[data-sec="ap"]'),dd=card.querySelector('.school[data-d]');if(!o||!dd)return;
   const t=document.createElement('div');t.innerHTML=apSec(dd.dataset.d);const nw=t.firstElementChild;if(nw){nw.open=o.open;o.replaceWith(nw)}}
+// the AP courses key: [summary line, swatches] for N picked courses (names), full of them offering all
+function apKey(N,names,full){const sw=b=>'<span><i'+(b[1].startsWith('var(')?' class="off"':' style="background:'+b[1]+'"')+'></i>'+b[2]+'</span>';
+  const say=N>2?names.slice(0,2).map(esc).join(', ')+', +'+(N-2):names.map(esc).join(' and '),n=apSet;
+  apSet=Array.from({length:N},(_,i)=>i);const bins=N?apcBins():[];apSet=n;  // apcBins reads apSet's length
+  return [N?'<b>'+say+'</b> · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all '+N:' it'):'No courses picked yet: tap <b>Courses</b>.',
+    N?bins.map(b=>sw([0,b[2],b[0]])).join('')+sw([0,'var(--off)',N>1?'None of them':'Doesn’t'])+'<span><i class="na"></i>No data</span>':'']}
 function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementById('leg-ap');la.hidden=!ap;document.getElementById('ap-btn').hidden=metric!=='apc';
   if(metric!=='apc')setApPop(false);if(!ap||!LV.hs||!LV.hs.APC)return;apBoxes();
   document.querySelectorAll('#ap-boxes input').forEach(b=>{b.checked=apSet.includes(+b.value)});
@@ -1729,26 +1734,26 @@ function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementB
   if(metric==='ap'){
     document.getElementById('ap-sw').innerHTML=AP_BINS.slice(1).concat([AP_BINS[0]]).map(sw).join('')+sw([0,AP_CH,'Charter, offers AP'])+'<span><i class="na"></i>No data</span>';
     document.getElementById('ap-hint').innerHTML='How many AP classes each high school lists on MySchools. Half of NYC high schools list '+(ns[Math.floor(ns.length/2)]||0)+' or more; the most list '+(ns[ns.length-1]||0)+'. To find schools with the courses you want, pick “AP courses”. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. Charter schools aren’t in the MySchools directory: “Charter, offers AP” means the 2024–25 School Quality Snapshot shows students taking AP classes or passing AP exams there, without saying which or how many. <span class="nd"></span> No data: a charter school whose Snapshot shows no AP classes, or that has no Snapshot yet.';return}
-  const names=apPickNames(),full=all.filter(d=>N&&apVal(d)===N).length;
-  const say=N>2?names.slice(0,2).map(esc).join(', ')+', +'+(N-2):names.map(esc).join(' and ');
-  picked.innerHTML=N?'<b>'+say+'</b> · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all '+N:' it'):'No courses picked yet: tap <b>Courses</b>.';
+  const full=all.filter(d=>N&&apVal(d)===N).length,key=apKey(N,apPickNames(),full);
+  picked.innerHTML=key[0];document.getElementById('ap-sw').innerHTML=key[1];
   document.getElementById('ap-btn-n').textContent=N?N+' picked':'Pick';
   document.getElementById('ap-list-n').textContent=N?N+' picked · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all of them':' it'):'Pick the AP courses you want';
   document.getElementById('ap-clear').hidden=!N;
-  // the key keeps one height (three rows of swatches, the line above it two lines) whatever is picked, so the course
-  // pop-up above it (placeApPop) doesn't shrink and grow a scroll bar as you tick
-  const items=N?apcBins().map(b=>[0,b[2],b[0]]).map(sw).concat([sw([0,'var(--off)',N>1?'None of them':'Doesn’t']),'<span><i class="na"></i>No data</span>']):[];
-  while(items.length<6)items.push('<span class="sw-pad" aria-hidden="true"><i></i>&nbsp;</span>');
-  document.getElementById('ap-sw').innerHTML=items.join('');
   document.getElementById('ap-hint').innerHTML=(N?'High schools by how many of the courses you picked they list on MySchools. ':'Pick AP courses in Color by to see which high schools offer them. ')+'Ask a school whether each class runs every year. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'}
 document.getElementById('ap-clear').addEventListener('click',()=>{apSet=[];apChanged()});
 // the AP courses pop-up: opens when you pick AP courses or tap the Courses button (#ap-btn, next to Color by, shown
 // only for AP courses); the map recolors as you tick, so it stays
 // open until Done, ✕, Escape or a click elsewhere
 const appop=document.getElementById('ap-pop');document.getElementById('map').appendChild(appop);L.DomEvent.disableClickPropagation(appop);L.DomEvent.disableScrollPropagation(appop);
-// it ends just above the color key, so the Courses button stays visible to close it (phones especially)
-function placeApPop(){if(appop.hidden)return;const m=document.getElementById('map').getBoundingClientRect(),c=document.getElementById('map-legend').getBoundingClientRect();
-  appop.style.maxHeight=Math.max(200,Math.round(c.top-m.top-appop.offsetTop-8))+'px'}
+// it ends above the color key, so the Courses button stays visible to close it (phones especially), leaving room for
+// the key's tallest form (measured by drawing it for a moment: four picks, the longest names, a two-line summary) so
+// the list keeps its size as you tick and the key grows into the gap
+function placeApPop(){if(appop.hidden)return;const m=document.getElementById('map').getBoundingClientRect(),lg=document.getElementById('map-legend'),c=lg.getBoundingClientRect();
+  let extra=0;if(metric==='apc'){const pk=document.getElementById('ap-picked'),sw=document.getElementById('ap-sw'),was=[pk.innerHTML,sw.innerHTML];
+    const long=apNames().slice().sort((a,b)=>b.length-a.length);let tall=0;
+    [1,2,3,4,5].forEach(N=>{const k=apKey(N,long.slice(0,N),888);pk.innerHTML=k[0];sw.innerHTML=k[1];tall=Math.max(tall,lg.getBoundingClientRect().height)});
+    pk.innerHTML=was[0];sw.innerHTML=was[1];extra=Math.max(0,tall-c.height)}
+  appop.style.maxHeight=Math.max(200,Math.round(c.top-m.top-appop.offsetTop-8-extra))+'px'}
 addEventListener('resize',placeApPop);
 function setApPop(open){if(appop.hidden===!open)return;if(!open&&appop.contains(document.activeElement))document.activeElement.blur();appop.hidden=!open;document.getElementById('ap-btn').setAttribute('aria-expanded',String(open));
   if(!open)return;if(typeof closePops==='function')closePops();setPanel(false);syncAp();placeApPop();
