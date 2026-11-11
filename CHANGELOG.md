@@ -14,6 +14,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 
 ### Changed
 - Behind the scenes: the yearly refresh checklist now says how to tell the PSAL download found every shared program.
+- Behind the scenes: `fetch_data.py status` lists every data file with when it was last refreshed and whether it's due, and the build says when something is.
 
 ### Fixed
 - On the map, the card of a school with both middle and high school grades (like Young Women's Leadership School, grades 6–12) had an empty Demographics section when opened from the high school map, and showed only its middle grades' student count ("93 students" instead of 361). It now shows the whole school, as its school page does.

@@ -1195,6 +1195,10 @@ def main(standalone_path=None, pages=None):
         print(f"middle school: {len(d['MS']['features'])} zones, {len(d['MS']['T'])} schools with test results")
     print(f"wrote {out} ({os.path.getsize(out) / 1e6:.2f} MB) + " +
           ", ".join(f"{p} ({os.path.getsize(os.path.join(ROOT, p)) / 1e6:.2f} MB)" for p in assets.values()))
+    import data_status  # one line when a data file is due for its yearly refresh
+    line = data_status.summary()
+    if line:
+        print(line)
 
 
 def write_page(template, d, out):

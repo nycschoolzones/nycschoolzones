@@ -92,6 +92,7 @@ scripts/
   pages.py              school pages, district pages and the sitemap (called by build.py)
   neighborhoods.py      matches zones to neighborhoods and writes the neighborhood pages (called by build.py)
   fetch_data.py         re-downloads everything in data/ from the city
+  data_status.py        which data files are due for their yearly refresh (fetch_data.py status; the build's "data:" line)
   browser/              scripts to paste into a browser console for MySchools, the Snapshot and the PSAL (see "Refresh the data")
   streets.py            merges and simplifies street centerlines (used by fetch_data.py)
   make_preview.py       draws preview.png (needs matplotlib)
@@ -134,7 +135,7 @@ The site can report anonymous page views to [GoatCounter](https://www.goatcounte
 
 ## Refresh the data
 
-Most data changes once a year. This is the whole checklist, in order. Each step updates files in `data/`; run `python3 scripts/build.py` at the end (and after any step, to check it), then commit `data/` with the rebuilt site. Times are rough: when a source hasn't changed yet, skip it and come back.
+Most data changes once a year. Start with `python3 scripts/fetch_data.py status`: it lists every file in `data/` with its step below, the period it covers, when it was last refreshed and whether it's due (its source's usual month has come round since, or a year has passed for sources without one). The build prints a `data: refresh due:` line whenever something is. This is the whole checklist, in order. Each step updates files in `data/`; run `python3 scripts/build.py` at the end (and after any step, to check it), then commit `data/` with the rebuilt site. Times are rough: when a source hasn't changed yet, skip it and come back.
 
 Two sources, MySchools and the School Quality Snapshot, block scripts from outside a browser. For those, a script in `scripts/browser/` runs in your browser's console and downloads a raw file, then `fetch_data.py` turns that file into `data/`. To open the console: Chrome/Edge Cmd+Option+J (Mac) or Ctrl+Shift+J; Firefox Cmd+Option+K or Ctrl+Shift+K. If the browser asks whether the site may download several files, allow it.
 

@@ -1724,6 +1724,11 @@ if __name__ == "__main__":
         print("-- myschools (from browser downloads)")
         import_myschools(args[1:])
         sys.exit()
+    if args[:1] == ["status"]:  # which data files are due for their yearly refresh (scripts/data_status.py)
+        import data_status
+        data_status.print_report({**{n: history_period(n) for n in HISTORY_PERIODS if HISTORY_PERIODS[n] != "zones"},
+                                  "state_tests.json": f"spring {TESTS_YEAR}"})
+        sys.exit()
     if args[:1] == ["psal"] and len(args) == 2:  # the file scripts/browser/psal.js downloaded
         print("-- psal (from browser download)")
         import_psal(args[1])

@@ -32,6 +32,7 @@ fetch_data.py ──> data/*.json   (yearly refresh; MySchools, Snapshot and PSA
   `TABS_JS`), the sitemap and shared CSS. It reads the same trimmed data `build.py` builds. `LOCAL_FIX` and `relative()`
   make links work from `file://`.
 - `scripts/neighborhoods.py`: one page per neighborhood, listing the zones that cover it.
+- `scripts/data_status.py`: `DATASETS` (each data file's README step and the month its source publishes), `report`/`print_report` (`fetch_data.py status`: last refreshed from the file's own "fetched" date or its last commit, due once that month has come round, or a year for sources without one), `summary` (the build's `data: refresh due:` line, which also names data files missing from `DATASETS`).
 - `scripts/fetch_data.py`: one command per source (`zones`, `myschools`, `snapshot-job`, `snapshot-raw`, `snapshot-counts`, `colocation`, `accessibility`, `admissions`, `charters`, `zips`, `demographics`, `charter-snapshot`, `psal` (`import_psal`, from `scripts/browser/psal.js`), …).
   The README's "Refresh the data" section is the checklist.
 - `scripts/release.sh`: bumps `VERSION`, dates the changelog, rebuilds, commits, tags and pushes. `.github/workflows/release.yml` (Actions → Release) runs it on GitHub with a patch/minor/major choice; its push starts the Pages deploy like any other.
