@@ -260,6 +260,9 @@ aside>*{flex-shrink:0}
 .map-btn .car{font-size:.72rem;color:var(--muted);margin-left:auto;padding-left:6px}
 .map-btn:hover{border-color:var(--muted)}
 .map-btn[aria-expanded="true"]{border-color:var(--fg);box-shadow:0 0 0 1px var(--fg)}
+/* AP courses: the button that opens the course list, filled so it reads as the next step */
+.ap-btn{flex:none;background:var(--fg);color:var(--panel);border-color:var(--fg)}.ap-btn small{color:var(--panel);opacity:.75}.ap-btn[hidden]{display:none}
+.ap-btn:hover{border-color:var(--fg);opacity:.9}.ap-btn[aria-expanded="true"]{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--fg)}
 #color-panel{position:absolute;left:10px;bottom:120px;z-index:1001;width:340px;max-width:calc(100% - 20px);max-height:calc(100% - 140px);overflow:auto;touch-action:pan-y;background:var(--panel);color:var(--fg);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;font-size:15px}
 #color-panel[hidden]{display:none}
 .cp-head{display:flex;justify-content:space-between;align-items:center}
@@ -282,7 +285,7 @@ aside>*{flex-shrink:0}
 #color-panel>*{flex-shrink:0}  /* a long AP course list scrolls the panel instead of squeezing the rows above it */
 .seg.two{grid-template-columns:repeat(2,1fr)}
 /* AP courses: a wide pop-up over the map, the subject groups flowing into columns (phones: two, full width) */
-#ap-pop{position:absolute;top:10px;left:54px;z-index:1150;background:var(--panel);color:var(--fg);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);padding:12px 16px 14px;width:min(700px,calc(100% - 64px));max-height:calc(100% - 20px);overflow:auto;box-sizing:border-box;font-size:15px}
+#ap-pop{position:absolute;top:10px;left:54px;z-index:1150;background:var(--panel);color:var(--fg);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);padding:10px 16px 10px;width:min(720px,calc(100% - 64px));max-height:calc(100% - 20px);overflow:auto;box-sizing:border-box;font-size:15px}
 #ap-pop[hidden]{display:none}
 #ap-pop .cp-head{margin-bottom:4px}
 .ap-list-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:4px}
@@ -290,12 +293,12 @@ aside>*{flex-shrink:0}
 #ap-pop .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;padding:6px 0}#ap-pop .link-btn[hidden]{display:none}
 .ap-done{font:inherit;font-family:var(--display);font-weight:600;font-size:.85rem;padding:6px 16px;border-radius:6px;border:0;background:var(--fg);color:var(--panel);cursor:pointer}
 #ap-boxes{columns:3 190px;column-gap:24px}
-.ap-grp{break-inside:avoid;padding-top:8px}
+.ap-grp{break-inside:avoid;padding-top:6px}
 #ap-boxes .grp-h{margin:0 0 2px}
 #ap-boxes .layers{gap:0}
-#ap-boxes .chk{padding:4px 0;font-weight:500;align-items:flex-start;line-height:1.25}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
+#ap-boxes .chk{padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
-.ap-picked{margin:0 0 6px;font-size:.85rem}.ap-picked .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;margin-left:4px}
+.ap-picked{margin:0 0 6px;font-size:.85rem}
 .ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
 #map-legend .hint{display:none;max-height:28vh;overflow:auto}
 #map-legend.open .hint{display:block}
@@ -662,7 +665,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
     </div>
   </div>
   <div id="map-legend">
-    <div class="lg-head"><button type="button" class="map-btn" id="color-btn" aria-expanded="false" aria-controls="color-panel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8.5 12 14l10-5.5z"/><path d="m2 13 10 5.5L22 13"/><path d="m2 17.5 10 5.5 10-5.5" opacity=".5"/></svg><span><small>Color by</small><b id="color-name">Overall rating</b></span><span class="car" aria-hidden="true">▾</span></button><button type="button" class="lg-info" id="lg-info" aria-expanded="false" aria-label="About these colors">i</button></div>
+    <div class="lg-head"><button type="button" class="map-btn" id="color-btn" aria-expanded="false" aria-controls="color-panel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 8.5 12 14l10-5.5z"/><path d="m2 13 10 5.5L22 13"/><path d="m2 17.5 10 5.5 10-5.5" opacity=".5"/></svg><span><small>Color by</small><b id="color-name">Overall rating</b></span><span class="car" aria-hidden="true">▾</span></button><button type="button" class="map-btn ap-btn" id="ap-btn" aria-controls="ap-pop" aria-expanded="false" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 2 2 3-3M3 13l2 2 3-3M3 20l2 2 3-3M12 6h9M12 13h9M12 20h9"/></svg><span><small>Courses</small><b id="ap-btn-n">Pick</b></span></button><button type="button" class="lg-info" id="lg-info" aria-expanded="false" aria-label="About these colors">i</button></div>
     <span id="grp-src">DOE School Quality Snapshot · 2024–25</span>
       <div class="legend" id="leg-rate">
         <div class="sw"><span><i style="background:var(--r-green)"></i>Excellent (4)</span><span><i style="background:var(--r-yellow)"></i>Good (3)</span><span><i style="background:var(--r-orange)"></i>Fair (2)</span><span><i style="background:var(--r-red)"></i>Needs Improvement (1)</span></div>
@@ -1694,7 +1697,8 @@ document.getElementById('llf').addEventListener('submit',async e=>{e.preventDefa
 
 
 const METRIC_NAME={comp:'Overall rating',ip:'Instruction rating',ss:'Safety rating',rf:'Families rating',both:'ELA + Math scores',scr:'Screened programs',ela:'ELA scores',math:'Math scores',pk:'Pre-K & 3-K',grad:'Graduation rate',coll:'College & career',ccr:'College readiness',sat:'Average SAT',gt:'G&T programs',dl:'Dual language',iep:'Special ed (IEP share)',ap:'AP class count',apc:'AP courses'};
-function syncName(){const n=metric==='apc'&&apSet.length===1?'AP '+apPickNames()[0]:metric==='apc'&&apSet.length?apSet.length+' AP courses':METRIC_NAME[metric]||'';['leg-title','color-name'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=n})}
+// (AP courses: the Courses button beside Color by says how many are picked)
+function syncName(){const n=METRIC_NAME[metric]||'';['leg-title','color-name'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=n})}
 document.querySelectorAll('#search-sec [role=tab]').forEach(b=>b.addEventListener('click',()=>{const s=b.dataset.s;
   document.querySelectorAll('#search-sec [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
   document.getElementById('addr-sec').hidden=s!=='addr';document.getElementById('find-sec').hidden=s!=='school';
@@ -1709,11 +1713,11 @@ function apBoxes(){const box=document.getElementById('ap-boxes');if(box.childEle
     return '<label class="chk"><input type="checkbox" value="'+k+'"> <span>'+esc(nm)+'</span><small title="High schools that list it">'+(n[k]||0)+'</small></label>'}).join('')+'</div></div>').join('');
   box.addEventListener('change',e=>{const b=e.target;if(b.type!=='checkbox')return;const k=+b.value;
     apSet=b.checked?apSet.concat([k]).sort((x,y)=>x-y):apSet.filter(x=>x!==k);apChanged()})}
-function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec()}
+function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec();placeApPop()}
 // the open card's AP section marks the picked courses
 function refreshApSec(){const o=card.querySelector('.sec[data-sec="ap"]'),dd=card.querySelector('.school[data-d]');if(!o||!dd)return;
   const t=document.createElement('div');t.innerHTML=apSec(dd.dataset.d);const nw=t.firstElementChild;if(nw){nw.open=o.open;o.replaceWith(nw)}}
-function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementById('leg-ap');la.hidden=!ap;
+function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementById('leg-ap');la.hidden=!ap;document.getElementById('ap-btn').hidden=metric!=='apc';
   if(metric!=='apc')setApPop(false);if(!ap||!LV.hs||!LV.hs.APC)return;apBoxes();
   document.querySelectorAll('#ap-boxes input').forEach(b=>{b.checked=apSet.includes(+b.value)});
   const all=apSchools(),ns=all.map(apCount).filter(n=>n!=null&&n>=0).sort((a,b)=>a-b),N=apSet.length;
@@ -1725,22 +1729,28 @@ function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementB
     document.getElementById('ap-hint').innerHTML='How many AP classes each high school lists on MySchools. Half of NYC high schools list '+(ns[Math.floor(ns.length/2)]||0)+' or more; the most list '+(ns[ns.length-1]||0)+'. To find schools with the courses you want, pick “AP courses”. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. Charter schools aren’t in the MySchools directory: “Charter, offers AP” means the 2024–25 School Quality Snapshot shows students taking AP classes or passing AP exams there, without saying which or how many. <span class="nd"></span> No data: a charter school whose Snapshot shows no AP classes, or that has no Snapshot yet.';return}
   const names=apPickNames(),full=all.filter(d=>N&&apVal(d)===N).length;
   const say=N>2?names.slice(0,2).map(esc).join(', ')+', +'+(N-2):names.map(esc).join(' and ');
-  picked.innerHTML=N?'<b>'+say+'</b> · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all '+N:' it')+' <button type="button" class="link-btn" data-ap-edit>Edit</button>':'No courses picked yet. <button type="button" class="link-btn" data-ap-edit>Pick courses</button>';
+  picked.innerHTML=N?'<b>'+say+'</b> · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all '+N:' it'):'No courses picked yet: tap <b>Courses</b>.';
+  document.getElementById('ap-btn-n').textContent=N?N+' picked':'Pick';
   document.getElementById('ap-list-n').textContent=N?N+' picked · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all of them':' it'):'Pick the AP courses you want';
   document.getElementById('ap-clear').hidden=!N;
   document.getElementById('ap-sw').innerHTML=N?apcBins().map(b=>[0,b[2],b[0]]).map(sw).join('')+sw([0,'var(--off)',N>1?'None of them':'Doesn’t'])+'<span><i class="na"></i>No data</span>':'';
   document.getElementById('ap-hint').innerHTML=(N?'High schools by how many of the courses you picked they list on MySchools. ':'Pick AP courses in Color by to see which high schools offer them. ')+'Ask a school whether each class runs every year. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'}
 document.getElementById('ap-clear').addEventListener('click',()=>{apSet=[];apChanged()});
-// the AP courses pop-up: opens when you pick AP courses or tap Edit in the key; the map recolors as you tick, so it stays
+// the AP courses pop-up: opens when you pick AP courses or tap the Courses button (#ap-btn, next to Color by, shown
+// only for AP courses); the map recolors as you tick, so it stays
 // open until Done, ✕, Escape or a click elsewhere
 const appop=document.getElementById('ap-pop');document.getElementById('map').appendChild(appop);L.DomEvent.disableClickPropagation(appop);L.DomEvent.disableScrollPropagation(appop);
-function setApPop(open){if(appop.hidden===!open)return;if(!open&&appop.contains(document.activeElement))document.activeElement.blur();appop.hidden=!open;
-  if(!open)return;if(typeof closePops==='function')closePops();setPanel(false);syncAp();
+// it ends just above the color key, so the Courses button stays visible to close it (phones especially)
+function placeApPop(){if(appop.hidden)return;const m=document.getElementById('map').getBoundingClientRect(),c=document.getElementById('map-legend').getBoundingClientRect();
+  appop.style.maxHeight=Math.max(200,Math.round(c.top-m.top-appop.offsetTop-8))+'px'}
+addEventListener('resize',placeApPop);
+function setApPop(open){if(appop.hidden===!open)return;if(!open&&appop.contains(document.activeElement))document.activeElement.blur();appop.hidden=!open;document.getElementById('ap-btn').setAttribute('aria-expanded',String(open));
+  if(!open)return;if(typeof closePops==='function')closePops();setPanel(false);syncAp();placeApPop();
   const f=appop.querySelector('#ap-boxes input:checked')||appop.querySelector('#ap-boxes input');if(f)f.focus({preventScroll:true})}
 ['ap-close','ap-done'].forEach(id=>document.getElementById(id).addEventListener('click',()=>setApPop(false)));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!appop.hidden)setApPop(false)});
-document.addEventListener('click',e=>{if(!appop.hidden&&!appop.contains(e.target)&&!e.target.closest('[data-ap-edit],label[for=m-apc]'))setApPop(false)});
-document.getElementById('map-legend').addEventListener('click',e=>{if(e.target.closest('[data-ap-edit]'))setApPop(true)});
+document.addEventListener('click',e=>{if(!appop.hidden&&!appop.contains(e.target)&&!e.target.closest('#ap-btn,label[for=m-apc]'))setApPop(false)});
+document.getElementById('ap-btn').addEventListener('click',()=>{markEngaged();setApPop(appop.hidden)});
 function syncLegend(){syncName();syncAp();const lo=document.getElementById('leg-out');lo.hidden=!isOut(metric);
   if(isOut(metric)){const o=OUT[metric],s=o.stops,pct=v=>outPos(metric,v)+'%',rv=n=>'var(--r-'+n+')';
     document.getElementById('out-bar').style.background='linear-gradient(90deg,'+rv(s[0][1])+' 0%,'+rv(s[0][1])+' '+pct(s[0][0])+','+rv(s[1][1])+' '+pct(s[1][0])+','+rv(s[2][1])+' '+pct(s[2][0])+','+rv(s[2][1])+' 100%)';
