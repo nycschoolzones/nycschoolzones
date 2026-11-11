@@ -59,6 +59,7 @@ table.dm{width:100%;border-collapse:collapse;margin-top:12px;font-size:.95rem;fo
 .dm tr.pov>*{border-top:1px solid var(--line);padding-top:8px}
 .progs{list-style:none;margin:0;padding:0}
 h3.ex-h{font-size:.95rem;margin:14px 0 2px}h3.ex-h+p{margin:0}
+table.spt{border-collapse:collapse}table.spt td{padding:2px 18px 2px 0;vertical-align:top}table.spt td+td{color:var(--muted)}
 ul.ap{columns:2 12rem;column-gap:24px;margin:0;padding-left:1.2em}ul.ap li{break-inside:avoid;padding:2px 0}
 .adm-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin:6px 0 4px;font-size:.95rem}
 .adm-t th,.adm-t td{padding:6px 0 6px 10px;text-align:right;font-weight:400;white-space:nowrap}
