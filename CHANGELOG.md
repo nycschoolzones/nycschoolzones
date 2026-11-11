@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.74.0 (2026-11-10)
 
 ### Added
 - With AP courses picked, a high school's card now says which of them the school doesn't offer, at the top of its AP classes section ("Missing: Physics C: Mechanics"). On a phone, where there are no tooltips, that's the quickest way to see what a school lacks.
