@@ -285,7 +285,7 @@ aside>*{flex-shrink:0}
 #color-panel>*{flex-shrink:0}  /* a long AP course list scrolls the panel instead of squeezing the rows above it */
 .seg.two{grid-template-columns:repeat(2,1fr)}
 /* AP courses: a wide pop-up over the map, the subject groups flowing into columns (phones: two, full width) */
-#ap-pop{position:absolute;top:10px;left:54px;z-index:1150;background:var(--panel);color:var(--fg);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);padding:10px 16px 10px;width:min(720px,calc(100% - 64px));max-height:calc(100% - 20px);overflow:auto;box-sizing:border-box;font-size:15px}
+#ap-pop{scrollbar-gutter:stable;position:absolute;top:10px;left:54px;z-index:1150;background:var(--panel);color:var(--fg);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);padding:10px 16px 10px;width:min(720px,calc(100% - 64px));max-height:calc(100% - 20px);overflow:auto;box-sizing:border-box;font-size:15px}
 #ap-pop[hidden]{display:none}
 #ap-pop .cp-head{margin-bottom:4px}
 .ap-list-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:4px}
@@ -298,7 +298,8 @@ aside>*{flex-shrink:0}
 #ap-boxes .layers{gap:0}
 #ap-boxes .chk{padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
-.ap-picked{margin:0 0 6px;font-size:.85rem}
+.ap-picked{margin:0 0 6px;font-size:.85rem;min-height:2.8em}
+.sw-pad{visibility:hidden}
 .ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
 #map-legend .hint{display:none;max-height:28vh;overflow:auto}
 #map-legend.open .hint{display:block}
@@ -1733,7 +1734,11 @@ function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementB
   document.getElementById('ap-btn-n').textContent=N?N+' picked':'Pick';
   document.getElementById('ap-list-n').textContent=N?N+' picked · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all of them':' it'):'Pick the AP courses you want';
   document.getElementById('ap-clear').hidden=!N;
-  document.getElementById('ap-sw').innerHTML=N?apcBins().map(b=>[0,b[2],b[0]]).map(sw).join('')+sw([0,'var(--off)',N>1?'None of them':'Doesn’t'])+'<span><i class="na"></i>No data</span>':'';
+  // the key keeps one height (three rows of swatches, the line above it two lines) whatever is picked, so the course
+  // pop-up above it (placeApPop) doesn't shrink and grow a scroll bar as you tick
+  const items=N?apcBins().map(b=>[0,b[2],b[0]]).map(sw).concat([sw([0,'var(--off)',N>1?'None of them':'Doesn’t']),'<span><i class="na"></i>No data</span>']):[];
+  while(items.length<6)items.push('<span class="sw-pad" aria-hidden="true"><i></i>&nbsp;</span>');
+  document.getElementById('ap-sw').innerHTML=items.join('');
   document.getElementById('ap-hint').innerHTML=(N?'High schools by how many of the courses you picked they list on MySchools. ':'Pick AP courses in Color by to see which high schools offer them. ')+'Ask a school whether each class runs every year. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'}
 document.getElementById('ap-clear').addEventListener('click',()=>{apSet=[];apChanged()});
 // the AP courses pop-up: opens when you pick AP courses or tap the Courses button (#ap-btn, next to Color by, shown
