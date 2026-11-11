@@ -513,6 +513,15 @@ def test_row(city, dbn, snap_t):
     return t + [1] if t else None
 
 
+def snapshot_has_ap(o):
+    """Whether a high school Snapshot (hs_snapshot.json or charter_snapshot.json "hs") shows AP classes: students
+    enrolled in an AP course ("disp_str_ap_enroll": "145 (39%)"), or seniors who passed an AP exam ("ccpc_co_N":
+    "A.P. US History", "Other A.P. Exams"). For charter schools, which MySchools doesn't list."""
+    m = re.match(r"\s*(\d+)", str(o.get("disp_str_ap_enroll") or ""))
+    return bool(m and int(m.group(1))) or any(str(v or "").startswith(("A.P.", "Other A.P.")) for k, v in o.items()
+                                              if re.fullmatch(r"ccpc_co_\d+", k))
+
+
 def hs_snapshot_rows(o, city_grad):
     """One school's high school Snapshot values (hs_snapshot.json) -> (Q row or None, outcomes row or None).
     Q: [average SAT, college & career readiness score, % in any advanced course, % in AP,
@@ -533,7 +542,7 @@ def hs_snapshot_rows(o, city_grad):
     aps, i = [], 1
     while f"ccpc_co_{i}" in o:
         nm = o[f"ccpc_co_{i}"] or ""
-        if nm.startswith("A.P.") and "Other" not in nm:
+        if nm.startswith("A.P.") and "Other" not in nm and nm.strip() != "A.P. Exams":  # "A.P. Exams" names no subject
             aps.append(nm[4:].strip())
         i += 1
     row = [int(sat) if sat else None, int(ccr) if ccr is not None else None,
@@ -775,6 +784,8 @@ def add_charters(d, city_tests):
         if set(now) & {9, 10, 11, 12} and "HS" in d:
             d["HS"]["CH"].append(row)
             if hsr:
+                if snapshot_has_ap(hsr.get("hs") or {}):
+                    d["HS"].setdefault("APCH", []).append(dbn)
                 q, oc = hs_snapshot_rows(hsr.get("hs", {}), city_grad)
                 if q:
                     d["HS"].setdefault("Q", {})[dbn] = q
@@ -782,6 +793,8 @@ def add_charters(d, city_tests):
                     d["HS"]["O"][dbn] = oc
                 if ems:
                     d["HS"]["CHR"][dbn], d["HS"]["CHX"][dbn] = fix(hsr["r"]), hsr["x"]
+    if "HS" in d:
+        d["HS"]["APCH"] = sorted(d["HS"].get("APCH", []))
     print(f"charter schools: {len(d['CH'])} elementary, {len(d.get('MS', {}).get('CH', []))} middle, "
           f"{len(d.get('HS', {}).get('CH', []))} high school; {sum(1 for k in d['CHX'] if k in d['R'])} with Snapshot data")
 
