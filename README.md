@@ -15,7 +15,7 @@ An interactive map of New York City's elementary (kindergarten), middle and high
 - **School district lines:** [School Districts](https://data.cityofnewyork.us/d/8ugf-3d8u), NYC Open Data (GeoJSON export; refresh with `python3 scripts/fetch_data.py districts <file.geojson>`)
 - **Middle schools and programs:** the MySchools middle school directory (`data/ms_directory.json`, programs, priorities, seats and applicants, classes, sports and activities) and Snapshot pages for schools without zones (`data/ms_snapshot.json`), both read through a browser
 - **High schools and programs:** the MySchools high school directory (`data/hs_directory.json`, programs, priorities, seats and applicants, ratings and graduation rates, classes, sports and activities), read through a browser
-- **PSAL campuses:** which high schools play on one shared set of PSAL teams, from each campus's "Campus Schools List" on [psal.org](https://www.psal.org/profiles/profile.aspx) (`data/psal_campuses.json`), read through a browser
+- **PSAL campuses and teams:** which high schools play on one shared set of PSAL teams, and the teams of charter schools (which aren't in MySchools), from each school's profile and "Campus Schools List" on [psal.org](https://www.psal.org/profiles/profile.aspx) (`data/psal_campuses.json`), read through a browser
 - **High school outcomes:** average SAT, college readiness, where graduates went and advanced courses from the 2024–25 School Quality Snapshot (`data/hs_snapshot.json`), read through a browser
 - **SHSAT cutoffs:** `data/shsat_cutoffs.json`, DOE figures as reported by Caddell Prep
 - **Non-zoned schools (elementary):** the MySchools kindergarten directory (`data/nonzoned_k.json`; kindergarten priority groups for every school in `data/k_priority.json`) and their Snapshot pages (`data/nonzoned_snapshot.json`); both read through a browser, since those sites block scripts here
@@ -73,6 +73,7 @@ data/
   snapshot_extra.json   enrollment, programs and other Snapshot facts by school
   colocation.json       other schools in each school's building (Snapshot co-location, LCGMS names)
   psal_campuses.json    the PSAL's campuses: schools whose students play on one shared set of teams (psal.org, via scripts/browser/psal.js)
+  psal_teams.json       each PSAL program's schools and its teams this season, for the schools MySchools doesn't list (charters)
   demographics.json     race and ethnicity, girls and boys, % low-income, IEPs and English learners by school, plus all of NYC (DOE Demographic Snapshot)
   state_tests.json      ELA/Math results by school, all tested grades (DOE, settings.TESTS_YEAR)
   snapshot_ratings.json Snapshot ratings by school
@@ -84,7 +85,7 @@ data/
   zips.json             each school's current address, ZIP code, tax lot center and grades (DOE LCGMS, NYC Planning PLUTO)
   history/<name>/<period>.json  dated copies of the yearly datasets above, kept for trends (the build doesn't read them):
                         Snapshot files by school year (2024-25), MySchools files by admissions round (fall-2026), demographics,
-                        class size and building use by school year, pre-K by fall, zones and PSAL campuses by the month fetched (2026-10),
+                        class size and building use by school year, pre-K by fall, zones and PSAL files by the month fetched (2026-10),
                         and state_tests/<year>.json: every year in the DOE's file since 2018, all grades and each grade
 scripts/
   build.py              data/ + src/template.html  →  index.html
@@ -156,16 +157,16 @@ Programs, admissions methods, seats and applicants, priorities, schools without 
 
 This writes `nonzoned_k.json`, `citywide_gt_k.json`, `k_priority.json`, `ms_directory.json`, `hs_directory.json` and `accessibility.json` (each school's building accessibility, merged across the directories you pass; `python3 scripts/fetch_data.py accessibility <files>` updates only that). Then set `MYSCHOOLS_LABEL` in `scripts/settings.py` to the admissions round the directory's "last year" numbers describe (the 2026–27 directory: "fall 2026"); the import warns when it doesn't match. If MySchools hasn't opened the next year's kindergarten applications yet, pass only the middle and high school files.
 
-### 2b. PSAL campuses (each fall, after the MySchools directories)
+### 2b. PSAL campuses and teams (each fall, after the MySchools directories)
 
-Which high schools share their PSAL teams. The PSAL calls most shared programs a "… Campus" (John Jay Campus: Park Slope Collegiate, Cyberarts Studio Academy, John Jay School for Law, Millennium Brooklyn and Millennium High School), and a high school's Sports section names its campus and the other schools on it.
+Which high schools share their PSAL teams. The PSAL calls most shared programs a "… Campus" (John Jay Campus: Park Slope Collegiate, Cyberarts Studio Academy, John Jay School for Law, Millennium Brooklyn and Millennium High School), and a high school's Sports section names its campus and the other schools on it. Charter high schools aren't in MySchools, so their Sports section and their Team count and Teams colors come from the PSAL's own team lists.
 
-1. Open [psal.org/profiles/profile.aspx](https://www.psal.org/profiles/profile.aspx), wait for the school list, open the console, paste all of `scripts/browser/psal.js` and press Enter. It asks every PSAL school for its campus list, so a few minutes later you have `psal_campuses.json` in Downloads.
+1. Open [psal.org/profiles/profile.aspx](https://www.psal.org/profiles/profile.aspx), wait for the school list, open the console, paste all of `scripts/browser/psal.js` and press Enter. For every PSAL school it asks for its details, its teams in the two latest seasons and its campus list (leaving out coaches, phone numbers and email), so about five minutes later you have `psal_campuses.json` in Downloads. It's a raw download: don't commit it.
 2. `python3 scripts/fetch_data.py psal ~/Downloads/psal_campuses.json`
 
-The PSAL's data only answers inside a browser on psal.org, so there's no scripted fetch. The script reads the same service as each school profile's "Campus Schools List" button (`GetSchoolByCampus`).
+The PSAL's data only answers inside a browser on psal.org, so there's no scripted fetch. The script reads the same services as each school's profile page: its teams by season (`vw_School_Profile`) and its "Campus Schools List" button (`GetSchoolByCampus`).
 
-The import merges a campus found under several names, and prints a `psal:` line for each school the browser couldn't get and each member without a DOE code. Without the file, the build leaves the campus line out. Check the run: the November 2026 one found 113 programs and 389 schools (`data/history/psal_campuses/2026-11.json`). Far fewer means it missed some. Spot-check two that are easy to miss: East Harlem Pride (TYWLS 03M610 with Central Park East, Frederick Douglass Academy II, Heritage and Park East) and John Jay Campus (with Millennium High School, 02M418, in Manhattan).
+The import merges a campus found under several names, and prints a `psal:` line for each school the browser couldn't get and each member without a DOE code. Without the file, the build leaves the campus line out. Check the run: the November 2026 one found 113 programs and 389 schools (`data/history/psal_campuses/2026-11.json`). Far fewer means it missed some. It also writes `psal_teams.json`. A PSAL program's schools are its campus list, or else the one school whose name is the PSAL's exactly; it lists the programs it can't place that way (25 in November 2026, mostly transfer schools and renamed ones). An address alone isn't enough, because schools in a shared building have the same one. Spot-check two that are easy to miss: East Harlem Pride (TYWLS 03M610 with Central Park East, Frederick Douglass Academy II, Heritage and Park East) and John Jay Campus (with Millennium High School, 02M418, in Manhattan).
 
 ### 3. School Quality Snapshot (when a new year appears at [tools.nycenet.edu/snapshot](https://tools.nycenet.edu/snapshot/))
 
@@ -274,7 +275,7 @@ Look over a few school cards and pages, bump `VERSION`, add a `CHANGELOG.md` ent
 - [Local Law 72 admissions report](https://infohub.nyced.org/reports/government-reports), NYC DOE (fall 2025 admissions, School tab; refresh with `python3 scripts/fetch_data.py prek <file.xlsx>`)
 - [School Quality Snapshot 2024–25](https://tools.nycenet.edu/snapshot/), NYC DOE (ratings, test scores, graduation rates, programs and current school names)
 - [Centerline (CSCL)](https://data.cityofnewyork.us/City-Government/Centerline/inkn-q76z), NYC Open Data (major streets)
-- [PSAL](https://www.psal.org/profiles/profile.aspx), the Public Schools Athletic League: each campus's "Campus Schools List" (refresh with `scripts/browser/psal.js`, see "Refresh the data")
+- [PSAL](https://www.psal.org/profiles/profile.aspx), the Public Schools Athletic League: each school's teams and "Campus Schools List" (refresh with `scripts/browser/psal.js`, see "Refresh the data")
 - [Parks Properties](https://data.cityofnewyork.us/d/enfh-gkve), NYC Parks via NYC Open Data (park outlines; refresh with `python3 scripts/fetch_data.py parks`)
 
 Zones change from year to year. Before applying, always confirm a specific address on [schoolsearch.schools.nyc](https://schoolsearch.schools.nyc/).

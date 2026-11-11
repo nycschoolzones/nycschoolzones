@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- Charter high schools now have a Sports section too, with their PSAL teams for 2026–27 from the PSAL's own lists, since charter schools aren't in the MySchools directory. That covers 47 charter high schools, like KIPP NYC College Prep and the Uncommon high schools. They also count in Team count and Teams on the map, where they used to show as no data. Charter schools the PSAL lists no teams for still show as no data.
+
 ## 1.76.0 (2026-11-11)
 
 ### Added
