@@ -162,7 +162,7 @@ aside>*{flex-shrink:0}
 .adm td:last-child{color:var(--muted);font-weight:500;min-width:3.2em}
 .adm .adm-note{margin:2px 0 0;font-size:.8rem}
 .ex{font-size:.85rem}.ex p{margin:2px 0 0}.ex-src{color:var(--muted);font-size:.75rem}
-.spt{border-collapse:collapse;margin:2px 0 8px}.spt td{padding:2px 14px 2px 0;vertical-align:top}.spt td+td{color:var(--muted);padding-right:0}
+.spt{border-collapse:collapse;margin:2px 0 8px}.spt td{padding:2px 14px 2px 0;vertical-align:top}.spt td+td{color:var(--muted);padding-right:0}.spt b.pick{color:var(--fg)}
 .ap{font-size:.85rem}.ap ul{columns:2 10rem;column-gap:16px;margin:2px 0 8px;padding-left:1.1em}.ap li{break-inside:avoid;padding:1px 0}
 .jump{margin:4px 0 0;font-size:.85rem}.jump a{color:var(--hl)}.sec{scroll-margin-top:8px}
 .adm-p{font-weight:600;margin-top:8px}.adm-p small{font-weight:400;color:var(--muted)}
@@ -630,6 +630,11 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
         <input type="radio" name="metric" id="m-ap" value="ap"><label for="m-ap">AP count</label>
         <input type="radio" name="metric" id="m-apc" value="apc"><label for="m-apc">AP courses</label>
     </div>
+    <div class="grp-h" id="g-sp" hidden>Sports</div>
+    <div class="seg two" data-g="sp" role="radiogroup" aria-labelledby="g-sp" hidden>
+        <input type="radio" name="metric" id="m-spn" value="spn"><label for="m-spn">Team count</label>
+        <input type="radio" name="metric" id="m-spt" value="spt"><label for="m-spt">Teams</label>
+    </div>
     </div>
   </div>
   <div id="map-legend">
@@ -751,7 +756,7 @@ async function loadLevel(lv){if(LV[lv])return true;if(!ASSETS[lv])return false;
   try{const x=await getAsset(lv);
     Object.entries(x.schools).forEach(([d,s])=>{S[d]=Object.assign({},s,S[d]||{})});snapNames(Object.keys(x.schools));
     if(x.O)Object.assign(O,x.O);if(x.Q)Object.assign(Q,x.Q);
-    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
+    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],SPT:x.SPT||{},SPC:x.SPC||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
   catch(e){alertLoad();return false}finally{document.body.style.cursor=''}}
 function alertLoad(){const m=document.getElementById('llmsg');if(m){m.textContent='Couldn’t load that part of the map. Check your connection and try again.';m.hidden=false}}
 const RK={ip:2,ss:3,rf:4},RNAME={ip:'Instruction and Performance',ss:'Safety and School Climate',rf:'Relationships with Families'};
@@ -762,33 +767,43 @@ const X=D.X||{},XN=D.XN||{},DM=Object.assign({},D.DM,MSD&&MSD.DM,HSD&&HSD.DM),DM
 const CS=D.CS||{},G=D.G||{};  // G: this year's grades from LCGMS, for every district school (build.py add_grades)
 const IEP_BINS=[[17,'#e0f1ee'],[22,'#a6dbd0'],[27,'#5fb8a8'],[32,'#2a8a7e'],[Infinity,'#0f5a54']];
 const iepColor=v=>IEP_BINS.find(b=>v<b[0])[1];
-// high school AP classes (MySchools, LV.hs.AP / APC, build.py ap_courses). ap ("AP count"): how many the school lists
-// (AP_BINS: [up to, color, legend label], a yellow -> blue spectrum, no red: more isn't a rating; none is --off).
-// Charters aren't in MySchools: -1 when their Snapshot shows AP classes (LV.hs.APCH, build.py snapshot_has_ap), which
-// courses unknown; else null (no data). apc ("AP courses"): the courses picked (apSet, catalog indexes), colored by
-// how many of them the school offers (apcBins: all of them darkest, then fewer); charters are no data there.
-// Shared zones show the school with the most.
+// high school AP classes and PSAL teams, each two ways: a count, and the ones you pick (KINDS, from the MySchools
+// directory). ap ("AP count"): how many AP classes the school lists (AP_BINS: [up to, color, legend label], a yellow ->
+// blue spectrum, no red: more isn't a rating; none is --off). Charters aren't in MySchools: -1 when their Snapshot shows
+// AP classes (LV.hs.APCH, build.py snapshot_has_ap), which courses unknown; else null (no data). spn ("Team count"): how
+// many PSAL teams, boys', girls' and coed (SP_BINS); charters are no data. apc ("AP courses") and spt ("Teams"): the
+// ones picked (K.set, catalog indexes), colored by how many of them the school has (pickBins: all of them darkest,
+// then fewer); charters are no data there. Shared zones show the school with the most.
 const AP_BINS=[[1,'var(--off)','None'],[5,'#f2d35b','1–4'],[10,'#8cc26a','5–9'],[15,'#2b9c8e','10–14'],[Infinity,'#2c5aa0','15 or more']],AP_YES='#2c5aa0',AP_CH='#a26bbf';
-let apSet=[];
-const apNames=()=>LV.hs&&LV.hs.APC?LV.hs.APC.flatMap(a=>a[1]):[];
+const SP_BINS=[[1,'var(--off)','None'],[7,'#f2d35b','1–6'],[13,'#8cc26a','7–12'],[20,'#2b9c8e','13–19'],[Infinity,'#2c5aa0','20 or more']];
+// each kind: its count and pick metrics; its catalog LV.hs[cat] ([[group, [names]]], an index counts through the groups
+// in order: build.py ap_courses, psal_teams) and each school's LV.hs[of] ({dbn: [indexes]}); the link's parameter
+// (?ap=, ?sp=); the picked set; how one item reads on its own (nm: "Calculus BC", "Girls Soccer"); and its words
+const KINDS={
+  ap:{count:'ap',pick:'apc',cat:'APC',of:'AP',url:'ap',set:[],bins:AP_BINS,nm:(g,n)=>n,title:'AP courses',btn:'Courses',one:'course',many:'courses',has:['offers','offer'],pre:'AP '},
+  sp:{count:'spn',pick:'spt',cat:'SPC',of:'SPT',url:'sp',set:[],bins:SP_BINS,nm:(g,n)=>g+' '+n,title:'PSAL teams',btn:'Teams',one:'team',many:'teams',has:['has','have'],pre:''}};
+const kindOf=m=>m==='ap'||m==='apc'?KINDS.ap:m==='spn'||m==='spt'?KINDS.sp:null;
+const isPick=()=>metric==='apc'||metric==='spt';
+const kNames=K=>LV.hs&&LV.hs[K.cat]?LV.hs[K.cat].flatMap(([g,l])=>l.map(n=>K.nm(g,n))):[];
+const apNames=()=>kNames(KINDS.ap);
 const apCharter=d=>!!(LV.hs&&LV.hs.APCH&&LV.hs.APCH.includes(d));
-function apCount(d){const lp=LV.hs;if(!lp)return null;const a=lp.AP&&lp.AP[d];return a?a.length:lp.P&&lp.P[d]?0:apCharter(d)?-1:null}
-function apVal(d){const n=apCount(d);if(metric!=='apc')return n;if(n==null||n===-1||!apSet.length)return null;const a=LV.hs.AP[d]||[];return apSet.filter(i=>a.includes(i)).length}
-// [label, at least this many of the picked courses, color]: one band per count up to 4 picks, then all / half or more / fewer
-const AP_PART=[AP_BINS[1][1],AP_BINS[2][1],AP_BINS[3][1]];  // the AP count spectrum: yellow (few of them), green, teal; all of them is AP_YES blue
-function apcBins(){const N=apSet.length;if(N<2)return [[N?'Offers it':'',1,AP_YES]];
+function kCount(K,d){const lp=LV.hs;if(!lp)return null;const a=lp[K.of]&&lp[K.of][d];return a?a.length:lp.P&&lp.P[d]?0:K===KINDS.ap&&apCharter(d)?-1:null}
+function kVal(d){const K=kindOf(metric),n=kCount(K,d);if(metric!==K.pick)return n;if(n==null||n===-1||!K.set.length)return null;const a=LV.hs[K.of][d]||[];return K.set.filter(i=>a.includes(i)).length}
+// [label, at least this many of the N picked, color]: one band per count up to 4 picks, then all / half or more / fewer
+const AP_PART=[AP_BINS[1][1],AP_BINS[2][1],AP_BINS[3][1]];  // the count spectrum: yellow (few of them), green, teal; all of them is AP_YES blue
+function pickBins(N,K){if(N<2)return [[N?(K.has[0][0].toUpperCase()+K.has[0].slice(1)+' it'):'',1,AP_YES]];
   if(N<=4){const P=N===2?[AP_PART[2]]:N===3?[AP_PART[0],AP_PART[2]]:AP_PART;return [['All '+N,N,AP_YES]].concat(P.map((c,i)=>[(N-1-i)+' of '+N,N-1-i,P[P.length-1-i]]))}
   return [['All '+N,N,AP_YES],['Half or more',Math.ceil(N/2),AP_PART[2]],['Fewer than half',1,AP_PART[0]]]}
-function zoneAp(dbns){const v=dbns.map(apVal).filter(x=>x!=null);return v.length?Math.max(...v):null}
-const apColor=v=>metric==='apc'?(v?apcBins().find(b=>v>=b[1])[2]:'var(--off)'):v===-1?AP_CH:AP_BINS.find(b=>v<b[0])[1];
-const apPickNames=()=>{const n=apNames();return apSet.map(i=>n[i])};
-// yes-or-no colorings (G&T, dual language, one AP course): labels and tooltips name only the schools that have it
-const isYes=()=>isProg(metric)||metric==='apc'&&apSet.length===1;
-// a tooltip's value: as fmtVal, and with two or more AP courses picked, which of them the school has and is missing,
-// each list up to AP_KEY_NAMES courses (then "and N more"), on lines of their own
-function tipVal(d,v){const t=fmtVal(v);if(metric!=='apc'||apSet.length<2||!v)return t;const a=LV.hs.AP[d]||[],n=apNames();
-  const list=ix=>ix.slice(0,ix.length>AP_KEY_NAMES?AP_KEY_NAMES-1:ix.length).map(i=>esc(n[i])).join(', ')+(ix.length>AP_KEY_NAMES?', and '+(ix.length-AP_KEY_NAMES+1)+' more':'');
-  const has=apSet.filter(i=>a.includes(i)),miss=apSet.filter(i=>!a.includes(i));
+function zoneK(dbns){const v=dbns.map(kVal).filter(x=>x!=null);return v.length?Math.max(...v):null}
+const kColor=v=>{const K=kindOf(metric);return metric===K.pick?(v?pickBins(K.set.length,K).find(b=>v>=b[1])[2]:'var(--off)'):v===-1?AP_CH:K.bins.find(b=>v<b[0])[1]};
+const pickNames=K=>{const n=kNames(K);return K.set.map(i=>n[i])};
+// yes-or-no colorings (G&T, dual language, one AP course or team): labels and tooltips name only the schools that have it
+const isYes=()=>isProg(metric)||isPick()&&kindOf(metric).set.length===1;
+// a tooltip's value: as fmtVal, and with two or more AP courses or teams picked, which of them the school has and is
+// missing, each list up to PICK_KEY_NAMES (then "and N more"), on lines of their own
+function tipVal(d,v){const t=fmtVal(v);if(!isPick()||!v)return t;const K=kindOf(metric);if(K.set.length<2)return t;const a=LV.hs[K.of][d]||[],n=kNames(K);
+  const list=ix=>ix.slice(0,ix.length>PICK_KEY_NAMES?PICK_KEY_NAMES-1:ix.length).map(i=>esc(n[i])).join(', ')+(ix.length>PICK_KEY_NAMES?', and '+(ix.length-PICK_KEY_NAMES+1)+' more':'');
+  const has=K.set.filter(i=>a.includes(i)),miss=K.set.filter(i=>!a.includes(i));
   return t+'<br><span class="tip-ap"><b>Has:</b> '+list(has)+(miss.length?'<br><b>Missing:</b> '+list(miss):'')+'</span>'}
 const hasGT=d=>!!(X[d]&&X[d][8]&&X[d][8].includes('G&T'));
 const dualLang=d=>X[d]&&X[d][4]||null;
@@ -811,7 +826,7 @@ function scrCat(d){const P=((LV[level]&&LV[level].P||{})[d]||[]).filter(p=>p[1]!
   const n=P.filter(p=>SCR_CODES.includes(p[1])).length;return n?n===P.length?2:1:0}
 function zoneScr(dbns){const v=dbns.map(scrCat).filter(x=>x!=null);return v.length?Math.max(...v):null}
 const progWord=m=>m==='gt'?'G&T':'dual language';
-const progTxt=d=>metric==='apc'?'offers AP '+apPickNames()[0]:metric==='dl'&&dualLang(d)?dualLang(d)+' dual language':'has '+progWord(metric);
+const progTxt=d=>isPick()?(K=>K.has[0]+' '+K.pre+pickNames(K)[0])(kindOf(metric)):metric==='dl'&&dualLang(d)?dualLang(d)+' dual language':'has '+progWord(metric);
 // pre-K and 3-K (Local Law 72): 0 neither, 1 pre-K only (or 3-K only), 2 both; a zone with several schools shows the most
 const PK_COL=['var(--off)','#f4b6cf','#9c3f8f'],PK_LAB=['No pre-K or 3-K','Pre-K only','Pre-K and 3-K'];
 function pkCat(d){const p=PK[d];if(!p)return null;return (p[0]?1:0)+(p[2]?1:0)}
@@ -851,7 +866,7 @@ function chBlock(o){const x=CHX[o.d]||[];
     ' Apply through the <a href="'+CH_APPLY+'" target="_blank" rel="noopener">common charter application ↗</a> or on the school’s own site, by April 1 for most schools. It’s separate from MySchools: applying doesn’t affect your MySchools application.'+
     (x[3]?' Formerly '+esc(x[3])+'.':'')+'</p></details>'}
 regNZ(NZ_ES);
-[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
+[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],SPT:x.SPT||{},SPC:x.SPC||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
   if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});regNZ(LV[lv].NZ)});
 function nzDistricts(o){const ds=o.pd.length?o.pd:[+o.d.slice(0,2)];return ds}
 function nzPriority(o){if(o.ch)return 'Admission is by lottery only. Charter schools can’t screen: no tests, grades, interviews or auditions. Lottery priority usually goes to siblings, then to families who live in District '+o.pd[0]+'.';if(o.hs){if(o.gt)return o.pr.some(p=>p[1]==='T')?'Admission is by SHSAT score only. Any NYC 8th or 9th grader can take the test.':'Admission is by audition. Students from anywhere in NYC can apply.';return o.pz||'Open to students from anywhere in NYC.'}if(o.gt)return 'Open to children found eligible for G&T, from anywhere in NYC.'+(o.pd.length?' Priority to eligible children in Districts '+o.pd.slice(0,-1).join(', ')+' and '+o.pd[o.pd.length-1]+'.':'');const ds=nzDistricts(o),t=ds.length>1?'Districts '+ds.slice(0,-1).join(', ')+' and '+ds[ds.length-1]:'District '+ds[0];
@@ -1038,9 +1053,9 @@ const renderer=L.canvas({padding:.3,tolerance:2});
 function short(d){const s=S[d];if(!s)return 'School '+d;return s.n}
 // one school's value under the current coloring (null if none)
 function schoolVal(d){if(isRate(metric))return zoneRating([d],metric);if(metric==='iep')return zoneIep([d]);
-  if(metric==='pk')return pkCat(d);if(metric==='scr')return scrCat(d);if(metric==='ap'||metric==='apc')return zoneAp([d]);if(isOut(metric))return zoneOut([d],metric);if(isProg(metric)){const v=zoneProg([d],metric);return v==null?null:v?1:0}if(metric==='none')return null;return pct([d],metric)}
+  if(metric==='pk')return pkCat(d);if(metric==='scr')return scrCat(d);if(kindOf(metric))return zoneK([d]);if(isOut(metric))return zoneOut([d],metric);if(isProg(metric)){const v=zoneProg([d],metric);return v==null?null:v?1:0}if(metric==='none')return null;return pct([d],metric)}
 function fmtVal(v,short){if(v==null)return '–';if(isRate(metric))return metric==='comp'||!Number.isInteger(v)?v.toFixed(1):String(v);  // numbers, never the DOE's words
-  if(metric==='pk')return ['no pre-K','pre-K','pre-K + 3-K'][v];if(metric==='scr')return SCR_LAB[v];if(isOut(metric)&&OUT[metric].abs)return String(Math.round(v));if(metric==='iep')return Math.round(v)+'%';if(metric==='ap')return v===-1?'offers AP':v?v+' AP':'no AP';if(metric==='apc')return apSet.length===1?(v?'yes':'no'):v===apSet.length?'all '+v:v+' of '+apSet.length;if(isProg(metric))return v?'yes':'no';return Math.round(v)+'%'}
+  if(metric==='pk')return ['no pre-K','pre-K','pre-K + 3-K'][v];if(metric==='scr')return SCR_LAB[v];if(isOut(metric)&&OUT[metric].abs)return String(Math.round(v));if(metric==='iep')return Math.round(v)+'%';if(metric==='ap')return v===-1?'offers AP':v?v+' AP':'no AP';if(metric==='spn')return v?v+' team'+(v>1?'s':''):'no teams';if(isPick()){const N=kindOf(metric).set.length;return N===1?(v?'yes':'no'):v===N?'all '+v:v+' of '+N}if(isProg(metric))return v?'yes':'no';return Math.round(v)+'%'}
 function distTag(p){const d=p.dist&&String(p.dist).split(',').map(Number).filter(Boolean);return d&&d.length?'District '+d.join(' / '):''}
 const NONRES=/park|cemeter|golf|airport|island|beach|zoo|garden|reservoir/i;
 function noZoneHere(p){return !p.dbns.length&&!NONRES.test(p.remarks||'')}
@@ -1072,7 +1087,7 @@ const isOut=m=>m in OUT;
 const outColor=(m,v)=>rampColor(v,OUT[m].stops);
 function zoneOut(dbns,m){const v=dbns.map(d=>outVal(d,m)).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null}
 function rgb(c){return 'rgb('+c.map(Math.round).join(',')+')'}
-function fillFor(f){const p=f.properties;if(!p.dbns.length)return css('--land');if(metric==='none')return css('--z'+p.c);if(metric==='pk'){const v=zonePk(p.dbns);return v==null?css('--nodata'):v?PK_COL[v]:css('--off')}if(metric==='scr'){const v=zoneScr(p.dbns);return v==null?css('--nodata'):v?SCR_COL[v]:css('--off')}if(metric==='dl'){const k=zoneDl(p.dbns);return k==null?css('--nodata'):k?dlColor(k):css('--off')}if(metric==='ap'||metric==='apc'){const v=zoneAp(p.dbns);return v==null?css('--nodata'):apColor(v).startsWith('var(')?css('--off'):apColor(v)}if(isProg(metric)){const h=zoneProg(p.dbns,metric);return h==null?css('--nodata'):h?PROG_COL:css('--off')}if(metric==='iep'){const v=zoneIep(p.dbns);return v==null?css('--nodata'):iepColor(v)}if(isOut(metric)){const v=zoneOut(p.dbns,metric);return v==null?css('--nodata'):outColor(metric,v)}if(isRate(metric)){const r=zoneRating(p.dbns,metric);return r==null?css('--nodata'):rateColor(r)}const v=pct(p.dbns,metric);return v==null?css('--nodata'):scoreColor(v)}
+function fillFor(f){const p=f.properties;if(!p.dbns.length)return css('--land');if(metric==='none')return css('--z'+p.c);if(metric==='pk'){const v=zonePk(p.dbns);return v==null?css('--nodata'):v?PK_COL[v]:css('--off')}if(metric==='scr'){const v=zoneScr(p.dbns);return v==null?css('--nodata'):v?SCR_COL[v]:css('--off')}if(metric==='dl'){const k=zoneDl(p.dbns);return k==null?css('--nodata'):k?dlColor(k):css('--off')}if(kindOf(metric)){const v=zoneK(p.dbns);return v==null?css('--nodata'):kColor(v).startsWith('var(')?css('--off'):kColor(v)}if(isProg(metric)){const h=zoneProg(p.dbns,metric);return h==null?css('--nodata'):h?PROG_COL:css('--off')}if(metric==='iep'){const v=zoneIep(p.dbns);return v==null?css('--nodata'):iepColor(v)}if(isOut(metric)){const v=zoneOut(p.dbns,metric);return v==null?css('--nodata'):outColor(metric,v)}if(isRate(metric)){const r=zoneRating(p.dbns,metric);return r==null?css('--nodata'):rateColor(r)}const v=pct(p.dbns,metric);return v==null?css('--nodata'):scoreColor(v)}
 function style(f,sel){const a=zoneAlpha();const empty=!f.properties.dbns.length;
   if(!LAY.zones)return{renderer,stroke:false,fillColor:'#000',fillOpacity:0};
   if(f.properties.dbns.length>1&&metric!=='none')return{renderer,stroke:false,fillColor:fillFor(f),fillOpacity:0};  // drawn as stripes
@@ -1430,7 +1445,7 @@ function demoSec(d){const m=DM[d]&&DM[d][0]?DM[d]:null,x=X[d]||[],c=DMC,k=DEMO_G
 // school card: sections that open and close. Each viewer's choice is remembered in this browser; the Color by
 // metric also opens the section that shows it (without changing what's remembered). The non-zoned and charter
 // lists on zone and school cards (opts-nz, opts-ch) are remembered the same way.
-const SEC_KEY='nsz-card-v1',SEC={},SEC_FOR={scr:'adm-',ip:'rate',ss:'rate',rf:'rate',ela:'tests',math:'tests',coll:'out',ccr:'out',sat:'out',iep:'demo',ap:'ap',apc:'ap'};
+const SEC_KEY='nsz-card-v1',SEC={},SEC_FOR={scr:'adm-',ip:'rate',ss:'rate',rf:'rate',ela:'tests',math:'tests',coll:'out',ccr:'out',sat:'out',iep:'demo',ap:'ap',apc:'ap',spn:'sp',spt:'sp'};
 try{Object.assign(SEC,JSON.parse(localStorage.getItem(SEC_KEY)||'{}'))}catch(e){}
 // a section you opened or closed stays that way; one you haven't touched opens when Color by shows its measure (SEC_FOR)
 function sec(k,sum,body){return '<details class="sec" data-sec="'+k+'"'+((k in SEC?SEC[k]:SEC_FOR[metric]&&k.startsWith(SEC_FOR[metric]))?' open':'')+'><summary>'+sum+'</summary><div class="sec-b">'+body+'</div></details>'}
@@ -1472,13 +1487,17 @@ function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)r
   return sec('ex','<span class="st">Classes'+(level==='hs'?'':', sports')+' &amp; activities<small>'+sum+'</small></span>',body+'<small class="ex-src">As the school lists them on MySchools.</small>')}
 // high school sports (MySchools; LV.hs.SP: one list per group as indexes into SPV; SPG: [heading, one, many], the
 // PSAL groups marked by one 'PSAL team', build.py SP_GROUPS): the PSAL team count up top; inside, a sport to a row
-// with who plays it ("Basketball  Boys · Girls"), then other sports and teams as the school writes them
+// with who plays it ("Basketball  Boys · Girls"), then other sports and teams as the school writes them. With teams
+// picked (Color by Teams), the school's picked ones get a ✓ and a "Missing:" line lists the rest
 function spSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.SP&&lp.SP[d];if(!x)return '';
-  const by={},other=[];let n=0;
+  const K=KINDS.sp,pick=metric==='spt'?K.set:[],nm=kNames(K),by={},other=[];let n=0;
   x.forEach((l,i)=>{const g=lp.SPG[i];if(!g)return;if(g[1]==='PSAL team'){n+=l.length;l.forEach(k=>{const s=lp.SPV[k];(by[s]=by[s]||[]).push(g[0])})}else other.push(...l.map(k=>lp.SPV[k]))});
   const sports=Object.keys(by).sort((a,b)=>a.localeCompare(b)),no=other.filter(s=>s.length<=80).length;
-  const sum=[n?n+' PSAL team'+(n>1?'s':''):'',no?no+' other sport'+(no>1?'s':''):''].filter(Boolean).join(' · ');
-  const body=(sports.length?'<div class="ex"><div class="adm-h">PSAL teams · '+n+'</div><table class="spt">'+sports.map(s=>'<tr><td>'+esc(s)+'</td><td>'+by[s].join(' · ')+'</td></tr>').join('')+'</table></div>':'')
+  const isPicked=(g,s)=>pick.includes(nm.indexOf(g+' '+s)),has=new Set(sports.flatMap(s=>by[s].map(g=>g+' '+s)));
+  const mine=pick.length?pick.filter(k=>has.has(nm[k])).length:0,miss=pick.filter(k=>!has.has(nm[k]));
+  const sum=[n?n+' PSAL team'+(n>1?'s':'')+(pick.length?' · '+mine+' of your '+pick.length:''):'',no?no+' other sport'+(no>1?'s':''):''].filter(Boolean).join(' · ');
+  const body=(miss.length?'<p class="ap-miss"><b>Missing:</b> '+miss.map(k=>esc(nm[k])).join(', ')+'</p>':'')
+    +(sports.length?'<div class="ex"><div class="adm-h">PSAL teams · '+n+'</div><table class="spt">'+sports.map(s=>'<tr><td>'+esc(s)+'</td><td>'+by[s].map(g=>isPicked(g,s)?'<b class="pick">✓ '+g+'</b>':g).join(' · ')+'</td></tr>').join('')+'</table></div>':'')
     +(other.length?'<div class="ex"><div class="adm-h">Other sports and teams</div><p>'+esc(other.join(', '))+'</p></div>':'');
   return sec('sp','<span class="st">Sports<small>'+sum+'</small></span>'+(n?'<span class="sa">'+n+'</span>':''),body+'<small class="ex-src">As the school lists them on MySchools. PSAL is the public schools’ league; some teams are shared by the schools in one building.</small>')}
 // high school AP classes (MySchools; LV.hs.AP: indexes into the catalog LV.hs.APC, [[subject area, [names]]] counted
@@ -1487,11 +1506,11 @@ function apSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.AP&&lp.AP[d];
   if(!x&&level==='hs'&&apCharter(d)){const q=Q[d]||[];
     return sec('ap','<span class="st">AP classes<small>Courses not listed</small></span>','<div class="ex"><p>'+(q[3]?q[3]+'% of students took an AP course. ':'')+(q[5]&&q[5].length?'Seniors passed AP exams in '+esc(q[5].join(', '))+'. ':'')+(q[3]||q[5]&&q[5].length?'':'The school’s students took AP classes or exams. ')+'Charter schools aren’t in the MySchools directory, so the courses aren’t listed here: ask the school or see its website.</p></div><small class="ex-src">__SNAPSHOT__ School Quality Snapshot.</small>')}
   if(!x)return '';
-  const has=new Set(x),pick=metric==='apc'?new Set(apSet):new Set();let i=0;
+  const has=new Set(x),pick=metric==='apc'?new Set(KINDS.ap.set):new Set();let i=0;
   const body=lp.APC.map(([a,l])=>{const got=l.map(n=>[n,i++]).filter(([,k])=>has.has(k));return got.length?'<div class="ap"><div class="adm-h">'+esc(a)+' · '+got.length+'</div><ul>'+got.map(([n,k])=>'<li'+(pick.has(k)?' class="pick"':'')+'>'+esc(n)+'</li>').join('')+'</ul></div>':''}).join('');
   const mine=pick.size?' · '+x.filter(k=>pick.has(k)).length+' of your '+pick.size:'';
   // AP courses: your picked courses the school doesn't list, first (the tooltip's "Missing:", for phones too)
-  const miss=apSet.filter(k=>pick.has(k)&&!has.has(k)),nm=apNames();
+  const miss=KINDS.ap.set.filter(k=>pick.has(k)&&!has.has(k)),nm=apNames();
   const missing=miss.length?'<p class="ap-miss"><b>Missing:</b> '+miss.map(k=>esc(nm[k])).join(', ')+'</p>':'';
   return sec('ap','<span class="st">AP classes<small>'+x.length+' AP class'+(x.length>1?'es':'')+(mine||', by subject')+'</small></span><span class="sa">'+x.length+'</span>',missing+body+'<small class="ex-src">As the school lists them on MySchools, __MYSCHOOLS__, by the College Board’s subject areas. Ask the school which run every year.</small>')}
 // specialized high schools: last fall's SHSAT cutoff up top
@@ -1684,79 +1703,81 @@ document.getElementById('llf').addEventListener('submit',async e=>{e.preventDefa
   catch(err){geoFail()}});
 
 
-const METRIC_NAME={comp:'Overall rating',ip:'Instruction rating',ss:'Safety rating',rf:'Families rating',both:'ELA + Math scores',scr:'Screened programs',ela:'ELA scores',math:'Math scores',pk:'Pre-K & 3-K',grad:'Graduation rate',coll:'College & career',ccr:'College readiness',sat:'Average SAT',gt:'G&T programs',dl:'Dual language',iep:'Special ed (IEP share)',ap:'AP class count',apc:'AP courses'};
-// (AP courses: the Courses button beside Color by says how many are picked)
+const METRIC_NAME={comp:'Overall rating',ip:'Instruction rating',ss:'Safety rating',rf:'Families rating',both:'ELA + Math scores',scr:'Screened programs',ela:'ELA scores',math:'Math scores',pk:'Pre-K & 3-K',grad:'Graduation rate',coll:'College & career',ccr:'College readiness',sat:'Average SAT',gt:'G&T programs',dl:'Dual language',iep:'Special ed (IEP share)',ap:'AP class count',apc:'AP courses',spn:'PSAL team count',spt:'PSAL teams'};
+// (AP courses and Teams: the button beside Color by says how many are picked)
 function syncName(){const n=METRIC_NAME[metric]||'';['leg-title','color-name'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=n})}
 document.querySelectorAll('#search-sec [role=tab]').forEach(b=>b.addEventListener('click',()=>{const s=b.dataset.s;
   document.querySelectorAll('#search-sec [role=tab]').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
   document.getElementById('addr-sec').hidden=s!=='addr';document.getElementById('find-sec').hidden=s!=='school';
   document.getElementById('addr-res').hidden=true;document.getElementById('res').hidden=true;document.getElementById('llmsg').hidden=true;
   document.getElementById(s==='addr'?'ll':'q').focus()}));
-// AP classes: the count key, or the picked courses (a checklist in its own pop-up, #ap-pop / #ap-boxes, filled once the
-// high school data is in, each course with how many schools list it), the "how many of them" key and hints
+// AP classes and PSAL teams (KINDS): the count key, or the picked ones (a checklist in its own pop-up, #ap-pop /
+// #ap-boxes, built for the kind on show once the high school data is in, each item with how many schools list it),
+// the "how many of them" key and hints. The ap-* elements serve both kinds.
 function apSchools(){return Object.keys(LV.hs.P||{})}
-function apBoxes(){const box=document.getElementById('ap-boxes');if(box.childElementCount||!LV.hs||!LV.hs.APC)return;
-  const n={};apSchools().forEach(d=>(LV.hs.AP[d]||[]).forEach(i=>{n[i]=(n[i]||0)+1}));let i=0;
-  box.innerHTML=LV.hs.APC.map(([a,l])=>'<div class="ap-grp"><div class="grp-h">'+esc(a)+'</div><div class="layers">'+l.map(nm=>{const k=i++;
-    return '<label class="chk"><input type="checkbox" value="'+k+'"> <span>'+esc(nm)+'</span><small title="High schools that list it">'+(n[k]||0)+'</small></label>'}).join('')+'</div></div>').join('');
-  box.addEventListener('change',e=>{const b=e.target;if(b.type!=='checkbox')return;const k=+b.value;
-    apSet=b.checked?apSet.concat([k]).sort((x,y)=>x-y):apSet.filter(x=>x!==k);apChanged()})}
-function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec()}
-// the open card's AP section marks the picked courses
-function refreshApSec(){const o=card.querySelector('.sec[data-sec="ap"]'),dd=card.querySelector('.school[data-d]');if(!o||!dd)return;
-  const t=document.createElement('div');t.innerHTML=apSec(dd.dataset.d);const nw=t.firstElementChild;if(nw){nw.open=o.open;o.replaceWith(nw)}}
-// the AP courses key: [summary line, swatches] for N picked courses (names), full of them offering all
+function pickBoxes(K){const box=document.getElementById('ap-boxes');if(box.dataset.k===K.url||!LV.hs||!LV.hs[K.cat])return;box.dataset.k=K.url;
+  const n={};apSchools().forEach(d=>((LV.hs[K.of]||{})[d]||[]).forEach(i=>{n[i]=(n[i]||0)+1}));let i=0;
+  box.innerHTML=LV.hs[K.cat].map(([a,l])=>'<div class="ap-grp"><div class="grp-h">'+esc(a)+'</div><div class="layers">'+l.map(nm=>{const k=i++;
+    return '<label class="chk"><input type="checkbox" value="'+k+'"> <span>'+esc(nm)+'</span><small title="High schools that list it">'+(n[k]||0)+'</small></label>'}).join('')+'</div></div>').join('')}
+document.getElementById('ap-boxes').addEventListener('change',e=>{const b=e.target,K=kindOf(metric);if(b.type!=='checkbox'||!K)return;const k=+b.value;
+  K.set=b.checked?K.set.concat([k]).sort((x,y)=>x-y):K.set.filter(x=>x!==k);pickChanged()});
+function pickChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshPickSecs()}
+// the open card's AP classes and Sports sections mark the picked courses and teams
+function refreshPickSecs(){const dd=card.querySelector('.school[data-d]');if(!dd)return;
+  [['ap',apSec],['sp',spSec]].forEach(([k,f])=>{const o=card.querySelector('.sec[data-sec="'+k+'"]');if(!o)return;
+    const t=document.createElement('div');t.innerHTML=f(dd.dataset.d);const nw=t.firstElementChild;if(nw){nw.open=o.open;o.replaceWith(nw)}})}
 // every high school on the map: the MySchools directory and the charter schools
 function apAll(){return [...new Set(Object.keys(LV.hs.P||{}).concat((LV.hs.NZ||[]).map(o=>o.d)))]}  // NZ: the markers, charters included
 const apSw=(col,label,k)=>'<span><i'+(col==='na'?' class="na"':col.startsWith('var(')?' class="off"':' style="background:'+col+'"')+'></i>'+label+(k!=null?' <span class="ap-k">('+k.toLocaleString()+')</span>':'')+'</span>';
-// the AP courses key: [the picked courses, swatches with how many schools in each] for N picked (names); vals: each
-// school's apVal, or null to leave the counts out. Up to AP_KEY_NAMES courses by name, then "and N more".
-const AP_KEY_NAMES=6;
-function apKey(N,names,vals){const n=apSet;apSet=Array.from({length:N},(_,i)=>i);const bins=N?apcBins():[];apSet=n;  // apcBins reads apSet's length
+// the pick key: [the picked ones, swatches with how many schools in each] for N picked (names) of kind K; vals: each
+// school's kVal, or null to leave the counts out. Up to PICK_KEY_NAMES by name, then "and N more".
+const PICK_KEY_NAMES=6;
+function pickKey(K,N,names,vals){const bins=N?pickBins(N,K):[];
   const cnt=(lo,hi)=>vals?vals.filter(v=>v!=null&&v>=lo&&v<hi).length:null;
-  const shown=names.slice(0,N>AP_KEY_NAMES?AP_KEY_NAMES-1:N).map(esc).join(', ')+(N>AP_KEY_NAMES?', and '+(N-AP_KEY_NAMES+1)+' more':'');
-  return [N?(N>1?'Your '+N+' courses: ':'Your course: ')+'<b>'+shown+'</b>':'No courses picked yet: tap <b>Courses</b>.',
-    N?bins.map((b,i)=>apSw(b[2],b[0],cnt(b[1],i?bins[i-1][1]:Infinity))).join('')+apSw('var(--off)',N>1?'None':'Doesn’t',cnt(0,1))+apSw('na','No data',vals?vals.filter(v=>v==null).length:null):'']}
-function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementById('leg-ap');la.hidden=!ap;document.getElementById('ap-btn').hidden=metric!=='apc';
-  if(metric!=='apc')setApPop(false);if(!ap||!LV.hs||!LV.hs.APC)return;apBoxes();
-  document.querySelectorAll('#ap-boxes input').forEach(b=>{b.checked=apSet.includes(+b.value)});
-  const all=apSchools(),ns=all.map(apCount).filter(n=>n!=null&&n>=0).sort((a,b)=>a-b),N=apSet.length;
-  const sw=b=>'<span><i'+(b[1].startsWith('var(')?' class="off"':' style="background:'+b[1]+'"')+'></i>'+b[2]+'</span>';
+  const shown=names.slice(0,N>PICK_KEY_NAMES?PICK_KEY_NAMES-1:N).map(esc).join(', ')+(N>PICK_KEY_NAMES?', and '+(N-PICK_KEY_NAMES+1)+' more':'');
+  return [N?(N>1?'Your '+N+' '+K.many+': ':'Your '+K.one+': ')+'<b>'+shown+'</b>':'No '+K.many+' picked yet: tap <b>'+K.btn+'</b>.',
+    N?bins.map((b,i)=>apSw(b[2],b[0],cnt(b[1],i?bins[i-1][1]:Infinity))).join('')+apSw('var(--off)',N>1?'None':(K===KINDS.ap?'Doesn’t':'Doesn’t have it'),cnt(0,1))+apSw('na','No data',vals?vals.filter(v=>v==null).length:null):'']}
+function syncPick(){const K=kindOf(metric),la=document.getElementById('leg-ap');la.hidden=!K;document.getElementById('ap-btn').hidden=!isPick();
+  if(!isPick())setApPop(false);if(!K||!LV.hs||!LV.hs[K.cat])return;pickBoxes(K);
+  document.getElementById('ap-lab').textContent=K.title;document.querySelector('#ap-btn small').textContent=K.btn;
+  document.querySelectorAll('#ap-boxes input').forEach(b=>{b.checked=K.set.includes(+b.value)});
+  const all=apSchools(),ns=all.map(d=>kCount(K,d)).filter(n=>n!=null&&n>=0).sort((a,b)=>a-b),N=K.set.length,half=ns[Math.floor(ns.length/2)]||0,most=ns[ns.length-1]||0;
   document.getElementById('grp-src').textContent='MySchools high school directory · __MYSCHOOLS__';
-  const picked=document.getElementById('ap-picked');picked.hidden=metric!=='apc';
-  if(metric==='ap'){
-    const v=apAll().map(apCount),k=(lo,hi)=>v.filter(x=>x!=null&&x>=lo&&x<hi).length;
-    document.getElementById('ap-sw').innerHTML=AP_BINS.slice(1).map((b,i)=>apSw(b[1],b[2],k(AP_BINS[i][0],b[0]))).join('')+apSw(AP_BINS[0][1],AP_BINS[0][2],k(0,1))+apSw(AP_CH,'Charter, offers AP',k(-1,0))+apSw('na','No data',v.filter(x=>x==null).length);
-    document.getElementById('ap-hint').innerHTML='How many AP classes each high school lists on MySchools. Half of NYC high schools list '+(ns[Math.floor(ns.length/2)]||0)+' or more; the most list '+(ns[ns.length-1]||0)+'. To find schools with the courses you want, pick “AP courses”. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. Charter schools aren’t in the MySchools directory: “Charter, offers AP” means the __SNAPSHOT__ School Quality Snapshot shows students taking AP classes or passing AP exams there, without saying which or how many. <span class="nd"></span> No data: a charter school whose Snapshot shows no AP classes, or that has no Snapshot yet.';return}
-  const full=all.filter(d=>N&&apVal(d)===N).length,key=apKey(N,apPickNames(),N?apAll().map(apVal):null);
+  const picked=document.getElementById('ap-picked');picked.hidden=!isPick();
+  if(metric===K.count){
+    const v=apAll().map(d=>kCount(K,d)),k=(lo,hi)=>v.filter(x=>x!=null&&x>=lo&&x<hi).length,B=K.bins;
+    document.getElementById('ap-sw').innerHTML=B.slice(1).map((b,i)=>apSw(b[1],b[2],k(B[i][0],b[0]))).join('')+apSw(B[0][1],B[0][2],k(0,1))+(K===KINDS.ap?apSw(AP_CH,'Charter, offers AP',k(-1,0)):'')+apSw('na','No data',v.filter(x=>x==null).length);
+    document.getElementById('ap-hint').innerHTML=K===KINDS.ap?'How many AP classes each high school lists on MySchools. Half of NYC high schools list '+half+' or more; the most list '+most+'. To find schools with the courses you want, pick “AP courses”. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. Charter schools aren’t in the MySchools directory: “Charter, offers AP” means the __SNAPSHOT__ School Quality Snapshot shows students taking AP classes or passing AP exams there, without saying which or how many. <span class="nd"></span> No data: a charter school whose Snapshot shows no AP classes, or that has no Snapshot yet.'
+      :'How many PSAL teams each high school lists on MySchools, boys’, girls’ and coed added up. Half of NYC high schools list '+half+' or more; the most list '+most+'. To find schools with the teams you want, pick “Teams”. More teams isn’t a rating, and some teams are shared by the schools in one building, so they count at each. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which aren’t in the MySchools directory.';return}
+  const full=all.filter(d=>N&&kVal(d)===N).length,key=pickKey(K,N,pickNames(K),N?apAll().map(kVal):null);
   picked.innerHTML=key[0];document.getElementById('ap-sw').innerHTML=key[1];
   document.getElementById('ap-btn-n').textContent=N?N+' picked':'Pick';
-  document.getElementById('ap-list-n').textContent=N?N+' picked · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all of them':' it'):'Pick the AP courses you want';
+  document.getElementById('ap-list-n').textContent=N?N+' picked · '+full+' school'+(full===1?'':'s')+' '+K.has[full===1?0:1]+(N>1?' all of them':' it'):'Pick the '+K.title.replace(/^PSAL /,'')+' you want';
   document.getElementById('ap-clear').hidden=!N;
-  document.getElementById('ap-hint').innerHTML=(N?'High schools by how many of the courses you picked they list on MySchools. ':'Pick AP courses in Color by to see which high schools offer them. ')+'Ask a school whether each class runs every year. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'}
-document.getElementById('ap-clear').addEventListener('click',()=>{apSet=[];apChanged()});
-// the AP courses pop-up: opens when you pick AP courses or tap the Courses button (#ap-btn, next to Color by, shown
-// only for AP courses); the map recolors as you tick, so it stays
-// open until Done, ✕, Escape or a click elsewhere
+  document.getElementById('ap-hint').innerHTML=K===KINDS.ap?(N?'High schools by how many of the courses you picked they list on MySchools. ':'Pick AP courses in Color by to see which high schools offer them. ')+'Ask a school whether each class runs every year. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'
+    :(N?'High schools by how many of the PSAL teams you picked they list on MySchools. ':'Pick PSAL teams in Color by to see which high schools have them. ')+'Some teams are shared by the schools in one building; ask a school whether each team plays this season. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which aren’t in the MySchools directory.'}
+document.getElementById('ap-clear').addEventListener('click',()=>{const K=kindOf(metric);if(K){K.set=[];pickChanged()}});
+// the pick pop-up: opens when you pick AP courses or Teams, or tap the button next to Color by (#ap-btn, shown only for
+// those); the map recolors as you tick, so it stays open until Done, ✕, Escape or a click elsewhere
 const appop=document.getElementById('ap-pop');document.getElementById('map').appendChild(appop);L.DomEvent.disableClickPropagation(appop);L.DomEvent.disableScrollPropagation(appop);
-// it ends above the color key, so the Courses button stays visible to close it (phones especially), leaving room for
-// the key's tallest form (measured by drawing it for a moment: 1 to AP_KEY_NAMES+1 picks with the longest names and
-// four-digit counts) so the list keeps its size as you tick and the key grows into the gap
+// it ends above the color key, so the button stays visible to close it (phones especially), leaving room for the key's
+// tallest form (measured by drawing it for a moment: 1 to PICK_KEY_NAMES+1 picks with the longest names and four-digit
+// counts) so the list keeps its size as you tick and the key grows into the gap
 function placeApPop(){if(appop.hidden)return;const m=document.getElementById('map').getBoundingClientRect(),lg=document.getElementById('map-legend'),c=lg.getBoundingClientRect();
-  let extra=0;if(metric==='apc'){const pk=document.getElementById('ap-picked'),sw=document.getElementById('ap-sw'),was=[pk.innerHTML,sw.innerHTML];
-    const long=apNames().slice().sort((a,b)=>b.length-a.length);let tall=0;
-    [1,2,3,4,5,AP_KEY_NAMES,AP_KEY_NAMES+1].forEach(N=>{const k=apKey(N,long.slice(0,N),Array(9999).fill(1));pk.innerHTML=k[0];sw.innerHTML=k[1];tall=Math.max(tall,lg.getBoundingClientRect().height)});
+  let extra=0;if(isPick()){const K=kindOf(metric),pk=document.getElementById('ap-picked'),sw=document.getElementById('ap-sw'),was=[pk.innerHTML,sw.innerHTML];
+    const long=kNames(K).sort((a,b)=>b.length-a.length);let tall=0;
+    [1,2,3,4,5,PICK_KEY_NAMES,PICK_KEY_NAMES+1].forEach(N=>{const k=pickKey(K,N,long.slice(0,N),Array(9999).fill(1));pk.innerHTML=k[0];sw.innerHTML=k[1];tall=Math.max(tall,lg.getBoundingClientRect().height)});
     pk.innerHTML=was[0];sw.innerHTML=was[1];extra=Math.max(0,tall-c.height)}
   appop.style.maxHeight=Math.max(200,Math.round(c.top-m.top-appop.offsetTop-8-extra))+'px'}
 addEventListener('resize',placeApPop);
 function setApPop(open){if(appop.hidden===!open)return;if(!open&&appop.contains(document.activeElement))document.activeElement.blur();appop.hidden=!open;document.getElementById('ap-btn').setAttribute('aria-expanded',String(open));
-  if(!open)return;if(typeof closePops==='function')closePops();setPanel(false);syncAp();placeApPop();
+  if(!open)return;if(typeof closePops==='function')closePops();setPanel(false);syncPick();placeApPop();
   const f=appop.querySelector('#ap-boxes input:checked')||appop.querySelector('#ap-boxes input');if(f)f.focus({preventScroll:true})}
 ['ap-close','ap-done'].forEach(id=>document.getElementById(id).addEventListener('click',()=>setApPop(false)));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!appop.hidden)setApPop(false)});
-document.addEventListener('click',e=>{if(!appop.hidden&&!appop.contains(e.target)&&!e.target.closest('#ap-btn,label[for=m-apc]'))setApPop(false)});
+document.addEventListener('click',e=>{if(!appop.hidden&&!appop.contains(e.target)&&!e.target.closest('#ap-btn,label[for=m-apc],label[for=m-spt]'))setApPop(false)});
 document.getElementById('ap-btn').addEventListener('click',()=>{markEngaged();setApPop(appop.hidden)});
-function syncLegend(){syncName();syncAp();const lo=document.getElementById('leg-out');lo.hidden=!isOut(metric);
+function syncLegend(){syncName();syncPick();const lo=document.getElementById('leg-out');lo.hidden=!isOut(metric);
   if(isOut(metric)){const o=OUT[metric],s=o.stops,pct=v=>outPos(metric,v)+'%',rv=n=>'var(--r-'+n+')';
     document.getElementById('out-bar').style.background='linear-gradient(90deg,'+rv(s[0][1])+' 0%,'+rv(s[0][1])+' '+pct(s[0][0])+','+rv(s[1][1])+' '+pct(s[1][0])+','+rv(s[2][1])+' '+pct(s[2][0])+','+rv(s[2][1])+' 100%)';
     document.getElementById('out-ticks').innerHTML=o.ticks.map((v,i)=>'<span style="left:'+outPos(metric,v)+'%">'+v+(i===o.ticks.length-1&&!o.abs?'%':'')+'</span>').join('');
@@ -1769,7 +1790,7 @@ function syncLegend(){syncName();syncAp();const lo=document.getElementById('leg-
 syncLegend();
 //METRIC
 // metric groups: tabs show one row of options at a time and remember the last pick in each
-const GROUP_SRC={ap:'MySchools high school directory · __MYSCHOOLS__',quality:'DOE School Quality Snapshot · __SNAPSHOT__',tests:'New York State tests · __TESTS__',programs:'DOE School Quality Snapshot · __SNAPSHOT__'};
+const GROUP_SRC={ap:'MySchools high school directory · __MYSCHOOLS__',sp:'MySchools high school directory · __MYSCHOOLS__',quality:'DOE School Quality Snapshot · __SNAPSHOT__',tests:'New York State tests · __TESTS__',programs:'DOE School Quality Snapshot · __SNAPSHOT__'};
 const lastPick={};
 document.querySelectorAll('.seg[data-g]').forEach(s=>{lastPick[s.dataset.g]=s.querySelector('input').value});
 lastPick.quality='comp';
@@ -1778,16 +1799,18 @@ function showGroup(g){curGroup=g;
   document.getElementById('grp-src').textContent=g==='tests'?(level==='hs'?'DOE School Quality Snapshot · __SNAPSHOT__':'New York State tests · __TESTS__'):GROUP_SRC[g];}
 let quietColor=false;
 document.querySelectorAll('input[name=metric]').forEach(r=>r.addEventListener('change',()=>{const s=r.closest('.seg[data-g]');if(s){lastPick[s.dataset.g]=r.value;showGroup(s.dataset.g)}
-  if(!quietColor)markEngaged();metric=r.value;syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec();if(r.value==='apc'&&!quietColor)setApPop(true);
+  if(!quietColor)markEngaged();metric=r.value;syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshPickSecs();if((r.value==='apc'||r.value==='spt')&&!quietColor)setApPop(true);
   // picking a Color by opens its section on the card; a ?c= link loading (quietColor) opens it only if you've never
   // opened or closed that section yourself (SEC)
   if(SEC_FOR[metric])card.querySelectorAll('.sec[data-sec^="'+SEC_FOR[metric]+'"]').forEach(x=>{if(!quietColor||!(x.dataset.sec in SEC))x.open=true})}));
 // the color choice rides along in the URL (?c=ela), so a shared link opens with the same coloring
 function setColorParam(){try{const u=new URL(location.href);if(metric==='comp')u.searchParams.delete('c');else u.searchParams.set('c',metric);
-  if(metric==='apc'&&apSet.length)u.searchParams.set('ap',apPickNames().join('|'));else u.searchParams.delete('ap');history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}}
-function applyColorParam(){let c=null,ap=null;try{const q=new URLSearchParams(location.search);c=q.get('c');ap=q.get('ap')}catch(e){}
-  // ?c=apc&ap=Calculus BC|Physics 1; the first version's ?c=ap&ap=Calculus BC (one course) opens the same view
-  if(ap&&(c==='apc'||c==='ap')){const nm=apNames().map(n=>n.toLowerCase());apSet=[...new Set(ap.split('|').map(x=>nm.indexOf(x.trim().toLowerCase())).filter(i=>i>=0))].sort((x,y)=>x-y);if(apSet.length)c='apc'}
+  Object.values(KINDS).forEach(K=>{if(metric===K.pick&&K.set.length)u.searchParams.set(K.url,pickNames(K).join('|'));else u.searchParams.delete(K.url)});history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(e){}}
+function applyColorParam(){let c=null,q=null;try{q=new URLSearchParams(location.search);c=q.get('c')}catch(e){}
+  // ?c=apc&ap=Calculus BC|Physics 1, ?c=spt&sp=Girls Soccer|Boys Tennis; the first version's ?c=ap&ap=Calculus BC (one
+  // course) opens the same view
+  Object.values(KINDS).forEach(K=>{const v=q&&q.get(K.url);if(!v||c!==K.pick&&c!==K.count)return;const nm=kNames(K).map(n=>n.toLowerCase());
+    K.set=[...new Set(v.split('|').map(x=>nm.indexOf(x.trim().toLowerCase())).filter(i=>i>=0))].sort((x,y)=>x-y);if(K.set.length)c=K.pick});
   if(!c||c===metric)return;
   const r=document.querySelector('input[name=metric][value="'+c.replace(/[^a-z]/g,'')+'"]');if(!r||r.hidden)return;
   quietColor=true;r.checked=true;r.dispatchEvent(new Event('change'));quietColor=false}
@@ -1856,9 +1879,9 @@ async function setLevel(lv){if(lv===level)return;if(!LV[lv]&&!(await loadLevel(l
   const noScr=lv==='es';document.getElementById('m-scr').hidden=noScr;document.getElementById('lbl-scr').hidden=noScr;
   if(noScr&&metric==='scr'){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
   if(noScr&&lastPick.programs==='scr')lastPick.programs='dl';
-  // AP classes: high school only, a group of its own
-  document.getElementById('g-ap').hidden=!hs;document.querySelector('.seg[data-g=ap]').hidden=!hs;
-  if(!hs&&(metric==='ap'||metric==='apc')){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
+  // AP classes and sports: high school only, groups of their own
+  ['ap','sp'].forEach(g=>{document.getElementById('g-'+g).hidden=!hs;document.querySelector('.seg[data-g='+g+']').hidden=!hs});
+  if(!hs&&kindOf(metric)){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
   showGroup(curGroup);
   emptyCard();sheetDefault();
   try{history.replaceState(null,'',lv==='ms'?'#middle':lv==='hs'?'#high':location.pathname+location.search)}catch(e){}  // a selected zone replaces this below

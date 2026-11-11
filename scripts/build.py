@@ -626,6 +626,22 @@ def extras(groups, rows, key="EX"):
     return {key: ex, key + "V": exv, key + "G": [list(g[1:]) for g in groups]}
 
 
+def psal_teams(rows):
+    """{"SPT": {dbn: [indexes into the catalog]}, "SPC": [[group, [sports]] per group]} for each high school's PSAL teams,
+    the same shape as ap_courses, for the map's Color by "Teams": the groups are SP_GROUPS' PSAL ones (Boys, Girls,
+    Coed), each with the sports some school lists in it, A-Z. rows: {dbn: {group key: [sports]}} (fetch_data.py
+    _hs_extras). Schools with no PSAL team are left out."""
+    groups = [g for g in SP_GROUPS if g[2] == "PSAL team"]
+    cat = [[g[1], sorted({n for x in rows.values() for n in x.get(g[0], [])}, key=str.lower)] for g in groups]
+    flat, i = {}, 0
+    for g, (_, names) in zip(groups, cat):
+        for n in names:
+            flat[(g[0], n)] = i
+            i += 1
+    spt = {dbn: sorted(flat[(g[0], n)] for g in groups for n in x.get(g[0], [])) for dbn, x in rows.items()}
+    return {"SPT": {d: v for d, v in spt.items() if v}, "SPC": cat}
+
+
 def ap_courses(rows):
     """{"AP": {dbn: [indexes into the catalog]}, "APC": [[subject area, [course names]] per area]} for each high
     school's AP classes, from {dbn: [MySchools names ("AP Calculus AB")]} (fetch_data.py _hs_extras "ap"). The catalog
@@ -952,6 +968,7 @@ def main(standalone_path=None, pages=None):
             d["HS"]["O"] = outcomes
             d["HS"].update(extras(EX_GROUPS["hs"], {o["dbn"]: o["x"] for o in hsdir if o.get("x")}))
             d["HS"].update(extras(SP_GROUPS, {o["dbn"]: o["x"] for o in hsdir if o.get("x")}, "SP"))
+            d["HS"].update(psal_teams({o["dbn"]: o["x"] for o in hsdir if o.get("x")}))
             d["HS"].update(ap_courses({o["dbn"]: o["x"].get("ap", []) for o in hsdir if o.get("x")}))
             print(f"high school AP classes: {len(d['HS']['AP'])} schools")
             # SAT, college readiness, where graduates went and advanced courses (2024-25 Snapshot, high school report).
