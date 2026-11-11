@@ -1069,21 +1069,22 @@ def main(standalone_path=None, pages=None):
     # Who goes to each school (DOE Demographic Snapshot, settings.DEMOGRAPHICS_LABEL): DM {dbn: [enrollment, Asian
     # and Pacific Islander, Black, Hispanic, White, everyone else, % in poverty (whole % or ">95" / "<5"),
     # girls, boys, students with IEPs, English language learners]}. d["DM"] has the elementary map's
-    # schools; MS.DM and HS.DM the rest of their level's, loaded with it. DMC: the same row for every NYC public
+    # schools; MS.DM and HS.DM the rest of their level's, loaded with it. A 6-12 school is in both MS.DM and HS.DM:
+    # either level can load without the other, and its card needs the row. DMC: the same row for every NYC public
     # school student
     if os.path.exists(os.path.join(DATA, "demographics.json")):
         dm = load("demographics.json")
-        done, n = set(), 0
+        es, done = None, set()
         for lv in (d, d.get("MS"), d.get("HS")):
             if lv is None:
                 continue
             shown = {x for f in lv["features"] for x in f["properties"]["dbns"]}
             shown |= {r[0] for r in lv.get("NZ", []) + lv.get("CH", [])}
-            lv["DM"] = {k: v for k, v in dm["schools"].items() if k in shown - done}
+            es = shown if es is None else es  # the elementary map's, always loaded
+            lv["DM"] = {k: v for k, v in dm["schools"].items() if k in (shown if lv is d else shown - es)}
             done |= shown
-            n += len(lv["DM"])
         d["DMC"] = dm["city"]
-        print(f"demographics: {n} of {len(done)} schools")
+        print(f"demographics: {len(done & set(dm['schools']))} of {len(done)} schools")
 
     apply_school_fixes(d)
     fix_addresses(d)
