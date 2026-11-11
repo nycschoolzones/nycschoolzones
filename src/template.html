@@ -265,7 +265,7 @@ aside>*{flex-shrink:0}
 #ap-boxes .layers{display:block}
 #ap-boxes .chk{break-inside:avoid;padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
-.ap-picked{margin:0 0 6px;font-size:.85rem}.ap-k{color:var(--muted);font-variant-numeric:tabular-nums}
+.ap-picked{margin:0 0 6px;font-size:.85rem}.tip-ap{display:inline-block;white-space:normal;max-width:260px;font-size:.92em;color:var(--muted)}.ap-k{color:var(--muted);font-variant-numeric:tabular-nums}
 .ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
 #map-legend .hint{display:none;max-height:28vh;overflow:auto}
 #map-legend.open .hint{display:block}
@@ -783,6 +783,9 @@ const apColor=v=>metric==='apc'?(v?apcBins().find(b=>v>=b[1])[2]:'var(--off)'):v
 const apPickNames=()=>{const n=apNames();return apSet.map(i=>n[i])};
 // yes-or-no colorings (G&T, dual language, one AP course): labels and tooltips name only the schools that have it
 const isYes=()=>isProg(metric)||metric==='apc'&&apSet.length===1;
+// a tooltip's value: as fmtVal, and for some but not all of the picked AP courses, which ones, on a line of their own
+function tipVal(d,v){const t=fmtVal(v);if(metric!=='apc'||!(v>0&&v<apSet.length))return t;const a=LV.hs.AP[d]||[],n=apNames();
+  return t+'<br><span class="tip-ap">'+apSet.filter(i=>a.includes(i)).map(i=>esc(n[i])).join(', ')+'</span>'}
 const hasGT=d=>!!(X[d]&&X[d][8]&&X[d][8].includes('G&T'));
 const dualLang=d=>X[d]&&X[d][4]||null;
 // dual language by language: the common ones get their own color, the rest share "Other"; a school (or shared zone)
@@ -1039,7 +1042,7 @@ const NONRES=/park|cemeter|golf|airport|island|beach|zoo|garden|reservoir/i;
 function noZoneHere(p){return !p.dbns.length&&!NONRES.test(p.remarks||'')}
 function tipHtml(f){const p=f.properties;const dt=distTag(p);
   if(!p.dbns.length)return noZoneHere(p)?(dt?'<small class="tip-d">'+dt+'</small><br>':'')+(level==='hs'?'No zoned high school here<br><small>Students apply citywide through MySchools</small>':'No zoned school here<br><small>Students apply through MySchools</small>'):esc(p.remarks||LEVEL_TXT[level].noZone);
-  const val=d=>{const v=schoolVal(d);return v==null||isYes()&&!v?'':' · '+(isYes()?progTxt(d):fmtVal(v))};
+  const val=d=>{const v=schoolVal(d);return v==null||isYes()&&!v?'':' · '+(isYes()?progTxt(d):tipVal(d,v))};
   return (dt?'<small class="tip-d">'+dt+'</small><br>':'')+p.dbns.map(d=>esc(short(d))+val(d)).join('<br>')}
 function psNum(f){const p=f.properties;return p.dbns.length?p.label||p.dbns[0].slice(3):''}
 // proficiency for a zone: pooled across its schools that have results
@@ -1184,7 +1187,7 @@ const zsGroup=L.layerGroup().addTo(map);
 function markersByZoom(){return map.getZoom()>=12}  // a function, so the zone style can call it before this line runs
 function labelsByZoom(){return map.getZoom()>=13}
 function zsOn(){return !!LAY.zs&&markersByZoom()}
-function zsTip(d){const v=schoolVal(d),val=v==null||isYes()&&!v?'':' · '+(isYes()?progTxt(d):fmtVal(v));
+function zsTip(d){const v=schoolVal(d),val=v==null||isYes()&&!v?'':' · '+(isYes()?progTxt(d):tipVal(d,v));
   return '<small class="tip-d">District '+(+d.slice(0,2))+' · Zoned</small><br>'+esc(short(d))+val}
 function zsSelected(d){return selected&&selected.feature.properties.dbns.includes(d)}
 // a school without a zone (or a charter) in the same building as a zoned school: {dbn: its partner}, both ways.
@@ -1299,7 +1302,7 @@ function buildNZ(){nzGroup.clearLayers();document.getElementById('nz-key').hidde
       icon:L.divIcon({className:'',html:o.gt?gtStar(nzFill(o.d),nzSel===o.d):'<div class="'+(o.ch?'chm':'nzm')+(nzSel===o.d?' sel':'')+'" style="--c:'+nzFill(o.d)+'"></div>',iconSize:[sz,sz],iconAnchor:[sz/2-dx,sz/2-dy]})});
     m.bindTooltip(()=>nzTip(o),{direction:'top',offset:[0,-sz/2]});m.on('click',()=>selectNZ(o.d,true));m.addTo(nzGroup)})}
 function nzTip(o){const v=schoolVal(o.d),kind=o.ch?'Charter':o.hs?(o.gt?'Specialized':'High school'):o.ms?(o.gt?'Citywide':'No zone'):(o.gt?'Citywide G&T':'Non-zoned');
-  const val=v==null||isYes()&&!v?'':' · '+(isYes()?progTxt(o.d):fmtVal(v));
+  const val=v==null||isYes()&&!v?'':' · '+(isYes()?progTxt(o.d):tipVal(o.d,v));
   return '<small class="tip-d">'+(o.hs&&!o.ch?esc(BORO[o.d[2]]||''):'District '+distOf(o.d))+' · '+kind+'</small><br>'+esc(o.n)+val}
 map.on('zoomend',buildNZ);buildNZ();
 function clearNZSel(){if(!nzSel)return;nzSel=null;buildNZ()}
