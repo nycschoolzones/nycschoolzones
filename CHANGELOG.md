@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.75.0 (2026-11-11)
 
 ### Added
 - High schools now have their own "Sports" section, on the map card and the school page. PSAL teams are listed a sport to a row with who plays it ("Basketball: Boys · Girls"), followed by any other sports and teams the school lists, like cheerleading or step. The folded line counts them ("12 PSAL teams · 3 other sports"). High schools' "Classes, sports and activities" section is now "Classes and activities". Middle schools don't change.
