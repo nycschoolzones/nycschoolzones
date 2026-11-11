@@ -644,14 +644,20 @@ def _sports(sp, vocab, groups, dm=None):
     return by, n, other, apart
 
 
-def sports_html(sp, vocab, groups, dm=None):
+def sports_html(sp, vocab, groups, dm=None, campus=None):
     """A high school's sports, as the map card shows them (src/template.html spSec): its PSAL teams a sport to a row
     with who plays it, then other sports and teams as the school writes them, then at a single-sex school the other
-    gender's teams, apart, with why."""
+    gender's teams, apart, with why. campus: (the PSAL campus's name, [the other schools' names, as HTML]) when the
+    school is on one (build.py PCA), a line before the teams."""
     by, n, other, apart = _sports(sp, vocab, groups, dm)
     if not by and not other and not apart:
         return ""
     h = ""
+    if campus:
+        cn, others = campus
+        h += (f"<p>Plays on the PSAL’s <b>{e(cn)}</b> teams"
+              + (", with " + (", ".join(others[:-1]) + " and " + others[-1] if len(others) > 1 else others[0]) if others else "")
+              + ".</p>")
     if by:
         h += (f'<h3 class="ex-h">PSAL teams · {n}</h3><table class="spt">'
               + "".join(f"<tr><td>{e(s)}</td><td>{' · '.join(by[s])}</td></tr>" for s in sorted(by, key=str.lower))
@@ -1175,7 +1181,13 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                 sp = (HS.get("SP") or {}).get(dbn)
                 if sp:
                     spv, spg = HS.get("SPV") or [], HS.get("SPG") or []
-                    cards.append((sports_html(sp, spv, spg, dm), sports_summary(sp, spv, spg, dm), False))
+                    camp = next((c for c in HS.get("PCA") or [] if any(m[0] == dbn for m in c[1])), None)
+                    if camp:
+                        def label(m, pn):
+                            n = nice_name((R.get(m) or [None])[0] or S.get(m, {}).get("n") or pn)
+                            return f'<a href="/schools/{e(m)}/">{e(n)}</a>' if m in page_dbns(d) else e(n)
+                        camp = (camp[0], [label(m, pn) for m, pn in camp[1] if m != dbn])
+                    cards.append((sports_html(sp, spv, spg, dm, camp), sports_summary(sp, spv, spg, dm), False))
             cards.append((extras_html(ex, exv, exg, "Classes and activities" if lv == "hs" else "Classes, sports and activities"),
                           extras_summary(ex, exv, exg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)

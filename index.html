@@ -195,7 +195,7 @@ aside>*{flex-shrink:0}
 .adm td:last-child{color:var(--muted);font-weight:500;min-width:3.2em}
 .adm .adm-note{margin:2px 0 0;font-size:.8rem}
 .ex{font-size:.85rem}.ex p{margin:2px 0 0}.ex-src{color:var(--muted);font-size:.75rem}
-.spt{border-collapse:collapse;margin:2px 0 8px}.spt td{padding:2px 14px 2px 0;vertical-align:top}.spt td+td{color:var(--muted);padding-right:0}.spt b.pick{color:var(--fg)}
+.spt{border-collapse:collapse;margin:2px 0 8px}.spt td{padding:2px 14px 2px 0;vertical-align:top}.spt td+td{color:var(--muted);padding-right:0}.spt b.pick{color:var(--fg)}.sp-camp{margin:0 0 8px;font-size:.85rem}
 .ap{font-size:.85rem}.ap ul{columns:2 10rem;column-gap:16px;margin:2px 0 8px;padding-left:1.1em}.ap li{break-inside:avoid;padding:1px 0}
 .jump{margin:4px 0 0;font-size:.85rem}.jump a{color:var(--hl)}.sec{scroll-margin-top:8px}
 .adm-p{font-weight:600;margin-top:8px}.adm-p small{font-weight:400;color:var(--muted)}
@@ -791,7 +791,7 @@ async function loadLevel(lv){if(LV[lv])return true;if(!ASSETS[lv])return false;
   try{const x=await getAsset(lv);
     Object.entries(x.schools).forEach(([d,s])=>{S[d]=Object.assign({},s,S[d]||{})});snapNames(Object.keys(x.schools));
     if(x.O)Object.assign(O,x.O);if(x.Q)Object.assign(Q,x.Q);
-    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],SPT:x.SPT||{},SPC:x.SPC||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
+    LV[lv]={F:x.features,T:x.T||{},S:x.schools,P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],SPT:x.SPT||{},SPC:x.SPC||[],PCA:x.PCA||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}};if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});if(x.DM)Object.assign(DM,x.DM);regNZ(LV[lv].NZ);return true}
   catch(e){alertLoad();return false}finally{document.body.style.cursor=''}}
 function alertLoad(){const m=document.getElementById('llmsg');if(m){m.textContent='Couldn’t load that part of the map. Check your connection and try again.';m.hidden=false}}
 const RK={ip:2,ss:3,rf:4},RNAME={ip:'Instruction and Performance',ss:'Safety and School Climate',rf:'Relationships with Families'};
@@ -901,7 +901,7 @@ function chBlock(o){const x=CHX[o.d]||[];
     ' Apply through the <a href="'+CH_APPLY+'" target="_blank" rel="noopener">common charter application ↗</a> or on the school’s own site, by April 1 for most schools. It’s separate from MySchools: applying doesn’t affect your MySchools application.'+
     (x[3]?' Formerly '+esc(x[3])+'.':'')+'</p></details>'}
 regNZ(NZ_ES);
-[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],SPT:x.SPT||{},SPC:x.SPC||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
+[['ms',MSD],['hs',HSD]].forEach(([lv,x])=>{if(!x||!LV[lv])return;Object.assign(LV[lv],{P:x.P||{},A:x.A||{},EX:x.EX||{},EXV:x.EXV||[],EXG:x.EXG||[],SP:x.SP||{},SPV:x.SPV||[],SPG:x.SPG||[],SPT:x.SPT||{},SPC:x.SPC||[],PCA:x.PCA||[],AP:x.AP||{},APC:x.APC||[],APCH:x.APCH||[],EG:x.EG||{},NZ:allNZ(x,lv),CUT:x.CUT||null,CHR:x.CHR||{},CHX:x.CHX||{}});
   if(x.R)Object.entries(x.R).forEach(([k,v])=>{if(!R[k])R[k]=v});if(x.X)Object.entries(x.X).forEach(([k,v])=>{if(!X[k])X[k]=v});regNZ(LV[lv].NZ)});
 function nzDistricts(o){const ds=o.pd.length?o.pd:[+o.d.slice(0,2)];return ds}
 function nzPriority(o){if(o.ch)return 'Admission is by lottery only. Charter schools can’t screen: no tests, grades, interviews or auditions. Lottery priority usually goes to siblings, then to families who live in District '+o.pd[0]+'.';if(o.hs){if(o.gt)return o.pr.some(p=>p[1]==='T')?'Admission is by SHSAT score only. Any NYC 8th or 9th grader can take the test.':'Admission is by audition. Students from anywhere in NYC can apply.';return o.pz||'Open to students from anywhere in NYC.'}if(o.gt)return 'Open to children found eligible for G&T, from anywhere in NYC.'+(o.pd.length?' Priority to eligible children in Districts '+o.pd.slice(0,-1).join(', ')+' and '+o.pd[o.pd.length-1]+'.':'');const ds=nzDistricts(o),t=ds.length>1?'Districts '+ds.slice(0,-1).join(', ')+' and '+ds[ds.length-1]:'District '+ds[0];
@@ -1525,7 +1525,11 @@ function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)r
 // with who plays it ("Basketball  Boys · Girls"), then other sports and teams as the school writes them. With teams
 // picked (Color by Teams), the school's picked ones get a ✓ and a "Missing:" line lists the rest. An all-girls
 // school's boys' teams (or the other way round, by the Demographic Snapshot) are listed apart and not counted: they're
-// shared teams its students don't play on (build.py psal_teams leaves them out of Color by too)
+// shared teams its students don't play on (build.py psal_teams leaves them out of Color by too). A school on one of
+// the PSAL's campuses (LV.hs.PCA, the PSAL's own lists) gets a line naming the campus and its other schools
+function spCampus(d){const c=(LV.hs&&LV.hs.PCA||[]).find(c=>c[1].some(m=>m[0]===d));if(!c)return '';
+  const others=c[1].filter(m=>m[0]!==d).map(m=>S[m[0]]?short(m[0]):m[1]);
+  return '<p class="sp-camp">Plays on the PSAL’s <b>'+esc(c[0])+'</b> teams'+(others.length?', with '+esc(others.length>1?others.slice(0,-1).join(', ')+' and '+others[others.length-1]:others[0]):'')+'.</p>'}
 function spSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.SP&&lp.SP[d];if(!x)return '';
   const K=KINDS.sp,pick=metric==='spt'?K.set:[],nm=kNames(K),by={},other=[],dm=DM[d],kk=DEMO_GROUPS.length;let n=0;
   const only=dm&&dm[kk+2]!=null&&dm[kk+3]!=null&&!(dm[kk+2]&&dm[kk+3])&&(dm[kk+2]||dm[kk+3])?(dm[kk+2]?'Girls':'Boys'):'',not=only==='Girls'?'Boys':only?'Girls':'',apart=[];
@@ -1534,7 +1538,7 @@ function spSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.SP&&lp.SP[d];if(!x)retur
   const isPicked=(g,s)=>pick.includes(nm.indexOf(g+' '+s)),has=new Set(sports.flatMap(s=>by[s].map(g=>g+' '+s)));
   const mine=pick.length?pick.filter(k=>has.has(nm[k])).length:0,miss=pick.filter(k=>!has.has(nm[k]));
   const sum=[n?n+' PSAL team'+(n>1?'s':'')+(pick.length?' · '+mine+' of your '+pick.length:''):'',no?no+' other sport'+(no>1?'s':''):''].filter(Boolean).join(' · ');
-  const body=(miss.length?'<p class="ap-miss"><b>Missing:</b> '+miss.map(k=>esc(nm[k])).join(', ')+'</p>':'')
+  const body=(miss.length?'<p class="ap-miss"><b>Missing:</b> '+miss.map(k=>esc(nm[k])).join(', ')+'</p>':'')+spCampus(d)
     +(sports.length?'<div class="ex"><div class="adm-h">PSAL teams · '+n+'</div><table class="spt">'+sports.map(s=>'<tr><td>'+esc(s)+'</td><td>'+by[s].map(g=>isPicked(g,s)?'<b class="pick">✓ '+g+'</b>':g).join(' · ')+'</td></tr>').join('')+'</table></div>':'')
     +(other.length?'<div class="ex"><div class="adm-h">Other sports and teams</div><p>'+esc(other.join(', '))+'</p></div>':'')
     +(apart.length?'<div class="ex"><div class="adm-h">'+not+'’ teams, shared</div><p>'+esc(apart.join(', '))+'. MySchools lists these too, but this is an all-'+only.toLowerCase()+' school: they’re most likely teams it shares with other schools, which its students don’t play on.</p></div>':'');

@@ -980,6 +980,11 @@ def main(standalone_path=None, pages=None):
             d["HS"]["O"] = outcomes
             d["HS"].update(extras(EX_GROUPS["hs"], {o["dbn"]: o["x"] for o in hsdir if o.get("x")}))
             d["HS"].update(extras(SP_GROUPS, {o["dbn"]: o["x"] for o in hsdir if o.get("x")}, "SP"))
+            # the PSAL's campuses (fetch_data.py psal, from scripts/browser/psal.js): schools whose students play on
+            # one shared set of teams. PCA: [[PSAL name ("John Jay Campus"), [[dbn, PSAL's school name], ...]], ...]
+            if os.path.exists(os.path.join(DATA, "psal_campuses.json")):
+                d["HS"]["PCA"] = [[c[0], [m[:2] for m in c[1]]] for c in load("psal_campuses.json")["campuses"]]
+                print(f"PSAL campuses: {len(d['HS']['PCA'])}")
             d["HS"].update(psal_teams({o["dbn"]: o["x"] for o in hsdir if o.get("x")},
                                       single_sex(load("demographics.json")["schools"])
                                       if os.path.exists(os.path.join(DATA, "demographics.json")) else None))
