@@ -162,7 +162,9 @@ Which high schools share their PSAL teams. The PSAL calls most shared programs a
 1. Open [psal.org/profiles/profile.aspx](https://www.psal.org/profiles/profile.aspx), wait for the school list, open the console, paste all of `scripts/browser/psal.js` and press Enter. It asks every PSAL school for its campus list, so a few minutes later you have `psal_campuses.json` in Downloads.
 2. `python3 scripts/fetch_data.py psal ~/Downloads/psal_campuses.json`
 
-The import merges a campus found under several names, and prints a `psal:` line for each school the browser couldn't get and each member without a DOE code. Without the file, the build leaves the campus line out.
+The PSAL's data only answers inside a browser on psal.org, so there's no scripted fetch. The script reads the same service as each school profile's "Campus Schools List" button (`GetSchoolByCampus`).
+
+The import merges a campus found under several names, and prints a `psal:` line for each school the browser couldn't get and each member without a DOE code. Without the file, the build leaves the campus line out. Check the run: the November 2026 one found 113 programs and 389 schools (`data/history/psal_campuses/2026-11.json`). Far fewer means it missed some. Spot-check two that are easy to miss: East Harlem Pride (TYWLS 03M610 with Central Park East, Frederick Douglass Academy II, Heritage and Park East) and John Jay Campus (with Millennium High School, 02M418, in Manhattan).
 
 ### 3. School Quality Snapshot (when a new year appears at [tools.nycenet.edu/snapshot](https://tools.nycenet.edu/snapshot/))
 
