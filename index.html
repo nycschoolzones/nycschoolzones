@@ -298,7 +298,7 @@ aside>*{flex-shrink:0}
 #ap-boxes .layers{display:block}
 #ap-boxes .chk{break-inside:avoid;padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
-.ap-picked{margin:0 0 6px;font-size:.85rem}
+.ap-picked{margin:0 0 6px;font-size:.85rem}.ap-k{color:var(--muted);font-variant-numeric:tabular-nums}
 .ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
 #map-legend .hint{display:none;max-height:28vh;overflow:auto}
 #map-legend.open .hint{display:block}
@@ -1720,11 +1720,17 @@ function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorP
 function refreshApSec(){const o=card.querySelector('.sec[data-sec="ap"]'),dd=card.querySelector('.school[data-d]');if(!o||!dd)return;
   const t=document.createElement('div');t.innerHTML=apSec(dd.dataset.d);const nw=t.firstElementChild;if(nw){nw.open=o.open;o.replaceWith(nw)}}
 // the AP courses key: [summary line, swatches] for N picked courses (names), full of them offering all
-function apKey(N,names,full){const sw=b=>'<span><i'+(b[1].startsWith('var(')?' class="off"':' style="background:'+b[1]+'"')+'></i>'+b[2]+'</span>';
-  const say=N>2?names.slice(0,2).map(esc).join(', ')+', +'+(N-2):names.map(esc).join(' and '),n=apSet;
-  apSet=Array.from({length:N},(_,i)=>i);const bins=N?apcBins():[];apSet=n;  // apcBins reads apSet's length
-  return [N?'<b>'+say+'</b> · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all '+N:' it'):'No courses picked yet: tap <b>Courses</b>.',
-    N?bins.map(b=>sw([0,b[2],b[0]])).join('')+sw([0,'var(--off)',N>1?'None of them':'Doesn’t'])+'<span><i class="na"></i>No data</span>':'']}
+// every high school on the map: the MySchools directory and the charter schools
+function apAll(){return [...new Set(Object.keys(LV.hs.P||{}).concat((LV.hs.NZ||[]).map(o=>o.d)))]}  // NZ: the markers, charters included
+const apSw=(col,label,k)=>'<span><i'+(col==='na'?' class="na"':col.startsWith('var(')?' class="off"':' style="background:'+col+'"')+'></i>'+label+(k!=null?' <span class="ap-k">('+k.toLocaleString()+')</span>':'')+'</span>';
+// the AP courses key: [the picked courses, swatches with how many schools in each] for N picked (names); vals: each
+// school's apVal, or null to leave the counts out. Up to AP_KEY_NAMES courses by name, then "and N more".
+const AP_KEY_NAMES=6;
+function apKey(N,names,vals){const n=apSet;apSet=Array.from({length:N},(_,i)=>i);const bins=N?apcBins():[];apSet=n;  // apcBins reads apSet's length
+  const cnt=(lo,hi)=>vals?vals.filter(v=>v!=null&&v>=lo&&v<hi).length:null;
+  const shown=names.slice(0,N>AP_KEY_NAMES?AP_KEY_NAMES-1:N).map(esc).join(', ')+(N>AP_KEY_NAMES?', and '+(N-AP_KEY_NAMES+1)+' more':'');
+  return [N?(N>1?'Your '+N+' courses: ':'Your course: ')+'<b>'+shown+'</b>':'No courses picked yet: tap <b>Courses</b>.',
+    N?bins.map((b,i)=>apSw(b[2],b[0],cnt(b[1],i?bins[i-1][1]:Infinity))).join('')+apSw('var(--off)',N>1?'None':'Doesn’t',cnt(0,1))+apSw('na','No data',vals?vals.filter(v=>v==null).length:null):'']}
 function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementById('leg-ap');la.hidden=!ap;document.getElementById('ap-btn').hidden=metric!=='apc';
   if(metric!=='apc')setApPop(false);if(!ap||!LV.hs||!LV.hs.APC)return;apBoxes();
   document.querySelectorAll('#ap-boxes input').forEach(b=>{b.checked=apSet.includes(+b.value)});
@@ -1733,9 +1739,10 @@ function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementB
   document.getElementById('grp-src').textContent='MySchools high school directory · fall 2026';
   const picked=document.getElementById('ap-picked');picked.hidden=metric!=='apc';
   if(metric==='ap'){
-    document.getElementById('ap-sw').innerHTML=AP_BINS.slice(1).concat([AP_BINS[0]]).map(sw).join('')+sw([0,AP_CH,'Charter, offers AP'])+'<span><i class="na"></i>No data</span>';
+    const v=apAll().map(apCount),k=(lo,hi)=>v.filter(x=>x!=null&&x>=lo&&x<hi).length;
+    document.getElementById('ap-sw').innerHTML=AP_BINS.slice(1).map((b,i)=>apSw(b[1],b[2],k(AP_BINS[i][0],b[0]))).join('')+apSw(AP_BINS[0][1],AP_BINS[0][2],k(0,1))+apSw(AP_CH,'Charter, offers AP',k(-1,0))+apSw('na','No data',v.filter(x=>x==null).length);
     document.getElementById('ap-hint').innerHTML='How many AP classes each high school lists on MySchools. Half of NYC high schools list '+(ns[Math.floor(ns.length/2)]||0)+' or more; the most list '+(ns[ns.length-1]||0)+'. To find schools with the courses you want, pick “AP courses”. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. Charter schools aren’t in the MySchools directory: “Charter, offers AP” means the 2024–25 School Quality Snapshot shows students taking AP classes or passing AP exams there, without saying which or how many. <span class="nd"></span> No data: a charter school whose Snapshot shows no AP classes, or that has no Snapshot yet.';return}
-  const full=all.filter(d=>N&&apVal(d)===N).length,key=apKey(N,apPickNames(),full);
+  const full=all.filter(d=>N&&apVal(d)===N).length,key=apKey(N,apPickNames(),N?apAll().map(apVal):null);
   picked.innerHTML=key[0];document.getElementById('ap-sw').innerHTML=key[1];
   document.getElementById('ap-btn-n').textContent=N?N+' picked':'Pick';
   document.getElementById('ap-list-n').textContent=N?N+' picked · '+full+' school'+(full===1?'':'s')+' offer'+(full===1?'s':'')+(N>1?' all of them':' it'):'Pick the AP courses you want';
@@ -1747,12 +1754,12 @@ document.getElementById('ap-clear').addEventListener('click',()=>{apSet=[];apCha
 // open until Done, ✕, Escape or a click elsewhere
 const appop=document.getElementById('ap-pop');document.getElementById('map').appendChild(appop);L.DomEvent.disableClickPropagation(appop);L.DomEvent.disableScrollPropagation(appop);
 // it ends above the color key, so the Courses button stays visible to close it (phones especially), leaving room for
-// the key's tallest form (measured by drawing it for a moment: four picks, the longest names, a two-line summary) so
-// the list keeps its size as you tick and the key grows into the gap
+// the key's tallest form (measured by drawing it for a moment: 1 to AP_KEY_NAMES+1 picks with the longest names and
+// four-digit counts) so the list keeps its size as you tick and the key grows into the gap
 function placeApPop(){if(appop.hidden)return;const m=document.getElementById('map').getBoundingClientRect(),lg=document.getElementById('map-legend'),c=lg.getBoundingClientRect();
   let extra=0;if(metric==='apc'){const pk=document.getElementById('ap-picked'),sw=document.getElementById('ap-sw'),was=[pk.innerHTML,sw.innerHTML];
     const long=apNames().slice().sort((a,b)=>b.length-a.length);let tall=0;
-    [1,2,3,4,5].forEach(N=>{const k=apKey(N,long.slice(0,N),888);pk.innerHTML=k[0];sw.innerHTML=k[1];tall=Math.max(tall,lg.getBoundingClientRect().height)});
+    [1,2,3,4,5,AP_KEY_NAMES,AP_KEY_NAMES+1].forEach(N=>{const k=apKey(N,long.slice(0,N),Array(9999).fill(1));pk.innerHTML=k[0];sw.innerHTML=k[1];tall=Math.max(tall,lg.getBoundingClientRect().height)});
     pk.innerHTML=was[0];sw.innerHTML=was[1];extra=Math.max(0,tall-c.height)}
   appop.style.maxHeight=Math.max(200,Math.round(c.top-m.top-appop.offsetTop-8-extra))+'px'}
 addEventListener('resize',placeApPop);
