@@ -248,11 +248,19 @@ aside>*{flex-shrink:0}
 #color-panel [hidden]{display:none}
 #color-panel>*{flex-shrink:0}  /* a long AP course list scrolls the panel instead of squeezing the rows above it */
 .seg.two{grid-template-columns:repeat(2,1fr)}
-#ap-list{margin-top:10px;border-top:1px solid var(--line);padding-top:8px}
-.ap-list-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted)}
-#ap-list .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;padding:6px 0}
-#ap-boxes .grp-h{margin:10px 0 4px}
-#ap-boxes .chk{padding:6px 0;font-weight:500}#ap-boxes .chk input{width:18px;height:18px;flex:none;margin:0}
+/* AP courses: a wide pop-up over the map, the subject groups flowing into columns (phones: two, full width) */
+#ap-pop{position:absolute;top:10px;left:54px;z-index:1150;background:var(--panel);color:var(--fg);border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.3);padding:12px 16px 14px;width:min(700px,calc(100% - 64px));max-height:calc(100% - 20px);overflow:auto;box-sizing:border-box;font-size:15px}
+#ap-pop[hidden]{display:none}
+#ap-pop .cp-head{margin-bottom:4px}
+.ap-list-h{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.85rem;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:4px}
+.ap-acts{display:flex;align-items:center;gap:14px;flex:none}
+#ap-pop .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;padding:6px 0}#ap-pop .link-btn[hidden]{display:none}
+.ap-done{font:inherit;font-family:var(--display);font-weight:600;font-size:.85rem;padding:6px 16px;border-radius:6px;border:0;background:var(--fg);color:var(--panel);cursor:pointer}
+#ap-boxes{columns:3 190px;column-gap:24px}
+.ap-grp{break-inside:avoid;padding-top:8px}
+#ap-boxes .grp-h{margin:0 0 2px}
+#ap-boxes .layers{gap:0}
+#ap-boxes .chk{padding:4px 0;font-weight:500;align-items:flex-start;line-height:1.25}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
 .ap-picked{margin:0 0 6px;font-size:.85rem}.ap-picked .link-btn{all:unset;cursor:pointer;color:var(--hl);text-decoration:underline;font-weight:600;margin-left:4px}
 .ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
@@ -365,6 +373,9 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
 .leaflet-control-attribution a{color:inherit}
 .zl{font-family:var(--display);font-weight:700;font-size:11px;color:var(--fg);text-align:center;white-space:nowrap;text-shadow:var(--zl-halo);pointer-events:none;line-height:1}
 @media (max-width:760px){
+  #ap-pop{top:58px;left:10px;right:10px;width:auto;max-height:calc(100% - 70px);border-radius:12px}
+  #ap-boxes{columns:2 150px;column-gap:16px}
+  #ap-boxes .chk{padding:7px 0}
   /* phones: full-screen map; search, level and color are buttons on the map; details slide up in a sheet */
   html,body{overflow:hidden}
   :root{--peek:58px;--sheet:62vh}
@@ -575,6 +586,10 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
       <label class="chk" id="ly-parks-row"><input type="checkbox" id="ly-parks" checked> Parks &amp; water</label>
     </div>
   </div>
+  <div class="map-pop" id="ap-pop" role="dialog" aria-labelledby="ap-lab" hidden><div class="cp-head"><span class="lab" id="ap-lab">AP courses</span><button type="button" class="cp-close" id="ap-close" aria-label="Close">✕</button></div>
+    <div class="ap-list-h"><span id="ap-list-n" aria-live="polite"></span><span class="ap-acts"><button type="button" class="link-btn" id="ap-clear">Clear</button><button type="button" class="ap-done" id="ap-done">Done</button></span></div>
+    <div id="ap-boxes"></div>
+  </div>
   <div class="map-pop" id="search-dlg" role="dialog" aria-labelledby="sd-lab" hidden><div class="cp-head"><span class="lab" id="sd-lab">Search</span><button type="button" class="cp-close" id="sd-close" aria-label="Close search">✕</button></div></div>
   <div class="map-pop" id="lvl-pop" role="dialog" aria-labelledby="lp-lab" hidden><div class="cp-head"><span class="lab" id="lp-lab">School level</span><button type="button" class="cp-close" id="lp-close" aria-label="Close">✕</button></div></div>
   <div id="color-panel" role="dialog" aria-labelledby="mlab" hidden>
@@ -609,9 +624,6 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
         <input type="radio" name="metric" id="m-ap" value="ap"><label for="m-ap">AP count</label>
         <input type="radio" name="metric" id="m-apc" value="apc"><label for="m-apc">AP courses</label>
     </div>
-    <div id="ap-list" hidden>
-      <div class="ap-list-h"><span id="ap-list-n" aria-live="polite"></span><button type="button" class="link-btn" id="ap-clear">Clear</button></div>
-      <div id="ap-boxes"></div>
     </div>
   </div>
   <div id="map-legend">
@@ -1653,13 +1665,13 @@ document.querySelectorAll('#search-sec [role=tab]').forEach(b=>b.addEventListene
   document.getElementById('addr-sec').hidden=s!=='addr';document.getElementById('find-sec').hidden=s!=='school';
   document.getElementById('addr-res').hidden=true;document.getElementById('res').hidden=true;document.getElementById('llmsg').hidden=true;
   document.getElementById(s==='addr'?'ll':'q').focus()}));
-// AP classes: the count key, or the picked courses (a checklist in the Color by panel, #ap-boxes, filled once the
+// AP classes: the count key, or the picked courses (a checklist in its own pop-up, #ap-pop / #ap-boxes, filled once the
 // high school data is in, each course with how many schools list it), the "how many of them" key and hints
 function apSchools(){return Object.keys(LV.hs.P||{})}
 function apBoxes(){const box=document.getElementById('ap-boxes');if(box.childElementCount||!LV.hs||!LV.hs.APC)return;
   const n={};apSchools().forEach(d=>(LV.hs.AP[d]||[]).forEach(i=>{n[i]=(n[i]||0)+1}));let i=0;
-  box.innerHTML=LV.hs.APC.map(([a,l])=>'<div class="grp-h">'+esc(a)+'</div><div class="layers">'+l.map(nm=>{const k=i++;
-    return '<label class="chk"><input type="checkbox" value="'+k+'"> <span>'+esc(nm)+'</span><small title="High schools that list it">'+(n[k]||0)+'</small></label>'}).join('')+'</div>').join('');
+  box.innerHTML=LV.hs.APC.map(([a,l])=>'<div class="ap-grp"><div class="grp-h">'+esc(a)+'</div><div class="layers">'+l.map(nm=>{const k=i++;
+    return '<label class="chk"><input type="checkbox" value="'+k+'"> <span>'+esc(nm)+'</span><small title="High schools that list it">'+(n[k]||0)+'</small></label>'}).join('')+'</div></div>').join('');
   box.addEventListener('change',e=>{const b=e.target;if(b.type!=='checkbox')return;const k=+b.value;
     apSet=b.checked?apSet.concat([k]).sort((x,y)=>x-y):apSet.filter(x=>x!==k);apChanged()})}
 function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec()}
@@ -1667,7 +1679,7 @@ function apChanged(){markEngaged();syncLegend();restyle();drawLabels();setColorP
 function refreshApSec(){const o=card.querySelector('.sec[data-sec="ap"]'),dd=card.querySelector('.school[data-d]');if(!o||!dd)return;
   const t=document.createElement('div');t.innerHTML=apSec(dd.dataset.d);const nw=t.firstElementChild;if(nw){nw.open=o.open;o.replaceWith(nw)}}
 function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementById('leg-ap');la.hidden=!ap;
-  document.getElementById('ap-list').hidden=metric!=='apc';if(!ap||!LV.hs||!LV.hs.APC)return;apBoxes();
+  if(metric!=='apc')setApPop(false);if(!ap||!LV.hs||!LV.hs.APC)return;apBoxes();
   document.querySelectorAll('#ap-boxes input').forEach(b=>{b.checked=apSet.includes(+b.value)});
   const all=apSchools(),ns=all.map(apCount).filter(n=>n!=null&&n>=0).sort((a,b)=>a-b),N=apSet.length;
   const sw=b=>'<span><i'+(b[1].startsWith('var(')?' class="off"':' style="background:'+b[1]+'"')+'></i>'+b[2]+'</span>';
@@ -1684,7 +1696,16 @@ function syncAp(){const ap=metric==='ap'||metric==='apc',la=document.getElementB
   document.getElementById('ap-sw').innerHTML=N?apcBins().map(b=>[0,b[2],b[0]]).map(sw).join('')+sw([0,'var(--off)',N>1?'None of them':'Doesn’t'])+'<span><i class="na"></i>No data</span>':'';
   document.getElementById('ap-hint').innerHTML=(N?'High schools by how many of the courses you picked they list on MySchools. ':'Pick AP courses in Color by to see which high schools offer them. ')+'Ask a school whether each class runs every year. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'}
 document.getElementById('ap-clear').addEventListener('click',()=>{apSet=[];apChanged()});
-document.getElementById('map-legend').addEventListener('click',e=>{if(e.target.closest('[data-ap-edit]')){setPanel(true);setTimeout(()=>document.getElementById('ap-list').scrollIntoView({block:'nearest'}),30)}});
+// the AP courses pop-up: opens when you pick AP courses or tap Edit in the key; the map recolors as you tick, so it stays
+// open until Done, ✕, Escape or a click elsewhere
+const appop=document.getElementById('ap-pop');document.getElementById('map').appendChild(appop);L.DomEvent.disableClickPropagation(appop);L.DomEvent.disableScrollPropagation(appop);
+function setApPop(open){if(appop.hidden===!open)return;if(!open&&appop.contains(document.activeElement))document.activeElement.blur();appop.hidden=!open;
+  if(!open)return;if(typeof closePops==='function')closePops();setPanel(false);syncAp();
+  const f=appop.querySelector('#ap-boxes input:checked')||appop.querySelector('#ap-boxes input');if(f)f.focus({preventScroll:true})}
+['ap-close','ap-done'].forEach(id=>document.getElementById(id).addEventListener('click',()=>setApPop(false)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!appop.hidden)setApPop(false)});
+document.addEventListener('click',e=>{if(!appop.hidden&&!appop.contains(e.target)&&!e.target.closest('[data-ap-edit],label[for=m-apc]'))setApPop(false)});
+document.getElementById('map-legend').addEventListener('click',e=>{if(e.target.closest('[data-ap-edit]'))setApPop(true)});
 function syncLegend(){syncName();syncAp();const lo=document.getElementById('leg-out');lo.hidden=!isOut(metric);
   if(isOut(metric)){const o=OUT[metric],s=o.stops,pct=v=>outPos(metric,v)+'%',rv=n=>'var(--r-'+n+')';
     document.getElementById('out-bar').style.background='linear-gradient(90deg,'+rv(s[0][1])+' 0%,'+rv(s[0][1])+' '+pct(s[0][0])+','+rv(s[1][1])+' '+pct(s[1][0])+','+rv(s[2][1])+' '+pct(s[2][0])+','+rv(s[2][1])+' 100%)';
@@ -1707,7 +1728,7 @@ function showGroup(g){curGroup=g;
   document.getElementById('grp-src').textContent=g==='tests'?(level==='hs'?'DOE School Quality Snapshot · __SNAPSHOT__':'New York State tests · __TESTS__'):GROUP_SRC[g];}
 let quietColor=false;
 document.querySelectorAll('input[name=metric]').forEach(r=>r.addEventListener('change',()=>{const s=r.closest('.seg[data-g]');if(s){lastPick[s.dataset.g]=r.value;showGroup(s.dataset.g)}
-  if(!quietColor)markEngaged();metric=r.value;syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec();
+  if(!quietColor)markEngaged();metric=r.value;syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshApSec();if(r.value==='apc'&&!quietColor)setApPop(true);
   // picking a Color by opens its section on the card; a ?c= link loading (quietColor) opens it only if you've never
   // opened or closed that section yourself (SEC)
   if(SEC_FOR[metric])card.querySelectorAll('.sec[data-sec^="'+SEC_FOR[metric]+'"]').forEach(x=>{if(!quietColor||!(x.dataset.sec in SEC))x.open=true})}));
