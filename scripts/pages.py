@@ -647,17 +647,16 @@ def _sports(sp, vocab, groups, dm=None):
 def sports_html(sp, vocab, groups, dm=None, campus=None):
     """A high school's sports, as the map card shows them (src/template.html spSec): its PSAL teams a sport to a row
     with who plays it, then other sports and teams as the school writes them, then at a single-sex school the other
-    gender's teams, apart, with why. campus: (the PSAL campus's name, [the other schools' names, as HTML]) when the
-    school is on one (build.py PCA), a line before the teams."""
+    gender's teams, apart, with why. campus: (the PSAL campus's name, "" when it's a member's own, [the other schools'
+    names, as HTML]) when the school is on one (build.py PCA), a line before the teams."""
     by, n, other, apart = _sports(sp, vocab, groups, dm)
     if not by and not other and not apart:
         return ""
     h = ""
-    if campus:
+    if campus and campus[1]:
         cn, others = campus
-        h += (f"<p>Plays on the PSAL’s <b>{e(cn)}</b> teams"
-              + (", with " + (", ".join(others[:-1]) + " and " + others[-1] if len(others) > 1 else others[0]) if others else "")
-              + ".</p>")
+        h += ("<p>Shares its PSAL teams with " + (", ".join(others[:-1]) + " and " + others[-1] if len(others) > 1 else others[0])
+              + (f", as <b>{e(cn)}</b>" if cn else "") + ".</p>")
     if by:
         h += (f'<h3 class="ex-h">PSAL teams · {n}</h3><table class="spt">'
               + "".join(f"<tr><td>{e(s)}</td><td>{' · '.join(by[s])}</td></tr>" for s in sorted(by, key=str.lower))
