@@ -298,7 +298,7 @@ aside>*{flex-shrink:0}
 #ap-boxes .layers{display:block}
 #ap-boxes .chk{break-inside:avoid;padding:3px 0;font-weight:500;align-items:flex-start;line-height:1.2;font-size:.95em}#ap-boxes .chk input{width:17px;height:17px;flex:none;margin:1px 0 0}
 #ap-boxes .chk small{margin-left:auto;color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
-.ap-picked{margin:0 0 6px;font-size:.85rem}.tip-ap{display:inline-block;white-space:normal;max-width:260px;font-size:.92em;color:var(--muted)}.ap-k{color:var(--muted);font-variant-numeric:tabular-nums}
+.ap-picked{margin:0 0 6px;font-size:.85rem}.tip-ap{display:inline-block;white-space:normal;width:max-content;max-width:280px;font-size:.92em;color:var(--muted)}.tip-ap b{color:var(--fg);font-weight:600}.ap-k{color:var(--muted);font-variant-numeric:tabular-nums}
 .ap li.pick{font-weight:700}.ap li.pick::marker{content:"✓ "}
 #map-legend .hint{display:none;max-height:28vh;overflow:auto}
 #map-legend.open .hint{display:block}
@@ -818,9 +818,12 @@ const apColor=v=>metric==='apc'?(v?apcBins().find(b=>v>=b[1])[2]:'var(--off)'):v
 const apPickNames=()=>{const n=apNames();return apSet.map(i=>n[i])};
 // yes-or-no colorings (G&T, dual language, one AP course): labels and tooltips name only the schools that have it
 const isYes=()=>isProg(metric)||metric==='apc'&&apSet.length===1;
-// a tooltip's value: as fmtVal, and for some but not all of the picked AP courses, which ones, on a line of their own
-function tipVal(d,v){const t=fmtVal(v);if(metric!=='apc'||!(v>0&&v<apSet.length))return t;const a=LV.hs.AP[d]||[],n=apNames();
-  return t+'<br><span class="tip-ap">'+apSet.filter(i=>a.includes(i)).map(i=>esc(n[i])).join(', ')+'</span>'}
+// a tooltip's value: as fmtVal, and with two or more AP courses picked, which of them the school has and is missing,
+// each list up to AP_KEY_NAMES courses (then "and N more"), on lines of their own
+function tipVal(d,v){const t=fmtVal(v);if(metric!=='apc'||apSet.length<2||!v)return t;const a=LV.hs.AP[d]||[],n=apNames();
+  const list=ix=>ix.slice(0,ix.length>AP_KEY_NAMES?AP_KEY_NAMES-1:ix.length).map(i=>esc(n[i])).join(', ')+(ix.length>AP_KEY_NAMES?', and '+(ix.length-AP_KEY_NAMES+1)+' more':'');
+  const has=apSet.filter(i=>a.includes(i)),miss=apSet.filter(i=>!a.includes(i));
+  return t+'<br><span class="tip-ap"><b>Has:</b> '+list(has)+(miss.length?'<br><b>Missing:</b> '+list(miss):'')+'</span>'}
 const hasGT=d=>!!(X[d]&&X[d][8]&&X[d][8].includes('G&T'));
 const dualLang=d=>X[d]&&X[d][4]||null;
 // dual language by language: the common ones get their own color, the rest share "Other"; a school (or shared zone)
