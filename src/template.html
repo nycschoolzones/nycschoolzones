@@ -1488,18 +1488,22 @@ function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)r
 // high school sports (MySchools; LV.hs.SP: one list per group as indexes into SPV; SPG: [heading, one, many], the
 // PSAL groups marked by one 'PSAL team', build.py SP_GROUPS): the PSAL team count up top; inside, a sport to a row
 // with who plays it ("Basketball  Boys · Girls"), then other sports and teams as the school writes them. With teams
-// picked (Color by Teams), the school's picked ones get a ✓ and a "Missing:" line lists the rest
+// picked (Color by Teams), the school's picked ones get a ✓ and a "Missing:" line lists the rest. An all-girls
+// school's boys' teams (or the other way round, by the Demographic Snapshot) are listed apart and not counted: they're
+// shared teams its students don't play on (build.py psal_teams leaves them out of Color by too)
 function spSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.SP&&lp.SP[d];if(!x)return '';
-  const K=KINDS.sp,pick=metric==='spt'?K.set:[],nm=kNames(K),by={},other=[];let n=0;
-  x.forEach((l,i)=>{const g=lp.SPG[i];if(!g)return;if(g[1]==='PSAL team'){n+=l.length;l.forEach(k=>{const s=lp.SPV[k];(by[s]=by[s]||[]).push(g[0])})}else other.push(...l.map(k=>lp.SPV[k]))});
+  const K=KINDS.sp,pick=metric==='spt'?K.set:[],nm=kNames(K),by={},other=[],dm=DM[d],kk=DEMO_GROUPS.length;let n=0;
+  const only=dm&&dm[kk+2]!=null&&dm[kk+3]!=null&&!(dm[kk+2]&&dm[kk+3])&&(dm[kk+2]||dm[kk+3])?(dm[kk+2]?'Girls':'Boys'):'',not=only==='Girls'?'Boys':only?'Girls':'',apart=[];
+  x.forEach((l,i)=>{const g=lp.SPG[i];if(!g)return;if(g[0]===not){apart.push(...l.map(k=>lp.SPV[k]));return}if(g[1]==='PSAL team'){n+=l.length;l.forEach(k=>{const s=lp.SPV[k];(by[s]=by[s]||[]).push(g[0])})}else other.push(...l.map(k=>lp.SPV[k]))});
   const sports=Object.keys(by).sort((a,b)=>a.localeCompare(b)),no=other.filter(s=>s.length<=80).length;
   const isPicked=(g,s)=>pick.includes(nm.indexOf(g+' '+s)),has=new Set(sports.flatMap(s=>by[s].map(g=>g+' '+s)));
   const mine=pick.length?pick.filter(k=>has.has(nm[k])).length:0,miss=pick.filter(k=>!has.has(nm[k]));
   const sum=[n?n+' PSAL team'+(n>1?'s':'')+(pick.length?' · '+mine+' of your '+pick.length:''):'',no?no+' other sport'+(no>1?'s':''):''].filter(Boolean).join(' · ');
   const body=(miss.length?'<p class="ap-miss"><b>Missing:</b> '+miss.map(k=>esc(nm[k])).join(', ')+'</p>':'')
     +(sports.length?'<div class="ex"><div class="adm-h">PSAL teams · '+n+'</div><table class="spt">'+sports.map(s=>'<tr><td>'+esc(s)+'</td><td>'+by[s].map(g=>isPicked(g,s)?'<b class="pick">✓ '+g+'</b>':g).join(' · ')+'</td></tr>').join('')+'</table></div>':'')
-    +(other.length?'<div class="ex"><div class="adm-h">Other sports and teams</div><p>'+esc(other.join(', '))+'</p></div>':'');
-  return sec('sp','<span class="st">Sports<small>'+sum+'</small></span>'+(n?'<span class="sa">'+n+'</span>':''),body+'<small class="ex-src">As the school lists them on MySchools. PSAL is the public schools’ league; some teams are shared by the schools in one building.</small>')}
+    +(other.length?'<div class="ex"><div class="adm-h">Other sports and teams</div><p>'+esc(other.join(', '))+'</p></div>':'')
+    +(apart.length?'<div class="ex"><div class="adm-h">'+not+'’ teams, shared</div><p>'+esc(apart.join(', '))+'. MySchools lists these too, but this is an all-'+only.toLowerCase()+' school: they’re most likely teams it shares with other schools, which its students don’t play on.</p></div>':'');
+  return sec('sp','<span class="st">Sports<small>'+sum+'</small></span>'+(n?'<span class="sa">'+n+'</span>':''),body+'<small class="ex-src">As the school lists them on MySchools. PSAL is the public schools’ league; some teams are shared by several schools.</small>')}
 // high school AP classes (MySchools; LV.hs.AP: indexes into the catalog LV.hs.APC, [[subject area, [names]]] counted
 // through in order, build.py ap_courses): how many up top, a sorted list per subject area inside
 function apSec(d){const lp=LV.hs,x=level==='hs'&&lp&&lp.AP&&lp.AP[d];
@@ -1748,14 +1752,14 @@ function syncPick(){const K=kindOf(metric),la=document.getElementById('leg-ap');
     const v=apAll().map(d=>kCount(K,d)),k=(lo,hi)=>v.filter(x=>x!=null&&x>=lo&&x<hi).length,B=K.bins;
     document.getElementById('ap-sw').innerHTML=B.slice(1).map((b,i)=>apSw(b[1],b[2],k(B[i][0],b[0]))).join('')+apSw(B[0][1],B[0][2],k(0,1))+(K===KINDS.ap?apSw(AP_CH,'Charter, offers AP',k(-1,0)):'')+apSw('na','No data',v.filter(x=>x==null).length);
     document.getElementById('ap-hint').innerHTML=K===KINDS.ap?'How many AP classes each high school lists on MySchools. Half of NYC high schools list '+half+' or more; the most list '+most+'. To find schools with the courses you want, pick “AP courses”. More AP classes isn’t a rating: small and specialized schools often offer a few. Shared zones show the school with the most. Charter schools aren’t in the MySchools directory: “Charter, offers AP” means the __SNAPSHOT__ School Quality Snapshot shows students taking AP classes or passing AP exams there, without saying which or how many. <span class="nd"></span> No data: a charter school whose Snapshot shows no AP classes, or that has no Snapshot yet.'
-      :'How many PSAL teams each high school lists on MySchools, boys’, girls’ and coed added up. Half of NYC high schools list '+half+' or more; the most list '+most+'. To find schools with the teams you want, pick “Teams”. More teams isn’t a rating, and some teams are shared by the schools in one building, so they count at each. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which aren’t in the MySchools directory.';return}
+      :'How many PSAL teams each high school lists on MySchools, boys’, girls’ and coed added up. Half of NYC high schools list '+half+' or more; the most list '+most+'. To find schools with the teams you want, pick “Teams”. More teams isn’t a rating, and some teams are shared by several schools, so they count at each. At all-girls and all-boys schools, only their own students’ teams count. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which aren’t in the MySchools directory.';return}
   const full=all.filter(d=>N&&kVal(d)===N).length,key=pickKey(K,N,pickNames(K),N?apAll().map(kVal):null);
   picked.innerHTML=key[0];document.getElementById('ap-sw').innerHTML=key[1];
   document.getElementById('ap-btn-n').textContent=N?N+' picked':'Pick';
   document.getElementById('ap-list-n').textContent=N?N+' picked · '+full+' school'+(full===1?'':'s')+' '+K.has[full===1?0:1]+(N>1?' all of them':' it'):'Pick the '+K.title.replace(/^PSAL /,'')+' you want';
   document.getElementById('ap-clear').hidden=!N;
   document.getElementById('ap-hint').innerHTML=K===KINDS.ap?(N?'High schools by how many of the courses you picked they list on MySchools. ':'Pick AP courses in Color by to see which high schools offer them. ')+'Ask a school whether each class runs every year. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which don’t list their AP courses on MySchools.'
-    :(N?'High schools by how many of the PSAL teams you picked they list on MySchools. ':'Pick PSAL teams in Color by to see which high schools have them. ')+'Some teams are shared by the schools in one building; ask a school whether each team plays this season. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which aren’t in the MySchools directory.'}
+    :(N?'High schools by how many of the PSAL teams you picked they list on MySchools. ':'Pick PSAL teams in Color by to see which high schools have them. ')+'Some teams are shared by several schools; ask a school whether each team plays this season. Shared zones show the school with the most. <span class="nd"></span> No data: charter schools, which aren’t in the MySchools directory.'}
 document.getElementById('ap-clear').addEventListener('click',()=>{const K=kindOf(metric);if(K){K.set=[];pickChanged()}});
 // the pick pop-up: opens when you pick AP courses or Teams, or tap the button next to Color by (#ap-btn, shown only for
 // those); the map recolors as you tick, so it stays open until Done, ✕, Escape or a click elsewhere

@@ -617,25 +617,39 @@ def extras_html(ex, vocab, groups, title="Classes, sports and activities"):
             '<p class="src">As the school lists them on MySchools.</p>')
 
 
-def _sports(sp, vocab, groups):
+def _only(dm):
+    """"Girls" for an all-girls school, "Boys" for an all-boys one, else "" (Demographic Snapshot row: girls dm[7],
+    boys dm[8]), as the map card's spSec works it out."""
+    if not dm or len(dm) < 9 or dm[7] is None or dm[8] is None or (dm[7] and dm[8]) or not (dm[7] or dm[8]):
+        return ""
+    return "Girls" if dm[7] else "Boys"
+
+
+def _sports(sp, vocab, groups, dm=None):
     """A high school's sports (build.py SP, SPV, SPG): ({sport: [who plays it, "Boys", "Girls", "Coed"]} for its PSAL
-    teams, how many PSAL teams, [other sports and teams])."""
-    by, n, other = {}, 0, []
+    teams, how many PSAL teams, [other sports and teams], [the other gender's teams at a single-sex school: shared
+    teams its students don't play on, not counted; build.py psal_teams])."""
+    only = _only(dm)
+    other_g = {"Girls": "Boys", "Boys": "Girls"}.get(only)
+    by, n, other, apart = {}, 0, [], []
     for g, l in zip(groups, sp or []):
-        if g[1] == "PSAL team":
+        if g[0] == other_g:
+            apart += [vocab[k] for k in l]
+        elif g[1] == "PSAL team":
             n += len(l)
             for k in l:
                 by.setdefault(vocab[k], []).append(g[0])
         else:
             other += [vocab[k] for k in l]
-    return by, n, other
+    return by, n, other, apart
 
 
-def sports_html(sp, vocab, groups):
+def sports_html(sp, vocab, groups, dm=None):
     """A high school's sports, as the map card shows them (src/template.html spSec): its PSAL teams a sport to a row
-    with who plays it, then other sports and teams as the school writes them."""
-    by, n, other = _sports(sp, vocab, groups)
-    if not by and not other:
+    with who plays it, then other sports and teams as the school writes them, then at a single-sex school the other
+    gender's teams, apart, with why."""
+    by, n, other, apart = _sports(sp, vocab, groups, dm)
+    if not by and not other and not apart:
         return ""
     h = ""
     if by:
@@ -644,13 +658,18 @@ def sports_html(sp, vocab, groups):
               + "</table>")
     if other:
         h += f'<h3 class="ex-h">Other sports and teams</h3><p>{e(", ".join(other))}</p>'
+    if apart:
+        only = _only(dm)
+        h += (f'<h3 class="ex-h">{"Boys" if only == "Girls" else "Girls"}’ teams, shared</h3><p>{e(", ".join(apart))}. '
+              f"MySchools lists these too, but this is an all-{only.lower()} school: they’re most likely teams it shares "
+              "with other schools, which its students don’t play on.</p>")
     return ("<h2>Sports</h2>" + h + '<p class="src">As the school lists them on MySchools. PSAL is the public schools’ '
-            "league; some teams are shared by the schools in one building.</p>")
+            "league; some teams are shared by several schools.</p>")
 
 
-def sports_summary(sp, vocab, groups):
+def sports_summary(sp, vocab, groups, dm=None):
     """The folded card's line: "18 PSAL teams · 3 other sports" (an entry over 80 characters is prose, not a sport)."""
-    by, n, other = _sports(sp, vocab, groups)
+    by, n, other, _ = _sports(sp, vocab, groups, dm)
     no = sum(1 for x in other if len(x) <= 80)
     return " · ".join(x for x in (f"{n} PSAL team{'s' if n != 1 else ''}" if n else "",
                                   f"{no} other sport{'s' if no != 1 else ''}" if no else "") if x)
@@ -1156,7 +1175,7 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                 sp = (HS.get("SP") or {}).get(dbn)
                 if sp:
                     spv, spg = HS.get("SPV") or [], HS.get("SPG") or []
-                    cards.append((sports_html(sp, spv, spg), sports_summary(sp, spv, spg), False))
+                    cards.append((sports_html(sp, spv, spg, dm), sports_summary(sp, spv, spg, dm), False))
             cards.append((extras_html(ex, exv, exg, "Classes and activities" if lv == "hs" else "Classes, sports and activities"),
                           extras_summary(ex, exv, exg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)
