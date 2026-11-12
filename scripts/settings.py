@@ -36,6 +36,9 @@ DEMOGRAPHICS_LABEL = "2025–26"
 # NYC-wide high school averages from that Snapshot, quoted next to each school's numbers
 CITY_GRAD = 81        # 4-year graduation rate, %
 CITY_READINESS = 54   # college readiness score, of 100
+# NYC-wide middle school average from that Snapshot: share of 8th graders who earned high school credit (passed an
+# accelerated, Regents-level course), %
+CITY_HS_CREDIT = 44
 
 # ---------- color ramps ----------
 
@@ -116,6 +119,19 @@ AP_COURSES = (
 # MySchools spellings that differ from the College Board's (older course names), without "AP "
 AP_ALIASES = {"Pre-Calculus": "Precalculus", "Studio Art - 2D": "2-D Art and Design", "Studio Art - 3D": "3-D Art and Design",
               "Studio Art - Drawing": "Drawing"}
+
+# Middle school accelerated and honors classes (ms_directory.json "acc", as fetch_data.py _ms_extras names them:
+# "Algebra (accelerated)", "Math (honors)"), by subject for the map's Color by "Accelerated classes" and the card's
+# list (build.py ms_accelerated). A class goes in the area that names what comes before its " (": "Algebra II" in
+# Math. The build warns about one it can't place, which lands in "Other": add it here.
+MS_ACC_AREAS = (
+    ("Math", ("Algebra", "Algebra II", "Geometry", "Math")),
+    ("Science", ("Biology", "Chemistry", "Earth & Space Science", "Earth Science", "Physics", "Science")),
+    ("English", ("ELA",)),
+    ("Social studies", ("Global History & Geography II", "Social Studies", "US History")),
+    ("World languages", ("World Languages",)),
+    ("Arts and technology", ("Arts", "Comp Sci/Math Tech")),
+)
 
 # Application dates for the next admissions round, one per level: the line under the panel title ("Apply by Fri, Dec 4
 # · 24 days left") and "Key dates" in each "How … admissions work" window. Dates are YYYY-MM-DD. "offers_text", when

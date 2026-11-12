@@ -289,7 +289,7 @@ def more(*links):
 FOLD_KEYS = (("DOE ratings", "rate"), ("High school ratings", "rate"), ("State test scores", "tests"),
              ("Graduation and college", "grad"), ("Advanced courses", "grad"), ("Kindergarten admissions", "adm"),
              ("Grade ", "adm"), ("High school programs", "adm"), ("Pre-K", "prek"),
-             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
+             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Accelerated", "acc"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
 
 
 def fold_card(html, summary="", start_open=False):
@@ -697,6 +697,32 @@ def ap_html(ix, areas):
     return ("<h2>AP classes</h2>" + h +
             f'<p class="src">As the school lists them on MySchools, {settings.MYSCHOOLS_LABEL}, by the College Board’s '
             "subject areas. Ask the school which run every year.</p>")
+
+
+def acc_html(ix, areas, credit=None):
+    """A middle school's accelerated and honors classes, as the map card shows them (src/template.html accSec): the
+    share of 8th graders who earned high school credit (the Snapshot's, X[10]) up top, then a list per subject. ix:
+    indexes into the catalog areas, [[subject, [names]]] counted through in order (build.py ms_accelerated)."""
+    if not ix and credit is None:
+        return ""
+    has, i, h = set(ix or []), 0, ""
+    for a, names in areas:
+        got = [n for k, n in enumerate(names, i) if k in has]
+        i += len(names)
+        if got:
+            h += f'<h3 class="ex-h">{e(a)}</h3><ul class="ap">' + "".join(f"<li>{e(n)}</li>" for n in got) + "</ul>"
+    cred = (f"<p><b>{round(credit)}%</b> of the school’s 8th graders passed an accelerated, Regents-level class in "
+            f"{SNAPSHOT_LABEL}, earning high school credit (NYC: {settings.CITY_HS_CREDIT}%).</p>" if credit is not None else "")
+    src = ((f"Classes as the school lists them on MySchools, {settings.MYSCHOOLS_LABEL}. Accelerated classes can earn "
+            "high school credit; honors classes don’t. Ask the school who can take each one. " if ix else "")
+           + (f"8th graders passing: {SNAPSHOT_LABEL} School Quality Snapshot." if credit is not None else ""))
+    return "<h2>Accelerated classes</h2>" + cred + h + f'<p class="src">{src}</p>'
+
+
+def acc_summary(ix, credit=None):
+    """The folded card's line: "4 classes · 87% of 8th graders passed one"."""
+    return " · ".join(x for x in (f"{len(ix)} class{'es' if len(ix) > 1 else ''}" if ix else "",
+                                  f"{round(credit)}% of 8th graders passed one" if credit is not None else "") if x)
 
 
 def ap_charter_html(q):
@@ -1174,6 +1200,9 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
         if lv in ("ms", "hs"):
             LD = MS if lv == "ms" else HS
             ex, exv, exg = (LD.get("EX") or {}).get(dbn), LD.get("EXV") or [], LD.get("EXG") or []
+            if lv == "ms":
+                ax, credit = (MS.get("AX") or {}).get(dbn), (x[10] if len(x) > 10 else None)
+                cards.append((acc_html(ax, MS.get("AXC") or [], credit), acc_summary(ax, credit), False))
             if lv == "hs":
                 ap = (HS.get("AP") or {}).get(dbn)
                 if ap:

@@ -9,6 +9,8 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ## Unreleased
 
 ### Added
+- Middle schools can now be colored by accelerated classes, in a new "Accelerated classes" group under Color by. **8th graders passing** colors each middle school by the share of its 8th graders who passed an accelerated class: a Regents-level high school course like Algebra I or Living Environment, which earns them high school credit early. From the 2024–25 School Quality Snapshot (NYC average: 44%). **Classes offered** opens a checklist of the accelerated and honors classes middle schools list on MySchools, by subject, each with how many schools offer it: tick the ones you want, like Algebra and Geometry, and the map shows which schools have all of them and which have some. A link to the map keeps your picks.
+- Middle school cards and school pages have a new "Accelerated classes" section: the share of its 8th graders who passed an accelerated class, next to the citywide share, and its accelerated and honors classes by subject. With classes picked on the map, the card ticks the ones the school has and lists the ones it's missing. These classes used to be one line under "Classes, sports and activities".
 - Charter high schools now have a Sports section too, with their PSAL teams for 2026–27 from the PSAL's own lists, since charter schools aren't in the MySchools directory. That covers 47 charter high schools, like KIPP NYC College Prep and the Uncommon high schools. They also count in Team count and Teams on the map, where they used to show as no data. Charter schools the PSAL lists no teams for still show as no data.
 
 ## 1.76.0 (2026-11-11)
