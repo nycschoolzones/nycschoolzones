@@ -289,7 +289,7 @@ def more(*links):
 FOLD_KEYS = (("DOE ratings", "rate"), ("High school ratings", "rate"), ("State test scores", "tests"),
              ("Graduation and college", "grad"), ("Advanced courses", "grad"), ("Kindergarten admissions", "adm"),
              ("Grade ", "adm"), ("High school programs", "adm"), ("Pre-K", "prek"),
-             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Accelerated", "acc"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
+             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Accelerated", "acc"), ("Electives", "el"), ("Arts and", "ex"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
 
 
 def fold_card(html, summary="", start_open=False):
@@ -604,21 +604,34 @@ def about_html(who, lunch=False, lv="es"):
             + "</details>")
 
 
-def extras_html(ex, vocab, groups, title="Classes, sports and activities"):
+def ex_part(g):
+    """Which of a middle school's three sections an extras group goes in, as the map card's EX_PART: "el" its
+    electives, "sp" its sports, "ex" the rest (arts courses, clubs: "Arts and activities")."""
+    return "el" if len(g) > 3 and g[3] == "Electives" else "sp" if g[0] == "Sports" and len(g) < 4 else "ex"
+
+
+def ex_split(ex, groups, part):
+    """The lists and groups of one part (ex_part) of a middle school's extras."""
+    keep = [i for i, g in enumerate(groups) if ex_part(g) == part]
+    return [(ex or [])[i] if i < len(ex or []) else [] for i in keep], [groups[i] for i in keep]
+
+
+def extras_html(ex, vocab, groups, title="Classes, sports and activities", single=False):
     """Middle and high school classes, sports and activities, as the map card shows them (src/template.html exSec).
     ex: one list per group, as indexes into vocab; groups: [heading, one, many] each (build.py EX_GROUPS). High schools'
-    are titled "Classes and activities": their sports have a section of their own (sports_html)."""
+    are titled "Classes and activities": their sports have a section of their own (sports_html). Middle schools' come
+    in three cards (ex_part); single: a card of one list (Electives, Sports), which leaves out the list's heading."""
     if not ex:
         return ""
     # a group with a fourth item is one kind of a middle school's electives or clubs (build.py ms_extras): the list's
     # heading once, then a line per kind
-    h, top = "", None
+    h, top = "", ("Electives" if single else None)
     for g, l in zip(groups, ex):
         if not l:
             continue
         names = e(", ".join(vocab[k] for k in l))
         if len(g) < 4:
-            h, top = h + f'<h3 class="ex-h">{g[0]}</h3><p>{names}</p>', None
+            h, top = h + ("" if single else f'<h3 class="ex-h">{g[0]}</h3>') + f"<p>{names}</p>", None
             continue
         if g[3] != top:
             top = g[3]
@@ -1237,8 +1250,12 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                         camp = (camp[0], [label(m) for m in known] + ([f"{k} other school{'s' if k > 1 else ''}"] if k else []))
                     psal = HS.get("SPY") if dbn in (HS.get("SPP") or []) else None
                     cards.append((sports_html(sp, spv, spg, dm, camp, psal), sports_summary(sp, spv, spg, dm), False))
-            cards.append((extras_html(ex, exv, exg, "Classes and activities" if lv == "hs" else "Classes, sports and activities"),
-                          extras_summary(ex, exv, exg), False))
+            if lv == "hs":
+                cards.append((extras_html(ex, exv, exg, "Classes and activities"), extras_summary(ex, exv, exg), False))
+            else:  # electives and sports each get a card; arts courses and clubs share one
+                for part, title in (("el", "Electives"), ("sp", "Sports"), ("ex", "Arts and activities")):
+                    pe, pg = ex_split(ex, exg, part)
+                    cards.append((extras_html(pe, exv, pg, title, single=part != "ex"), extras_summary(pe, exv, pg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)
 
         # nearby options: other schools at this level in the same district
