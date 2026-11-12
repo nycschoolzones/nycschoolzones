@@ -60,7 +60,7 @@ def fill_settings(template):
     ticks = "".join(f'<span style="left:{v}%">{v}{"%" if v == hi else ""}</span>' for v, _ in settings.TEST_STOPS)
     for k, v in {"__SNAPSHOT_YEAR__": settings.SNAPSHOT_YEAR, "__SNAPSHOT__": settings.SNAPSHOT_LABEL,
                  "__PREK__": settings.PREK_LABEL, "__MYSCHOOLS__": settings.MYSCHOOLS_LABEL,
-                 "__CITY_GRAD__": str(settings.CITY_GRAD), "__CITY_READINESS__": str(settings.CITY_READINESS), "__BLUE_BOOK__": settings.BLUE_BOOK_LABEL,
+                 "__CITY_GRAD__": str(settings.CITY_GRAD), "__CITY_READINESS__": str(settings.CITY_READINESS), "__CITY_HS_CREDIT__": str(settings.CITY_HS_CREDIT), "__BLUE_BOOK__": settings.BLUE_BOOK_LABEL,
                  "__DEMOGRAPHICS__": settings.DEMOGRAPHICS_LABEL, "__TESTS__": settings.TESTS_LABEL, "__TESTS_NOTE_SHORT__": settings.TESTS_NOTE_SHORT,
                  "__TESTS_NOTE__": settings.TESTS_NOTE,
                  "__CITY_ELA_ES__": str(settings.CITY_ELA_ES), "__CITY_MATH_ES__": str(settings.CITY_MATH_ES),
@@ -595,7 +595,8 @@ def short_group(nm):
 # Classes, sports and activities on the card and the school page, per level: (key in the directory file, heading,
 # what the folded summary counts it as: singular, plural; groups with the same word are added up, "" not counted)
 EX_GROUPS = {
-    "ms": (("acc", "Accelerated and honors classes", "advanced class", "advanced classes"), ("art", "Arts courses", "", ""),
+    # accelerated and honors classes have their own section (ms_accelerated)
+    "ms": (("art", "Arts courses", "", ""),
            ("el", "Electives", "", ""), ("sp", "Sports", "sport", "sports"),
            ("ac", "Clubs and activities", "activity", "activities")),
     # AP classes have their own section (ap_courses)
@@ -678,6 +679,26 @@ def ap_courses(rows):
         if ix:
             ap[dbn] = ix
     return {"AP": ap, "APC": areas}
+
+
+def ms_accelerated(rows):
+    """{"AX": {dbn: [indexes into the catalog]}, "AXC": [[subject, [class names]] per subject]} for each middle
+    school's accelerated and honors classes, the same shape as ap_courses, from {dbn: [names ("Algebra (accelerated)")]}
+    (fetch_data.py _ms_extras "acc"). Subjects are settings.MS_ACC_AREAS, in order, each placing a class by what comes
+    before its " (" and listing the classes some school has, A-Z; one it can't place goes in "Other", with a warning.
+    Schools with none are left out."""
+    base = lambda n: re.sub(r"\s*\(.*\)$", "", n).strip()
+    names = sorted({n for l in rows.values() for n in l}, key=str.lower)
+    areas = [[a, [n for n in names if base(n) in subs]] for a, subs in settings.MS_ACC_AREAS]
+    placed = {n for _, l in areas for n in l}
+    other = [n for n in names if n not in placed and base(n) != "Other"]
+    for n in other:
+        print(f"  accelerated: no subject for {n!r}; add it to settings.MS_ACC_AREAS")
+    areas.append(["Other", other + [n for n in names if base(n) == "Other"]])
+    areas = [a for a in areas if a[1]]
+    flat = {n: i for i, n in enumerate(n for _, l in areas for n in l)}
+    ax = {dbn: sorted(flat[n] for n in set(l)) for dbn, l in rows.items() if l}
+    return {"AX": ax, "AXC": areas}
 
 
 BORO_OF_DISTRICT = {**{n: "Manhattan" for n in range(1, 7)}, **{n: "the Bronx" for n in range(7, 13)},
@@ -901,6 +922,7 @@ def main(standalone_path=None, pages=None):
                     snaps.update(load(name))
             d["MS"]["P"] = {r[0]: r[5] for r in msdir}
             d["MS"].update(extras(EX_GROUPS["ms"], {r[0]: r[6] for r in msdir if len(r) > 6}))
+            d["MS"].update(ms_accelerated({r[0]: r[6].get("acc", []) for r in msdir if len(r) > 6}))
             d["MS"]["NZ"] = []
             # citywide middle schools (open to students from anywhere in the city) are marked with a trailing 1
             citywide = set(load("citywide_ms.json")["dbns"]) if os.path.exists(os.path.join(DATA, "citywide_ms.json")) else set()

@@ -272,6 +272,9 @@ def snapshot_record(v, rt):
              pct_raw("ell_pct_raw"), pct_raw("iep_pct_raw"), flt("eni_pct_K8") if rt != "HS" else flt("eni_hs_pct_912"),
              (v.get("all_hs_admissionsmethods") if rt == "HS" else v.get("all_es_admissionsmethods")) or None,
              flt("median_distance")]
+    # middle school reports: the share of 8th graders who earned high school credit (accelerated, Regents-level courses)
+    if rt == "EMS" and flt("val_pct_accelerated_all") is not None:
+        extra.append(flt("val_pct_accelerated_all"))
     # elementary/middle state tests: [ELA test takers, ELA % proficient, Math test takers, Math % proficient, city ELA %, city Math %]
     tests = None
     if rt != "HS" and (flt("val_prof_pct_ela_all") is not None or flt("val_prof_pct_mth_all") is not None):
@@ -287,7 +290,8 @@ def fetch_snapshot():
     snapshot_ratings.json: [name, address, Instruction, Safety, Families, report type]
     snapshot_extra.json:   [enrollment, attendance %, teachers with 3+ yrs %, principal years,
                             dual-language programs, ELL %, IEP %, economic need %,
-                            admissions methods, median student travel distance (mi)]"""
+                            admissions methods, median student travel distance (mi),
+                            and for middle schools % of 8th graders earning high school credit]"""
     dbns = set()
     hs_dbns = set()
     hs_path = os.path.join(DATA, "hs_zones.json")
