@@ -6,6 +6,15 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- On middle school cards and pages, Electives and Sports are now sections of their own, and arts courses and clubs share an "Arts & activities" section, in place of one long "Classes, sports & activities" section.
+- Middle school electives and clubs are now sorted by kind on each school's card and page, A to Z: Business, Dance and theater, Extra help and test prep, Languages, Music, STEM and technology and so on, instead of one long list. Classes every middle school teaches, like Physical Education, Health and Advisory, are left out, as are Algebra I, Living Environment and US History, which the Accelerated classes section already shows.
+
+### Fixed
+- A middle school's Sports section listed sports its MySchools page doesn't show: MySchools keeps a second list of sports for its search filters, and the two were mixed together. MS 51 in Park Slope showed four sports while its MySchools page shows none. Now the section lists the sports on the school's MySchools page first, then any that only MySchools' search filters list, labeled as such.
+
 ## 1.77.0 (2026-11-11)
 
 ### Added

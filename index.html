@@ -1532,13 +1532,25 @@ function admSec(d){const eg=level==='ms'&&LV.ms.EG&&LV.ms.EG[d],g=eg?String(eg):
   if(!r)return '';
   return sec('adm-'+g,'<span class="st">Admissions, grade '+g+'<small>Seats / applied, fall '+y+'</small></span><span class="sa">'+r[0].toLocaleString()+' / '+r[1].toLocaleString()+'</span>',admHtml(d,level,true))}
 // middle and high school classes, sports and activities (MySchools, LV[level].EX as indexes into EXV; EXG: each
-// group's heading and what the summary counts it as, build.py EX_GROUPS): counts up top, the lists inside
-function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)return '';
-  const cnt={},words=[];x.forEach((l,i)=>{const g=lp.EXG[i];if(!g||!g[1])return;
+// group's heading and what the summary counts it as, build.py EX_GROUPS): counts up top, the lists inside. A group
+// with a fourth item is one kind of a middle school's electives or clubs (build.py ms_extras): the list's heading
+// once, then a line per kind. Middle schools split them into three sections (EX_PART): their electives (part 'el')
+// and sports ('sp': what the school's MySchools page shows, then what only MySchools' search filters list) each get one of their own, and the rest (arts courses, clubs) stay together as "Arts & activities"
+const EX_PART=g=>g[3]==='Electives'?'el':g[3]==='Sports'?'sp':'ex';
+function exSec(d,part='ex'){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)return '';
+  const inPart=g=>g&&(level==='hs'?part==='ex':EX_PART(g)===part);
+  const cnt={},words=[];x.forEach((l,i)=>{const g=lp.EXG[i];if(!inPart(g)||!g[1])return;
     const k=l.filter(j=>lp.EXV[j].length<=80).length;if(!(g[1] in cnt)){cnt[g[1]]=0;words.push(g)}cnt[g[1]]+=k});
   const sum=words.filter(g=>cnt[g[1]]).map(g=>cnt[g[1]]+' '+(cnt[g[1]]>1?g[2]:g[1])).join(' · ');
-  const body=x.map((l,i)=>l.length&&lp.EXG[i]?'<div class="ex"><div class="adm-h">'+lp.EXG[i][0]+'</div><p>'+esc(l.map(k=>lp.EXV[k]).join(', '))+'</p></div>':'').join('');
-  return sec('ex','<span class="st">Classes'+(level==='hs'?'':', sports')+' &amp; activities<small>'+sum+'</small></span>',body+'<small class="ex-src">As the school lists them on MySchools.</small>')}
+  // a section of one list (Electives, Sports) leaves out the list's heading: the section's title says it
+  let body='',filt=0,top=part==='ex'?null:part==='el'?'Electives':'Sports';x.forEach((l,i)=>{const g=lp.EXG[i];if(!l.length||!inPart(g))return;const names=esc(l.map(k=>lp.EXV[k]).join(', '));
+    if(!g[3]){top=null;body+='<div class="ex">'+(part==='ex'?'<div class="adm-h">'+g[0]+'</div>':'')+'<p>'+names+'</p></div>';return}
+    if(/search filters/.test(g[0]))filt=1;
+    body+='<div class="ex">'+(g[3]!==top?'<div class="adm-h">'+g[3]+'</div>':'')+'<p class="ex-kind"><b>'+esc(g[0])+':</b> '+names+'</p></div>';top=g[3]});
+  if(!body)return '';
+  const n=Object.values(cnt).reduce((a,b)=>a+b,0);
+  const title=level==='hs'?'Classes &amp; activities':part==='el'?'Electives':part==='sp'?'Sports':'Arts &amp; activities';
+  return sec(part,'<span class="st">'+title+'<small>'+sum+'</small></span>'+(part!=='ex'&&n?'<span class="sa">'+n+'</span>':''),body+'<small class="ex-src">As the school lists them on MySchools.'+(filt?' MySchools uses a separate list of sports for its search filters, which the school’s page doesn’t show. Ask the school which teams play this year.':'')+'</small>')}
 // high school sports (MySchools; LV.hs.SP: one list per group as indexes into SPV; SPG: [heading, one, many], the
 // PSAL groups marked by one 'PSAL team', build.py SP_GROUPS): the PSAL team count up top; inside, a sport to a row
 // with who plays it ("Basketball  Boys · Girls"), then other sports and teams as the school writes them. With teams
@@ -1661,7 +1673,7 @@ function jumpLine(d,noJump){if(noJump||CHX[d])return '';const lv=level,o=nzGet(d
 function jumpLink(d){const pg=level==='es'?(KP[d]?'priority groups':'kindergarten admissions'):msProgs(d,level).length?'priority groups':'admissions';
   return '<a href="#" class="to-adm" data-d="'+esc(d)+'">See this school’s '+pg+' ↓</a>'}
 function schoolBlock(d,noJump){const s=S[d],e=dmEnroll(d),n=e!=null?e.toLocaleString()+' students':'',gs=G[d]||(s&&s.g),gr=gs?'Grades '+esc(grades(gs,d)):'',ch=!!CHX[d];
-  return '<div class="school" data-d="'+esc(d)+'"><span class="nm"><a class="nm-link" href="'+pageUrl(d)+'#'+level+'">'+esc(short(d))+'</a> <span class="dbn">('+esc(d)+')</span></span>'+addrHtml(d)+(gr||n?'<span class="meta">'+[gr,n].filter(Boolean).join(' · ')+'</span>':'')+tagsHtml(d)+(level==='hs'?zonedHtml(d):'')+jumpLine(d,noJump)+'<hr class="sep">'+rateSec(d)+(level==='hs'?outSec(d):testSec(d))+(level==='es'?esAdmHtml(d):admSec(d)+cutSec(d)+(msProgs(d,level).length?'':progSec(d))+accSec(d)+apSec(d)+spSec(d)+exSec(d))+(factsHtml(d)?sec('facts','<span class="st">School details</span>',factsHtml(d)):'')+demoSec(d)+'<hr class="sep">'+'<div class="links">'+'<a href="'+pageUrl(d)+'"><b>Full school page →</b></a>'+(ch?'<a href="'+CH_APPLY+'" target="_blank" rel="noopener"><b>How to apply to charter schools ↗</b></a>':'<a href="'+mySchoolsUrl(d)+'" target="_blank" rel="noopener"><b>MySchools: apply &amp; see your chances ↗</b></a>')+snapLink(d)+'<a href="https://www.schools.nyc.gov/schools/'+esc(d.slice(2))+'" target="_blank" rel="noopener">School website ↗</a></div></div>'}
+  return '<div class="school" data-d="'+esc(d)+'"><span class="nm"><a class="nm-link" href="'+pageUrl(d)+'#'+level+'">'+esc(short(d))+'</a> <span class="dbn">('+esc(d)+')</span></span>'+addrHtml(d)+(gr||n?'<span class="meta">'+[gr,n].filter(Boolean).join(' · ')+'</span>':'')+tagsHtml(d)+(level==='hs'?zonedHtml(d):'')+jumpLine(d,noJump)+'<hr class="sep">'+rateSec(d)+(level==='hs'?outSec(d):testSec(d))+(level==='es'?esAdmHtml(d):admSec(d)+cutSec(d)+(msProgs(d,level).length?'':progSec(d))+accSec(d)+apSec(d)+spSec(d)+(level==='ms'?exSec(d,'el')+exSec(d,'sp'):'')+exSec(d))+(factsHtml(d)?sec('facts','<span class="st">School details</span>',factsHtml(d)):'')+demoSec(d)+'<hr class="sep">'+'<div class="links">'+'<a href="'+pageUrl(d)+'"><b>Full school page →</b></a>'+(ch?'<a href="'+CH_APPLY+'" target="_blank" rel="noopener"><b>How to apply to charter schools ↗</b></a>':'<a href="'+mySchoolsUrl(d)+'" target="_blank" rel="noopener"><b>MySchools: apply &amp; see your chances ↗</b></a>')+snapLink(d)+'<a href="https://www.schools.nyc.gov/schools/'+esc(d.slice(2))+'" target="_blank" rel="noopener">School website ↗</a></div></div>'}
 // the school's Snapshot report with the card's other links, as under "Overall rating" (rateSec), when it has ratings
 function snapLink(d){const r=R[d];if(!r||r.slice(2,5).every(x=>x==null))return '';
   return '<a href="https://tools.nycenet.edu/snapshot/2025/'+esc(d)+'/'+esc(r[5]||'EMS')+'/" target="_blank" rel="noopener">2024–25 School Quality Snapshot ↗</a>'}
