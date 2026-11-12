@@ -289,7 +289,7 @@ def more(*links):
 FOLD_KEYS = (("DOE ratings", "rate"), ("High school ratings", "rate"), ("State test scores", "tests"),
              ("Graduation and college", "grad"), ("Advanced courses", "grad"), ("Kindergarten admissions", "adm"),
              ("Grade ", "adm"), ("High school programs", "adm"), ("Pre-K", "prek"),
-             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Accelerated", "acc"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
+             ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Accelerated", "acc"), ("Electives", "el"), ("Arts and", "ex"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
 
 
 def fold_card(html, summary="", start_open=False):
@@ -604,17 +604,45 @@ def about_html(who, lunch=False, lv="es"):
             + "</details>")
 
 
-def extras_html(ex, vocab, groups, title="Classes, sports and activities"):
+def ex_part(g):
+    """Which of a middle school's three sections an extras group goes in, as the map card's EX_PART: "el" its
+    electives, "sp" its sports, "ex" the rest (arts courses, clubs: "Arts and activities")."""
+    return {"Electives": "el", "Sports": "sp"}.get(g[3], "ex") if len(g) > 3 else "ex"
+
+
+def ex_split(ex, groups, part):
+    """The lists and groups of one part (ex_part) of a middle school's extras."""
+    keep = [i for i, g in enumerate(groups) if ex_part(g) == part]
+    return [(ex or [])[i] if i < len(ex or []) else [] for i in keep], [groups[i] for i in keep]
+
+
+def extras_html(ex, vocab, groups, title="Classes, sports and activities", single=False):
     """Middle and high school classes, sports and activities, as the map card shows them (src/template.html exSec).
     ex: one list per group, as indexes into vocab; groups: [heading, one, many] each (build.py EX_GROUPS). High schools'
-    are titled "Classes and activities": their sports have a section of their own (sports_html)."""
+    are titled "Classes and activities": their sports have a section of their own (sports_html). Middle schools' come
+    in three cards (ex_part); single: a card of one list (Electives, Sports), which leaves out the list's heading."""
     if not ex:
         return ""
-    h = "".join(f'<h3 class="ex-h">{g[0]}</h3><p>{e(", ".join(vocab[k] for k in l))}</p>' for g, l in zip(groups, ex) if l)
+    # a group with a fourth item is one kind of a middle school's electives or clubs (build.py ms_extras): the list's
+    # heading once, then a line per kind
+    h, top = "", None
+    for g, l in zip(groups, ex):
+        if not l:
+            continue
+        names = e(", ".join(vocab[k] for k in l))
+        if len(g) < 4:
+            h, top = h + ("" if single else f'<h3 class="ex-h">{g[0]}</h3>') + f"<p>{names}</p>", None
+            continue
+        if g[3] != top and not single:
+            h += f'<h3 class="ex-h">{g[3]}</h3>'
+        top = g[3]
+        h += f'<p class="ex-kind"><b>{e(g[0])}:</b> {names}</p>'
+
     if not h:
         return ""
-    return (f"<h2>{title}</h2>" + h +
-            '<p class="src">As the school lists them on MySchools.</p>')
+    filt = any(l and len(g) > 3 and "search filters" in g[0] for g, l in zip(groups, ex))
+    return (f"<h2>{title}</h2>" + h + '<p class="src">As the school lists them on MySchools.'
+            + (" MySchools uses a separate list of sports for its search filters, which the school’s page doesn’t show. Ask the school which teams play this year." if filt else "") + "</p>")
 
 
 def _only(dm):
@@ -925,7 +953,7 @@ table.dm{width:100%;border-collapse:collapse;margin-top:12px;font-size:.95rem;fo
 .dm td{font-family:var(--display);font-weight:700;padding-left:16px;white-space:nowrap}.dm td+td{font-weight:400;color:var(--muted)}
 .dm tr.pov>*{border-top:1px solid var(--line);padding-top:8px}
 .progs{list-style:none;margin:0;padding:0}
-h3.ex-h{font-size:.95rem;margin:14px 0 2px}h3.ex-h+p{margin:0}
+h3.ex-h{font-size:.95rem;margin:14px 0 2px}h3.ex-h+p{margin:0}p.ex-kind{margin:3px 0}
 table.spt{border-collapse:collapse}table.spt td{padding:2px 18px 2px 0;vertical-align:top}table.spt td+td{color:var(--muted)}
 ul.ap{columns:2 12rem;column-gap:24px;margin:0;padding-left:1.2em}ul.ap li{break-inside:avoid;padding:2px 0}
 .adm-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin:6px 0 4px;font-size:.95rem}
@@ -1223,8 +1251,12 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
                         camp = (camp[0], [label(m) for m in known] + ([f"{k} other school{'s' if k > 1 else ''}"] if k else []))
                     psal = HS.get("SPY") if dbn in (HS.get("SPP") or []) else None
                     cards.append((sports_html(sp, spv, spg, dm, camp, psal), sports_summary(sp, spv, spg, dm), False))
-            cards.append((extras_html(ex, exv, exg, "Classes and activities" if lv == "hs" else "Classes, sports and activities"),
-                          extras_summary(ex, exv, exg), False))
+            if lv == "hs":
+                cards.append((extras_html(ex, exv, exg, "Classes and activities"), extras_summary(ex, exv, exg), False))
+            else:  # electives and sports each get a card; arts courses and clubs share one
+                for part, title in (("el", "Electives"), ("sp", "Sports"), ("ex", "Arts and activities")):
+                    pe, pg = ex_split(ex, exg, part)
+                    cards.append((extras_html(pe, exv, pg, title, single=part != "ex"), extras_summary(pe, exv, pg), False))
         body_cards = "".join(fold_card(h, sm, op) for h, sm, op in cards if h)
 
         # nearby options: other schools at this level in the same district

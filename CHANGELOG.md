@@ -10,6 +10,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 
 ### Changed
 - The color key for dual language, G&T, Pre-K & 3-K and Screened programs now shows how many schools are in each color, at every level they appear: for elementary dual language, Spanish (135), Chinese (11), Two or more (12), None (625) and so on. Pre-K & 3-K and Screened programs also get a "No data" color in the key, and "All programs screened" is now "All screened" to make room for the numbers.
+- On middle school cards and pages, Electives and Sports are now sections of their own, and arts courses and clubs share an "Arts & activities" section, in place of one long "Classes, sports & activities" section.
+- Middle school electives and clubs are now sorted by kind on each school's card and page, A to Z: Business, Dance and theater, Extra help and test prep, Languages, Music, STEM and technology and so on, instead of one long list. Classes every middle school teaches, like Physical Education, Health and Advisory, are left out, as are Algebra I, Living Environment and US History, which the Accelerated classes section already shows.
+
+### Fixed
+- A middle school's Sports section listed sports its MySchools page doesn't show: MySchools keeps a second list of sports for its search filters, and the two were mixed together. MS 51 in Park Slope showed four sports while its MySchools page shows none. Now the section lists the sports on the school's MySchools page first, then any that only MySchools' search filters list, labeled as such.
 
 ## 1.77.0 (2026-11-11)
 
