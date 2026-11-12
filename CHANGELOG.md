@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.78.0 (2026-11-12)
 
 ### Changed
 - On middle school cards and pages, Electives and Sports are now sections of their own, and arts courses and clubs share an "Arts & activities" section, in place of one long "Classes, sports & activities" section.
