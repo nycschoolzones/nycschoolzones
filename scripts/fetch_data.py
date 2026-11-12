@@ -1255,7 +1255,9 @@ def _program_label(prog, school, dbn):
 
 def _ms_extras(x):
     """A middle school's classes, sports and activities from its MySchools record: {"acc": accelerated and honors
-    classes, "art": arts courses, "el": electives, "sp": sports, "ac": clubs and activities}, each sorted, A-Z."""
+    classes, "art": arts courses, "el": electives, "sp": sports as the school writes them ("sports_description", what
+    its MySchools page shows), "spf": sports in MySchools' structured list ("school_sports", which feeds its search
+    filters but no school's page shows) that "sp" doesn't name, "ac": clubs and activities}, each sorted, A-Z."""
     import re
     def acc(n):  # "Middle School Algebra ACC" -> "Algebra (accelerated)", "Math (Middle School Honors)" -> "Math (honors)"
         n = re.sub(r"^Middle School (.+) ACC$", r"\1 (accelerated)", n)
@@ -1273,7 +1275,9 @@ def _ms_extras(x):
     return {"acc": tidy(acc(z["name"]) for z in x.get("advanced_placement_courses") or []),
             "art": tidy(z["name"] for z in x.get("art_courses") or []),
             "el": tidy(split(x.get("electives_description"))),
-            "sp": tidy([z["name"] for z in x.get("school_sports") or []] + split(x.get("sports_description"))),
+            "sp": tidy(split(x.get("sports_description"))),
+            "spf": [n for n in tidy(z["name"] for z in x.get("school_sports") or [])
+                    if n.lower() not in {s.lower() for s in tidy(split(x.get("sports_description")))}],
             "ac": tidy(split(x.get("activities_description")))}
 
 

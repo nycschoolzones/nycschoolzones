@@ -598,7 +598,10 @@ EX_GROUPS = {
     # accelerated and honors classes have their own section (ms_accelerated); electives and clubs ("el", "ac") come
     # in kinds (ms_extras): a group per kind, its heading the kind, with the list's heading as a fifth item
     "ms": (("art", "Arts courses", "", ""),
-           ("el", "Electives", "elective", "electives"), ("sp", "Sports", "sport", "sports"),
+           ("el", "Electives", "elective", "electives"),
+           # sports: as the school's MySchools page shows them, then the ones only MySchools' search filters list
+           ("sp", "On its MySchools page", "sport", "sports", "Sports"),
+           ("spf", "In MySchools’ search filters only", "sport", "sports", "Sports"),
            ("ac", "Clubs and activities", "activity", "activities")),
     # AP classes have their own section (ap_courses)
     "hs": (("ib", "IB classes", "IB class", "IB classes"),

@@ -1535,21 +1535,22 @@ function admSec(d){const eg=level==='ms'&&LV.ms.EG&&LV.ms.EG[d],g=eg?String(eg):
 // group's heading and what the summary counts it as, build.py EX_GROUPS): counts up top, the lists inside. A group
 // with a fourth item is one kind of a middle school's electives or clubs (build.py ms_extras): the list's heading
 // once, then a line per kind. Middle schools split them into three sections (EX_PART): their electives (part 'el')
-// and sports ('sp') each get one of their own, and the rest (arts courses, clubs) stay together as "Arts & activities"
-const EX_PART=g=>g[3]==='Electives'?'el':g[0]==='Sports'&&!g[3]?'sp':'ex';
+// and sports ('sp': what the school's MySchools page shows, then what only MySchools' search filters list) each get one of their own, and the rest (arts courses, clubs) stay together as "Arts & activities"
+const EX_PART=g=>g[3]==='Electives'?'el':g[3]==='Sports'?'sp':'ex';
 function exSec(d,part='ex'){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)return '';
   const inPart=g=>g&&(level==='hs'?part==='ex':EX_PART(g)===part);
   const cnt={},words=[];x.forEach((l,i)=>{const g=lp.EXG[i];if(!inPart(g)||!g[1])return;
     const k=l.filter(j=>lp.EXV[j].length<=80).length;if(!(g[1] in cnt)){cnt[g[1]]=0;words.push(g)}cnt[g[1]]+=k});
   const sum=words.filter(g=>cnt[g[1]]).map(g=>cnt[g[1]]+' '+(cnt[g[1]]>1?g[2]:g[1])).join(' · ');
   // a section of one list (Electives, Sports) leaves out the list's heading: the section's title says it
-  let body='',top=part==='ex'?null:'Electives';x.forEach((l,i)=>{const g=lp.EXG[i];if(!l.length||!inPart(g))return;const names=esc(l.map(k=>lp.EXV[k]).join(', '));
+  let body='',filt=0,top=part==='ex'?null:part==='el'?'Electives':'Sports';x.forEach((l,i)=>{const g=lp.EXG[i];if(!l.length||!inPart(g))return;const names=esc(l.map(k=>lp.EXV[k]).join(', '));
     if(!g[3]){top=null;body+='<div class="ex">'+(part==='ex'?'<div class="adm-h">'+g[0]+'</div>':'')+'<p>'+names+'</p></div>';return}
+    if(/search filters/.test(g[0]))filt=1;
     body+='<div class="ex">'+(g[3]!==top?'<div class="adm-h">'+g[3]+'</div>':'')+'<p class="ex-kind"><b>'+esc(g[0])+':</b> '+names+'</p></div>';top=g[3]});
   if(!body)return '';
   const n=Object.values(cnt).reduce((a,b)=>a+b,0);
   const title=level==='hs'?'Classes &amp; activities':part==='el'?'Electives':part==='sp'?'Sports':'Arts &amp; activities';
-  return sec(part,'<span class="st">'+title+'<small>'+sum+'</small></span>'+(part!=='ex'&&n?'<span class="sa">'+n+'</span>':''),body+'<small class="ex-src">As the school lists them on MySchools.</small>')}
+  return sec(part,'<span class="st">'+title+'<small>'+sum+'</small></span>'+(part!=='ex'&&n?'<span class="sa">'+n+'</span>':''),body+'<small class="ex-src">As the school lists them on MySchools.'+(filt?' MySchools uses a separate list of sports for its search filters, which the school’s page doesn’t show. Ask the school which teams play this year.':'')+'</small>')}
 // high school sports (MySchools; LV.hs.SP: one list per group as indexes into SPV; SPG: [heading, one, many], the
 // PSAL groups marked by one 'PSAL team', build.py SP_GROUPS): the PSAL team count up top; inside, a sport to a row
 // with who plays it ("Basketball  Boys · Girls"), then other sports and teams as the school writes them. With teams

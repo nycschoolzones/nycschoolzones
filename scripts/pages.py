@@ -607,7 +607,7 @@ def about_html(who, lunch=False, lv="es"):
 def ex_part(g):
     """Which of a middle school's three sections an extras group goes in, as the map card's EX_PART: "el" its
     electives, "sp" its sports, "ex" the rest (arts courses, clubs: "Arts and activities")."""
-    return "el" if len(g) > 3 and g[3] == "Electives" else "sp" if g[0] == "Sports" and len(g) < 4 else "ex"
+    return {"Electives": "el", "Sports": "sp"}.get(g[3], "ex") if len(g) > 3 else "ex"
 
 
 def ex_split(ex, groups, part):
@@ -625,7 +625,7 @@ def extras_html(ex, vocab, groups, title="Classes, sports and activities", singl
         return ""
     # a group with a fourth item is one kind of a middle school's electives or clubs (build.py ms_extras): the list's
     # heading once, then a line per kind
-    h, top = "", ("Electives" if single else None)
+    h, top = "", None
     for g, l in zip(groups, ex):
         if not l:
             continue
@@ -633,15 +633,16 @@ def extras_html(ex, vocab, groups, title="Classes, sports and activities", singl
         if len(g) < 4:
             h, top = h + ("" if single else f'<h3 class="ex-h">{g[0]}</h3>') + f"<p>{names}</p>", None
             continue
-        if g[3] != top:
-            top = g[3]
+        if g[3] != top and not single:
             h += f'<h3 class="ex-h">{g[3]}</h3>'
+        top = g[3]
         h += f'<p class="ex-kind"><b>{e(g[0])}:</b> {names}</p>'
 
     if not h:
         return ""
-    return (f"<h2>{title}</h2>" + h +
-            '<p class="src">As the school lists them on MySchools.</p>')
+    filt = any(l and len(g) > 3 and "search filters" in g[0] for g, l in zip(groups, ex))
+    return (f"<h2>{title}</h2>" + h + '<p class="src">As the school lists them on MySchools.'
+            + (" MySchools uses a separate list of sports for its search filters, which the school’s page doesn’t show. Ask the school which teams play this year." if filt else "") + "</p>")
 
 
 def _only(dm):
