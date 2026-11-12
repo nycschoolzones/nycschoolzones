@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- Coloring by dual language now shows how many schools are in each color in the key, at every level: for elementary schools, Spanish (135), Chinese (11), Two or more (12), None (625) and so on.
+
 ## 1.77.0 (2026-11-11)
 
 ### Added
