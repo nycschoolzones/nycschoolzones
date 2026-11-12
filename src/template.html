@@ -1497,12 +1497,16 @@ function admSec(d){const eg=level==='ms'&&LV.ms.EG&&LV.ms.EG[d],g=eg?String(eg):
   if(!r)return '';
   return sec('adm-'+g,'<span class="st">Admissions, grade '+g+'<small>Seats / applied, fall '+y+'</small></span><span class="sa">'+r[0].toLocaleString()+' / '+r[1].toLocaleString()+'</span>',admHtml(d,level,true))}
 // middle and high school classes, sports and activities (MySchools, LV[level].EX as indexes into EXV; EXG: each
-// group's heading and what the summary counts it as, build.py EX_GROUPS): counts up top, the lists inside
+// group's heading and what the summary counts it as, build.py EX_GROUPS): counts up top, the lists inside. A group
+// with a fourth item is one kind of a middle school's electives or clubs (build.py ms_extras): the list's heading
+// once, then a line per kind
 function exSec(d){const lp=LV[level],x=lp&&lp.EX&&lp.EX[d];if(level==='es'||!x)return '';
   const cnt={},words=[];x.forEach((l,i)=>{const g=lp.EXG[i];if(!g||!g[1])return;
     const k=l.filter(j=>lp.EXV[j].length<=80).length;if(!(g[1] in cnt)){cnt[g[1]]=0;words.push(g)}cnt[g[1]]+=k});
   const sum=words.filter(g=>cnt[g[1]]).map(g=>cnt[g[1]]+' '+(cnt[g[1]]>1?g[2]:g[1])).join(' · ');
-  const body=x.map((l,i)=>l.length&&lp.EXG[i]?'<div class="ex"><div class="adm-h">'+lp.EXG[i][0]+'</div><p>'+esc(l.map(k=>lp.EXV[k]).join(', '))+'</p></div>':'').join('');
+  let body='',top=null;x.forEach((l,i)=>{const g=lp.EXG[i];if(!l.length||!g)return;const names=esc(l.map(k=>lp.EXV[k]).join(', '));
+    if(!g[3]){top=null;body+='<div class="ex"><div class="adm-h">'+g[0]+'</div><p>'+names+'</p></div>';return}
+    body+='<div class="ex">'+(g[3]!==top?'<div class="adm-h">'+g[3]+'</div>':'')+'<p class="ex-kind"><b>'+esc(g[0])+':</b> '+names+'</p></div>';top=g[3]});
   return sec('ex','<span class="st">Classes'+(level==='hs'?'':', sports')+' &amp; activities<small>'+sum+'</small></span>',body+'<small class="ex-src">As the school lists them on MySchools.</small>')}
 // high school sports (MySchools; LV.hs.SP: one list per group as indexes into SPV; SPG: [heading, one, many], the
 // PSAL groups marked by one 'PSAL team', build.py SP_GROUPS): the PSAL team count up top; inside, a sport to a row

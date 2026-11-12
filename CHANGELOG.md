@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- Middle school electives and clubs are now sorted by kind on each school's card and page: Languages, STEM and technology, Music, Dance and theater, Writing, debate and law, Leadership and service, Extra help and test prep and so on, instead of one long list. Classes every middle school teaches, like Physical Education, Health and Advisory, are left out, as are Algebra I, Living Environment and US History, which the Accelerated classes section already shows.
+
 ## 1.77.0 (2026-11-11)
 
 ### Added

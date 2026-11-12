@@ -133,6 +133,44 @@ MS_ACC_AREAS = (
     ("Arts and technology", ("Arts", "Comp Sci/Math Tech")),
 )
 
+# Middle school electives and clubs (ms_directory.json "el" and "ac", as schools pick them on MySchools), by kind, for
+# the card's and school page's "Classes, sports & activities" (build.py ms_extras). Both lists share these groups;
+# names match ignoring case. The build warns about a name it can't place, which lands in "Other": add it here.
+MS_EXTRA_GROUPS = (
+    ("Languages", ("American Sign Language", "Foreign Language", "French", "French Club", "Italian", "Latin Language Club",
+                   "Mandarin", "Spanish", "Spanish Language & Culture")),
+    ("STEM and technology", ("Aquaponics", "Biotechnology", "Civil Engineering", "Coding", "Coding/robotics", "Computer Science",
+                             "Daily Student Computer Use", "Engineering", "Family Science Night", "Forensics", "Game Design",
+                             "Hydroponics", "LEGO Robotics", "Math Team", "Robotics", "S.T.E.A.M.", "Science Club",
+                             "Science Olympiad", "Sports Medicine", "STEM", "Technology", "Urban Advantage",
+                             "Urban Advantage program", "Web Design")),
+    ("Visual arts and design", ("Art", "Ceramics", "Fashion", "Film", "Fine Arts", "Graphic Design", "Photography",
+                                "Photography/yearbook club", "Sewing", "Studio Art", "Urban Arts", "Videography", "Visual Arts")),
+    ("Music", ("Band", "Choir", "Chorus", "Concert Band", "Drumline", "Glee Club", "Guitar", "Jazz Band", "Marching Band",
+               "Modern Band", "Music", "Music instruction - NYSSMA", "Orchestra", "Piano", "Rock Band", "Strings", "Vocal Music")),
+    ("Dance and theater", ("African Dance", "Ballroom Dancing", "Dance", "Drama", "Hip-Hop", "Latin Dance", "Musical Theater",
+                           "Performing Arts", "Step Team", "Talent Show", "Talent Showcase", "Theater", "Theatre")),
+    ("Writing, debate and law", ("Book Club", "Comic Book Club", "Creative Writing", "Debate", "Journalism", "Law",
+                                 "Library Squad", "Mock Trial", "Newspaper", "School Newspaper", "Spelling Bee", "Yearbook")),
+    ("Business", ("Business and Finance", "Stock Market", "Virtual Enterprise")),
+    ("Sports, fitness and wellness", ("Baseball", "Basketball", "Boys Basketball Team", "Brain Power Wellness", "Cheerleading",
+                                      "Fitness", "Girls Volleyball Team", "In-line Skating", "Martial Arts", "Mindfulness",
+                                      "Soccer", "Swimming", "Track", "Volleyball", "Wrestling", "Yoga")),
+    ("Games and hobbies", ("Chess", "Cooking", "Gardening", "Video Game Club")),
+    ("Leadership and service", ("Arista/Archon", "Community Service", "Environmental Club", "Green Team", "Leadership",
+                                "Multicultural club", "National Junior Honor Society", "Peer Mediation", "Restorative Circles",
+                                "Service Learning", "Student Council", "Student Government", "Student government and tutoring",
+                                "Student Leadership Ambassadors")),
+    ("Extra help and test prep", ("80 Challenge", "Accelerated Program", "College Immersion Programs (Seventh and Eighth Grades) from QC.",
+                                  "Homework Help", "Saturday Academy", "Specialized High School Test Preparation", "Tutoring")),
+    ("Other", ("Daily lunch clubs of all varieties.", "Many Student Designed Courses")),
+)
+# Classes every middle school teaches (or that the Accelerated classes section already covers), which some schools list
+# as electives or clubs anyway: left out of both lists
+MS_REQUIRED = ("Advisory", "Algebra I", "CC Algebra Regents", "Earth Science - NYS Regents", "English - NYS Regents",
+               "Global History - NYS Regents", "Health", "Library", "Living Environment", "Math", "Physical Education",
+               "Regents Living Environment", "Science", "US History", "US History - NYS Regents")
+
 # Application dates for the next admissions round, one per level: the line under the panel title ("Apply by Fri, Dec 4
 # · 24 days left") and "Key dates" in each "How … admissions work" window. Dates are YYYY-MM-DD. "offers_text", when
 # set, is shown instead of the offer date (the DOE hadn't posted the high school one); "offers" still decides when the

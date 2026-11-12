@@ -610,7 +610,21 @@ def extras_html(ex, vocab, groups, title="Classes, sports and activities"):
     are titled "Classes and activities": their sports have a section of their own (sports_html)."""
     if not ex:
         return ""
-    h = "".join(f'<h3 class="ex-h">{g[0]}</h3><p>{e(", ".join(vocab[k] for k in l))}</p>' for g, l in zip(groups, ex) if l)
+    # a group with a fourth item is one kind of a middle school's electives or clubs (build.py ms_extras): the list's
+    # heading once, then a line per kind
+    h, top = "", None
+    for g, l in zip(groups, ex):
+        if not l:
+            continue
+        names = e(", ".join(vocab[k] for k in l))
+        if len(g) < 4:
+            h, top = h + f'<h3 class="ex-h">{g[0]}</h3><p>{names}</p>', None
+            continue
+        if g[3] != top:
+            top = g[3]
+            h += f'<h3 class="ex-h">{g[3]}</h3>'
+        h += f'<p class="ex-kind"><b>{e(g[0])}:</b> {names}</p>'
+
     if not h:
         return ""
     return (f"<h2>{title}</h2>" + h +
@@ -925,7 +939,7 @@ table.dm{width:100%;border-collapse:collapse;margin-top:12px;font-size:.95rem;fo
 .dm td{font-family:var(--display);font-weight:700;padding-left:16px;white-space:nowrap}.dm td+td{font-weight:400;color:var(--muted)}
 .dm tr.pov>*{border-top:1px solid var(--line);padding-top:8px}
 .progs{list-style:none;margin:0;padding:0}
-h3.ex-h{font-size:.95rem;margin:14px 0 2px}h3.ex-h+p{margin:0}
+h3.ex-h{font-size:.95rem;margin:14px 0 2px}h3.ex-h+p{margin:0}p.ex-kind{margin:3px 0}
 table.spt{border-collapse:collapse}table.spt td{padding:2px 18px 2px 0;vertical-align:top}table.spt td+td{color:var(--muted)}
 ul.ap{columns:2 12rem;column-gap:24px;margin:0;padding-left:1.2em}ul.ap li{break-inside:avoid;padding:2px 0}
 .adm-t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;margin:6px 0 4px;font-size:.95rem}

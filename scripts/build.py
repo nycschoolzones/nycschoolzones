@@ -595,9 +595,10 @@ def short_group(nm):
 # Classes, sports and activities on the card and the school page, per level: (key in the directory file, heading,
 # what the folded summary counts it as: singular, plural; groups with the same word are added up, "" not counted)
 EX_GROUPS = {
-    # accelerated and honors classes have their own section (ms_accelerated)
+    # accelerated and honors classes have their own section (ms_accelerated); electives and clubs ("el", "ac") come
+    # in kinds (ms_extras): a group per kind, its heading the kind, with the list's heading as a fifth item
     "ms": (("art", "Arts courses", "", ""),
-           ("el", "Electives", "", ""), ("sp", "Sports", "sport", "sports"),
+           ("el", "Electives", "elective", "electives"), ("sp", "Sports", "sport", "sports"),
            ("ac", "Clubs and activities", "activity", "activities")),
     # AP classes have their own section (ap_courses)
     "hs": (("ib", "IB classes", "IB class", "IB classes"),
@@ -609,6 +610,38 @@ EX_GROUPS = {
 # the card and page list them a sport to a row), then other sports and teams, as the school writes them
 SP_GROUPS = (("psb", "Boys", "PSAL team", "PSAL teams"), ("psg", "Girls", "PSAL team", "PSAL teams"),
              ("psc", "Coed", "PSAL team", "PSAL teams"), ("sp", "Other sports and teams", "other sport", "other sports"))
+
+
+def ms_extras(groups, rows):
+    """EX_GROUPS["ms"] and {dbn: {group key: [names]}} with each middle school's electives and clubs ("el", "ac") split
+    by kind (settings.MS_EXTRA_GROUPS, ignoring case), for extras(): a group per list and kind, keyed "el.0", "ac.3"...,
+    as (key, kind, one, many, the list's heading), the kinds in settings order, names A-Z. Names in settings.MS_REQUIRED
+    are left out; one it can't place goes in "Other", with a warning."""
+    kinds = [k for k, _ in settings.MS_EXTRA_GROUPS]
+    kind = {n.lower(): i for i, (_, l) in enumerate(settings.MS_EXTRA_GROUPS) for n in l}
+    req = {n.lower() for n in settings.MS_REQUIRED}
+    other = kinds.index("Other")
+    split = {g[0] for g in groups if g[0] in ("el", "ac")}
+    unplaced, out = set(), {}
+    for dbn, x in rows.items():
+        y = {k: v for k, v in x.items() if k not in split}
+        for k in split:
+            for n in x.get(k, []):
+                n = n.title() if n.isupper() and len(n) > 4 else n  # "BASKETBALL"
+                if n.lower() in req:
+                    continue
+                i = kind.get(n.lower())
+                if i is None:
+                    unplaced.add(n)
+                    i = other
+                y.setdefault(f"{k}.{i}", []).append(n)
+        out[dbn] = y
+    for n in sorted(unplaced, key=str.lower):
+        print(f"  ms extras: no kind for {n!r}; add it to settings.MS_EXTRA_GROUPS (or MS_REQUIRED)")
+    gs = []
+    for g in groups:
+        gs += [(f"{g[0]}.{i}", kinds[i], g[2], g[3], g[1]) for i in range(len(kinds))] if g[0] in split else [g]
+    return gs, out
 
 
 def extras(groups, rows, key="EX"):
@@ -921,7 +954,7 @@ def main(standalone_path=None, pages=None):
                 if os.path.exists(os.path.join(DATA, name)):
                     snaps.update(load(name))
             d["MS"]["P"] = {r[0]: r[5] for r in msdir}
-            d["MS"].update(extras(EX_GROUPS["ms"], {r[0]: r[6] for r in msdir if len(r) > 6}))
+            d["MS"].update(extras(*ms_extras(EX_GROUPS["ms"], {r[0]: r[6] for r in msdir if len(r) > 6})))
             d["MS"].update(ms_accelerated({r[0]: r[6].get("acc", []) for r in msdir if len(r) > 6}))
             d["MS"]["NZ"] = []
             # citywide middle schools (open to students from anywhere in the city) are marked with a trailing 1
