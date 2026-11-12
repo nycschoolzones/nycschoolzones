@@ -134,7 +134,7 @@ MS_ACC_AREAS = (
 )
 
 # Middle school electives and clubs (ms_directory.json "el" and "ac", as schools pick them on MySchools), by kind, for
-# the card's and school page's "Classes, sports & activities" (build.py ms_extras). Both lists share these groups;
+# the card's and school page's "Classes, sports & activities" (build.py ms_extras), shown A-Z with "Other" last. Both lists share these groups;
 # names match ignoring case. The build warns about a name it can't place, which lands in "Other": add it here.
 MS_EXTRA_GROUPS = (
     ("Languages", ("American Sign Language", "Foreign Language", "French", "French Club", "Italian", "Latin Language Club",

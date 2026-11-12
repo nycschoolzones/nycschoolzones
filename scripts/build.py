@@ -615,10 +615,11 @@ SP_GROUPS = (("psb", "Boys", "PSAL team", "PSAL teams"), ("psg", "Girls", "PSAL 
 def ms_extras(groups, rows):
     """EX_GROUPS["ms"] and {dbn: {group key: [names]}} with each middle school's electives and clubs ("el", "ac") split
     by kind (settings.MS_EXTRA_GROUPS, ignoring case), for extras(): a group per list and kind, keyed "el.0", "ac.3"...,
-    as (key, kind, one, many, the list's heading), the kinds in settings order, names A-Z. Names in settings.MS_REQUIRED
+    as (key, kind, one, many, the list's heading), the kinds A-Z with "Other" last, names A-Z. Names in settings.MS_REQUIRED
     are left out; one it can't place goes in "Other", with a warning."""
-    kinds = [k for k, _ in settings.MS_EXTRA_GROUPS]
-    kind = {n.lower(): i for i, (_, l) in enumerate(settings.MS_EXTRA_GROUPS) for n in l}
+    order = sorted(settings.MS_EXTRA_GROUPS, key=lambda g: (g[0] == "Other", g[0].lower()))  # A-Z, "Other" last
+    kinds = [k for k, _ in order]
+    kind = {n.lower(): i for i, (_, l) in enumerate(order) for n in l}
     req = {n.lower() for n in settings.MS_REQUIRED}
     other = kinds.index("Other")
     split = {g[0] for g in groups if g[0] in ("el", "ac")}
