@@ -9,6 +9,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ## Unreleased
 
 ### Added
+- Schools New York State lists for improvement now say so, on their card on the map and their school page, in a new "State improvement list" section under the ratings. About 90 NYC schools are on one of the state's lists for 2025–26, based on 2024–25 results: Comprehensive Support and Improvement (CSI), for the schools with the lowest results in the state, or Targeted Support and Improvement (TSI and ATSI), when one group of students, like English learners or Black students, had results among the lowest in the state. The section says which group, and links to the school's state report card. It covers charter schools too, since the state lists them like any other school. Schools not on a list show nothing.
 - Charter high schools now have a Sports section too, with their PSAL teams for 2026–27 from the PSAL's own lists, since charter schools aren't in the MySchools directory. That covers 47 charter high schools, like KIPP NYC College Prep and the Uncommon high schools. They also count in Team count and Teams on the map, where they used to show as no data. Charter schools the PSAL lists no teams for still show as no data.
 
 ## 1.76.0 (2026-11-11)

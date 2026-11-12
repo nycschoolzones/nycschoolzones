@@ -5,6 +5,7 @@ An interactive map of New York City's elementary (kindergarten), middle and high
 - **Zones:** current elementary, middle and high school zones from the DOE's Find a School map
 - **School Quality Snapshot (2024–25):** Instruction and Performance, Safety and School Climate, and Relationships with Families, each rated 1–4, plus an Overall average of the three
 - **State tests (spring 2026):** share of students scoring proficient in ELA and Math, every tested grade at the school, from the DOE's school results (`data/state_tests.json`); charter schools, which those leave out, show their 2024–25 Snapshot scores; high schools show 4-year graduation and college/career enrollment instead
+- **State improvement lists (2025–26):** schools New York State lists for Comprehensive, Targeted or Additional Targeted Support and Improvement (CSI, TSI, ATSI), from 2024–25 results in NYSED's report card database (`data/state_status.json`); about 90 NYC schools, charters included. Schools not on a list show nothing
 - **Programs:** gifted & talented, dual language and special education
 - **Students with IEPs and English language learners:** counts from the Demographic Snapshot (`data/demographics.json`, also behind Color by special ed); the School Quality Snapshot's counts (`data/snapshot_counts.json`) fill in for the few schools it doesn't list
 - **Demographics:** race and ethnicity, girls and boys, the share of low-income students (the DOE's "poverty" count), and students with IEPs and English language learners at each school, next to all of NYC, from the DOE's Demographic Snapshot (`data/demographics.json`)
@@ -76,6 +77,7 @@ data/
   psal_teams.json       each PSAL program's schools and its teams this season, for the schools MySchools doesn't list (charters)
   demographics.json     race and ethnicity, girls and boys, % low-income, IEPs and English learners by school, plus all of NYC (DOE Demographic Snapshot)
   state_tests.json      ELA/Math results by school, all tested grades (DOE, settings.TESTS_YEAR)
+  state_status.json     New York State's accountability status by school (NYSED report card database, settings.STATE_RESULTS_YEAR)
   snapshot_ratings.json Snapshot ratings by school
   streets.json          simplified major streets for the overlay
   local_streets.json    every other street, compactly encoded
@@ -85,7 +87,7 @@ data/
   zips.json             each school's current address, ZIP code, tax lot center and grades (DOE LCGMS, NYC Planning PLUTO)
   history/<name>/<period>.json  dated copies of the yearly datasets above, kept for trends (the build doesn't read them):
                         Snapshot files by school year (2024-25), MySchools files by admissions round (fall-2026), demographics,
-                        class size and building use by school year, pre-K by fall, zones and PSAL files by the month fetched (2026-10),
+                        class size, building use and state_status by school year, pre-K by fall, zones and PSAL files by the month fetched (2026-10),
                         and state_tests/<year>.json: every year in the DOE's file since 2018, all grades and each grade
 scripts/
   build.py              data/ + src/template.html  →  index.html
@@ -100,7 +102,7 @@ scripts/
   make_brand.py         draws the YouTube icon and banner and the Facebook cover in brand/ (needs Playwright)
 ```
 
-Apart from make_preview.py (matplotlib), make_brand.py (Playwright) and the Blue Book step (pdftotext), the scripts need nothing beyond Python 3.
+Apart from make_preview.py (matplotlib), make_brand.py (Playwright), the Blue Book step (pdftotext) and the state improvement lists step (mdbtools' `mdb-export`, to read NYSED's Access database: `brew install mdbtools` or `apt install mdbtools`), the scripts need nothing beyond Python 3.
 
 ## Make changes
 
@@ -192,6 +194,13 @@ Older years, for trends: `python3 scripts/fetch_data.py snapshot-year 2024` fetc
 
 The build stops if `state_tests.json` doesn't match `TESTS_YEAR`. Charter schools aren't in these files, so theirs still come from the Snapshot (step 3).
 
+### 3c. State improvement lists (August, when NYSED posts its report card database at [data.nysed.gov](https://data.nysed.gov/downloads.php))
+
+1. Set `STATE_RESULTS_YEAR` in `scripts/settings.py` to the spring of the results (2026 for the database built from 2025–26 results, `SRC2026.zip`). The status it gives is for the school year after.
+2. `python3 scripts/fetch_data.py state-status` downloads the database (about 400 MB), reads its Accountability Status tables with `mdb-export` and writes `state_status.json`. If the download fails, save the zip in a browser and pass it: `fetch_data.py state-status ~/Downloads/SRC2026.zip`.
+
+Schools are matched by their state (BEDS) code from LCGMS. Read what it prints: it names schools with grade 3 or up that got no status. Schools that opened this fall have none yet; a charter whose code LCGMS has wrong goes in `beds` in `data/charter_fixes.json` (find it by name in the database). If the state adds a status `STATUS_CODES` in `fetch_data.py` doesn't know, it stops. The build stops if `state_status.json` doesn't match `STATE_RESULTS_YEAR`. What the cards say is in `STATE_STATUS_TEXT` in `scripts/settings.py`.
+
 ### 4. Admissions: kindergarten, grade 6, grade 9, pre-K and 3-K (each fall or winter, for the previous fall)
 
 Download the newest "fall-YYYY-admissions" Local Law 72 file from [DOE government reports](https://infohub.nyced.org/reports/government-reports), keep the last two years' files too, then:
@@ -242,7 +251,7 @@ Download the Classic Edition PDF from the [SCA](https://www.nycsca.org/Community
 - Citywide G&T kindergarten schools come from MySchools in step 2; check the five still make sense.
 - `APPLY_DATES` in `scripts/settings.py`: when each application opens and closes, and when offers come out, for kindergarten, middle and high school. Copy them from the DOE's enrollment pages (each level's `source`) once the next round is announced, usually in early fall. The line under the panel title hides itself once a round's offers are out, and the build prints `apply dates:` until you update them.
 - `data/school_fixes.json`: hand-checked corrections for district schools, each with its source. `moved`: a school in a building MySchools doesn't list yet (new address and point); the build leaves out the old building's facts. `points`: a better map point for a school whose address is right, or `null` for a virtual school (no marker). `closed`: schools the DOE has closed that Find a School still lists; the build takes them out of their zones. `entry`: middle schools that take new students in a grade other than 6 (the Center School, grade 5; Baccalaureate School for Global Education, grade 7); the card and school page name that grade instead of showing grade 6 seats. When you add a school to `closed`, delete its `schools/<DBN>/` folder too: the build doesn't remove old pages. The build prints when MySchools or Find a School catches up; then remove the entry.
-- `data/charter_fixes.json`: charter points for addresses that don't geocode (see step 6), and charter dual-language programs (`dual_language`), which the DOE doesn't list: check each against the school's site or its NYSED annual report and note the source. Remove schools that have closed.
+- `data/charter_fixes.json`: charter points for addresses that don't geocode (see step 6), charter dual-language programs (`dual_language`), which the DOE doesn't list: check each against the school's site or its NYSED annual report and note the source, and charters' state codes (`beds`) where LCGMS's are wrong (see step 3c). Remove schools that have closed.
 
 ### 9. Rarely
 

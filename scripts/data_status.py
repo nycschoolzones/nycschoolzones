@@ -28,6 +28,7 @@ DATASETS = [
                     "nonzoned_snapshot.json", "ms_snapshot.json", "hs_snapshot.json", "charter_snapshot.json",
                     "snapshot_counts.json", "colocation.json"), "when a new year appears", None),
     ("3b State tests", ("state_tests.json",), "late summer", 9),
+    ("3c State improvement lists", ("state_status.json",), "August, when NYSED posts its report card database", 9),
     ("4 Admissions", ("k_admissions.json", "ms_admissions.json", "hs_admissions.json", "prek.json"),
      "fall or winter, for the previous fall", None),
     ("5 Class size", ("class_size.json",), "spring", 4),

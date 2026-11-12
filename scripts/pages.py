@@ -287,7 +287,7 @@ def more(*links):
 # which kind of section a folded card is, from its heading: FOLD_JS remembers open and folded by kind across pages,
 # so every school's admissions share "adm" (kindergarten, grade 6 and grade 9 alike)
 FOLD_KEYS = (("DOE ratings", "rate"), ("High school ratings", "rate"), ("State test scores", "tests"),
-             ("Graduation and college", "grad"), ("Advanced courses", "grad"), ("Kindergarten admissions", "adm"),
+             ("State improvement", "state"), ("Graduation and college", "grad"), ("Advanced courses", "grad"), ("Kindergarten admissions", "adm"),
              ("Grade ", "adm"), ("High school programs", "adm"), ("Pre-K", "prek"),
              ("School details", "details"), ("Demographics", "demo"), ("AP classes", "ap"), ("Sports", "sp"), ("Classes", "ex"), ("Other ", "near"))
 
@@ -368,6 +368,13 @@ def ratings_html(dbn, r):
         ("Safety and school climate", chip(r[3], f"{r[3]} / 4")),
         ("Relationships with families", chip(r[4], f"{r[4]} / 4")),
     ]) + f'<p class="src">The DOE’s own ratings, from its {SNAPSHOT_LABEL} School Quality Snapshot.</p>')
+
+
+def state_html(ss):
+    """New York State's improvement list, for a school on one (build.py state_status: [code, name, sentence, more,
+    report card URL]), as the map card's stateSec."""
+    return (f'<h2>State improvement list</h2><p>{e(ss[2])}</p><p class="src">{e(ss[3])}</p>'
+            + more(ext(ss[4], "State report card")))
 
 
 def tests_html(t, grades, dbn, lv):
@@ -1069,6 +1076,9 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
         cards.append((ratings_html(dbn, r) + more(ext(snap, "Full School Quality Snapshot"),
                                                   "" if ch else ext(f"https://insideschools.org/school/{dbn}", "InsideSchools review")),
                       f"Overall {sum(vals) / len(vals):.1f} / 4" if vals else "", True))
+        ss = d.get("SS", {}).get(dbn)
+        if ss:
+            cards.append((state_html(ss), f"{ss[1]} ({ss[0]})", False))
         if lv == "hs":
             cut = (HS.get("CUT") or {})
             o2, q2 = (HS.get("O") or {}).get(dbn), (HS.get("Q") or {}).get(dbn)

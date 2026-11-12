@@ -32,7 +32,7 @@ LOCATIONS_DATASET = "wg9x-4ke6"   # 2019-2020 School Locations (lat/lon, grades)
 TESTS_URL = "https://infohub.nyced.org/docs/default-source/default-document-library/school-{}-results-public.xlsx"
 SNAPSHOT_API = "https://tools.nycenet.edu/api/v1/data/school/app/snapshot/all"
 from settings import (SNAPSHOT_YEAR, MYSCHOOLS_LABEL, DEMOGRAPHICS_LABEL, TESTS_YEAR,  # which year of each source (scripts/settings.py)
-                      PREK_LABEL, BLUE_BOOK_LABEL)
+                      PREK_LABEL, BLUE_BOOK_LABEL, STATE_RESULTS_YEAR)
 CENTERLINE_DATASET = "inkn-q76z"  # NYC Street Centerline (CSCL)
 NTA_DATASET = "9nt8-h7nd"         # 2020 Neighborhood Tabulation Areas (NYC Planning)
 PARKS_DATASET = "enfh-gkve"       # NYC Parks Properties (parks, playgrounds, gardens)
@@ -73,6 +73,7 @@ HISTORY_PERIODS = {
     **{n: "zones" for n in ("elem_zones.json", "ms_zones.json", "hs_zones.json")},
     "psal_campuses.json": "zones",  # the PSAL's campus lists and teams, by the month they were fetched
     "psal_teams.json": "zones",
+    "state_status.json": f"{int(STATE_RESULTS_YEAR) - 1}-{STATE_RESULTS_YEAR[2:]}",   # by the results year, "2024-25"
 }
 # state_tests.json isn't listed: fetch_tests writes every year in the DOE file to history/state_tests/<year>.json itself.
 
@@ -590,6 +591,115 @@ def fetch_demographics(path=None):
         print(f"  set DEMOGRAPHICS_LABEL in scripts/settings.py to \"{year.replace('-', '–')}\"")
     save("demographics.json", {"year": year, "source": "DOE Demographic Snapshot, School tab",
                                "city": city, "schools": schools})
+
+
+SRC_URL = "https://data.nysed.gov/files/essa/{}/SRC{}.zip"   # NYSED report card database, data.nysed.gov/downloads.php
+STATUS_CODES = {"Comprehensive Support and Improvement": "CSI", "Targeted Support and Improvement": "TSI",
+                "Additional Targeted Support and Improvement": "ATSI", "Local Support and Improvement": "LSI",
+                "CLOSING": "CLOSING"}
+
+
+def _src_tables(path, tables):
+    """CSV rows of some tables of NYSED's report card database (an Access file), through mdbtools' mdb-export
+    (apt install mdbtools, or brew install mdbtools). path: the downloaded SRC<year>.zip or the .accdb in it."""
+    import csv
+    import io
+    import shutil
+    import subprocess
+    import tempfile
+    import zipfile
+    if not shutil.which("mdb-export"):
+        sys.exit("  needs mdb-export, from mdbtools: apt install mdbtools, or brew install mdbtools")
+    with tempfile.TemporaryDirectory() as tmp:
+        if path.endswith(".zip"):  # the zip holds the same database twice, .accdb and .mdb: take one
+            with zipfile.ZipFile(path) as z:
+                name = next(n for n in z.namelist() if n.lower().endswith((".accdb", ".mdb")))
+                path = z.extract(name, tmp)
+        out = {}
+        for t in tables:
+            text = subprocess.run(["mdb-export", path, t], capture_output=True, text=True, check=True).stdout
+            out[t] = list(csv.DictReader(io.StringIO(text)))
+        return out
+
+
+def fetch_state_status(path=None, lcgms_path=None):
+    """New York State's accountability status for every NYC school, from NYSED's report card database for
+    STATE_RESULTS_YEAR (settings.py). The status (2025-26) is based on the year before's results (2024-25).
+        fetch_data.py state-status                          # downloads SRC_URL (about 400 MB) and LCGMS
+        fetch_data.py state-status ~/Downloads/SRC2025.zip  # a saved copy, or the .accdb in it
+    Needs mdbtools (_src_tables). Schools are matched by their state (BEDS) code, from LCGMS; LCGMS has an older
+    code for a few charters, so a charter's code is also matched on its last six digits (the part that names the
+    school), and charter_fixes.json "beds" has the rest by hand. Schools too new to have results aren't in it.
+    state_status.json: {"results": "2024-25", "status": "2025-26", "fetched", "source", "schools": {dbn: code}}
+    with code "LSI" (Local Support and Improvement: not identified, most schools) or, for the rest, [code, NYSED
+    institution ID (its report card: data.nysed.gov/essa.php?instid=...)], code "CSI" (Comprehensive Support and
+    Improvement), "TSI" (Targeted), "ATSI" (Additional Targeted) or "CLOSING"; TSI and ATSI add [student groups]: the
+    groups that led to it, by the state's names (Accountability Status by Subgroup)."""
+    import datetime
+    import tempfile
+    y = int(STATE_RESULTS_YEAR)
+    if not path:
+        url = SRC_URL.format(f"{y - 1 - 2000}-{y - 2000}", y)
+        print(f"  downloading {url}")
+        path = os.path.join(tempfile.gettempdir(), f"SRC{y}.zip")
+        req = urllib.request.Request(url, headers={"User-Agent": "nycschoolzones"})
+        with urllib.request.urlopen(req, timeout=600) as r, open(path, "wb") as f:
+            while chunk := r.read(1 << 20):
+                f.write(chunk)
+    db = _src_tables(os.path.expanduser(path), ["Accountability Status", "Accountability Status by Subgroup"])
+    if path.startswith(tempfile.gettempdir()):
+        os.remove(path)
+    rows = [r for r in db["Accountability Status"] if r["YEAR"] == str(y)]
+    if not rows:
+        sys.exit(f"  no {y} rows: is this the SRC{y} database? (STATE_RESULTS_YEAR in settings.py)")
+    status = {r["ENTITY_CD"]: r for r in rows if not r["ENTITY_CD"].endswith("0000")}   # schools, not districts
+    by_tail = {}  # charters: the last six digits name the school (86xxxx), the rest its district
+    for b in status:
+        if b[6:8] == "86":
+            by_tail.setdefault(b[6:], []).append(b)
+    groups = {}
+    for r in db["Accountability Status by Subgroup"]:
+        if r["YEAR"] == str(y) and r["OVERALL_STATUS"] in ("Targeted Support and Improvement",
+                                                              "Additional Targeted Support and Improvement"):
+            groups.setdefault(r["ENTITY_CD"], set()).add(r["SUBGROUP_NAME"])
+
+    fixes = _load("charter_fixes.json", {}).get("beds", {})
+    out, unknown, missing = {}, set(), []
+    for r in read_lcgms(lcgms_path):
+        dbn, b = r["ATS System Code"].strip(), (r.get("BEDS Number") or "").strip()
+        b = fixes.get(dbn, [b])[0]
+        if b not in status and len(by_tail.get(b[6:], [])) == 1 and r.get("Managed By Name") == "Charter":
+            b = by_tail[b[6:]][0]
+        if b not in status:
+            tested = any(g.isdigit() and int(g) >= 3 for g in r.get("Grades", "").split(","))
+            if r.get("Status Description") == "Open" and tested and not dbn.startswith("75"):
+                missing.append(dbn)   # pre-K centers and District 75 schools have no status of their own
+            continue
+        s = status[b]["OVERALL_STATUS"]
+        code = STATUS_CODES.get(s)
+        if not code:
+            unknown.add(s)
+            continue
+        out[dbn] = code if code == "LSI" else [code, status[b]["INSTITUTION_ID"]] + (
+            [sorted(groups.get(b, []))] if code in ("TSI", "ATSI") else [])
+    if unknown:
+        sys.exit(f"  statuses STATUS_CODES doesn't know: {', '.join(sorted(unknown))}")
+    count = {}
+    for v in out.values():
+        k = v if v == "LSI" else v[0]
+        count[k] = count.get(k, 0) + 1
+    print(f"  {len(out)} schools matched: " + ", ".join(f"{n} {k}" for k, n in sorted(count.items())))
+    enrolled = set(_load("demographics.json", {}).get("schools", {}))
+    missing = sorted(d for d in missing if d in enrolled and d not in out)
+    if missing:
+        print(f"  {len(missing)} schools with grade 3 or up and students in the Demographic Snapshot have no status (new "
+              f"schools have none yet; a charter with results under another code goes in charter_fixes.json \"beds\"): "
+              + ", ".join(missing))
+    save("state_status.json", {"results": f"{y - 1}-{str(y)[2:]}", "status": f"{y}-{str(y + 1)[2:]}",
+                               "fetched": datetime.date.today().isoformat(),
+                               "source": f"NYSED report card database SRC{y} (data.nysed.gov), Accountability Status; "
+                                         "matched to DBNs by BEDS code from DOE LCGMS",
+                               "schools": dict(sorted(out.items()))})
 
 
 def fetch_charters(lcgms_path=None, demographics_path=None):
@@ -1745,6 +1855,10 @@ if __name__ == "__main__":
     if args[:1] == ["charter-snapshot"]:  # straight from the Snapshot API; snapshot-raw also covers charters
         print("-- charter-snapshot")
         fetch_charter_snapshot()
+        sys.exit()
+    if args[:1] == ["state-status"]:  # NYSED's report card database: downloads it, or a saved SRC zip or .accdb
+        print("-- state-status")
+        fetch_state_status(*args[1:2])
         sys.exit()
     if args[:1] == ["charters"] and len(args) == 3:  # from a saved LCGMS export and Demographic Snapshot
         print("-- charters (from files)")

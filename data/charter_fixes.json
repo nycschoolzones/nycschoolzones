@@ -1,5 +1,5 @@
 {
- "source": "Hand-checked charter fixes. points: for addresses that don't geocode (fetch_data.py charters). dual_language: the DOE's data lists no charter dual-language programs, so these are checked by hand against each school's own or the state's description, and the map and pages show them like district schools' programs (build.py). Check each fall; remove schools that have closed.",
+ "source": "Hand-checked charter fixes. points: for addresses that don't geocode (fetch_data.py charters). dual_language: the DOE's data lists no charter dual-language programs, so these are checked by hand against each school's own or the state's description, and the map and pages show them like district schools' programs (build.py). beds: the state (BEDS) code NYSED's report card database has a charter under, where LCGMS's is missing or wrong, for state_status.json (fetch_data.py state-status prints the schools it can't match). Check each fall; remove schools that have closed.",
  "points": {
   "84Q385": [
    40.73793,
@@ -24,6 +24,20 @@
   "84X471": [
    "Spanish",
    "Dual-language Spanish/English, grades 6-12. NYSED renewal site visit report, March 2024 (nysed.gov/sites/default/files/programs/charter-schools/renewal-site-visit-report-american-dream-cs-3-18-24.pdf)"
+  ]
+ },
+ "beds": {
+  "84K680": [
+   "331900860993",
+   "LCGMS has 38400010680; NYSED lists ACHIEVEMENT FIRST ASPIRE CS as 331900860993 (SRC2025)."
+  ],
+  "84M702": [
+   "310500860804",
+   "LCGMS has 800000047050 (a NYSED institution ID); NYSED lists SISULU-WALKER CHARTER SCHOOL as 310500860804 (SRC2025)."
+  ],
+  "84X347": [
+   "321000860904",
+   "LCGMS has no code; NYSED lists INTERNATIONAL LEADERSHIP CHARTER HS as 321000860904 (SRC2025)."
   ]
  }
 }

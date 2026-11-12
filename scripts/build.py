@@ -82,6 +82,32 @@ def load(name):
         return json.load(f)
 
 
+def state_status():
+    """{dbn: [code, name, sentence, more, report card URL]} for the schools New York State lists for support and
+    improvement (state_status.json), worded by settings.STATE_STATUS_TEXT; the map card (stateSec) and the school
+    pages (pages.py state_html) show them as they are. "more" adds the year, what the lists mean and, for a high
+    school on the CSI list, a line on transfer schools."""
+    s = load("state_status.json")
+    want = f"{int(settings.STATE_RESULTS_YEAR) - 1}-{settings.STATE_RESULTS_YEAR[2:]}"
+    if s.get("results") != want:
+        sys.exit(f"data/state_status.json has {s.get('results')} results but settings.STATE_RESULTS_YEAR is "
+                 f"{settings.STATE_RESULTS_YEAR}; run fetch_data.py state-status or change the setting")
+    grades = load("zips.json").get("grades", {}) if os.path.exists(os.path.join(DATA, "zips.json")) else {}
+    listed = {k: v for k, v in s["schools"].items() if v != "LSI" and v[0] in settings.STATE_STATUS_TEXT}
+    n = len(listed)
+    more = settings.STATE_STATUS_MORE.format(results=settings.STATE_RESULTS_LABEL, status=settings.STATE_STATUS_LABEL,
+                                             n=round(n, -1) if n >= 20 else n, total=round(len(s["schools"]), -2))
+    out = {}
+    for dbn, (code, inst, *g) in sorted(listed.items()):
+        names = [settings.STATE_GROUPS.get(x, x) for x in (g[0] if g else [])]
+        groups = " and ".join(filter(None, [", ".join(names[:-1]), names[-1] if names else ""])) or "one group of students"
+        name, text = settings.STATE_STATUS_TEXT[code]
+        hs = code == "CSI" and any(x in grades.get(dbn, "").split(",") for x in ("09", "10", "11", "12"))
+        out[dbn] = [code, name, text.format(groups=groups), more + (" " + settings.STATE_STATUS_HS if hs else ""),
+                    f"https://data.nysed.gov/essa.php?instid={inst}&year={settings.STATE_RESULTS_YEAR}"]
+    return out
+
+
 def polys(geom):
     return geom["coordinates"] if geom["type"] == "MultiPolygon" else [geom["coordinates"]]
 
@@ -1103,6 +1129,12 @@ def main(standalone_path=None, pages=None):
                   for x in f["properties"]["dbns"]} | set((d.get("HS") or {}).get("X", {}))
         d["CO"] = {k: v for k, v in load("colocation.json")["schools"].items() if k in shown}
         print(f"shared buildings: {len(d['CO'])} schools")
+
+    # New York State's improvement lists (state_status.json, fetch_data.py state-status): SS {dbn: [code, name,
+    # sentence, more, NYSED report card URL]} for schools on one (CSI, TSI, ATSI); nothing for the rest
+    if os.path.exists(os.path.join(DATA, "state_status.json")):
+        d["SS"] = state_status()
+        print(f"state improvement lists: {len(d['SS'])} schools")
 
     # Who goes to each school (DOE Demographic Snapshot, settings.DEMOGRAPHICS_LABEL): DM {dbn: [enrollment, Asian
     # and Pacific Islander, Black, Hispanic, White, everyone else, % in poverty (whole % or ">95" / "<5"),

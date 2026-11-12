@@ -32,6 +32,37 @@ MYSCHOOLS_LABEL = "fall 2026"
 BLUE_BOOK_LABEL = "2025–26"
 # Race and ethnicity, family income and more: the DOE's Demographic Snapshot (data/demographics.json), the school year it counts
 DEMOGRAPHICS_LABEL = "2025–26"
+# New York State's school accountability status (data/state_status.json), from NYSED's report card database (SRC).
+# STATE_RESULTS_YEAR is the spring of the results it's based on ("2025": 2024-25 results, the database SRC2025.zip);
+# the status is for the school year after (2025-26). The build stops if state_status.json is from another year.
+STATE_RESULTS_YEAR = "2025"
+STATE_RESULTS_LABEL = f"{int(STATE_RESULTS_YEAR) - 1}–{STATE_RESULTS_YEAR[2:]}"   # "2024–25"
+STATE_STATUS_LABEL = f"{STATE_RESULTS_YEAR}–{int(STATE_RESULTS_YEAR[2:]) + 1}"     # "2025–26"
+# What the map's cards and the school pages say about a school the state lists for support and improvement
+# ("State improvement list"). Schools in Local Support and Improvement (most) get nothing. [name, sentence]; {groups}
+# is the student groups, worded by STATE_GROUPS ("Black students and English learners").
+STATE_STATUS_TEXT = {
+    "CSI": ["Comprehensive Support and Improvement",
+            "New York State lists this school for Comprehensive Support and Improvement (CSI), the state’s list of "
+            "the schools with the lowest results, from test scores, progress on tests, graduation rates, chronic "
+            "absenteeism and English learners’ progress."],
+    "TSI": ["Targeted Support and Improvement",
+            "New York State lists this school for Targeted Support and Improvement (TSI): results for {groups} at "
+            "the school were among the lowest in the state, though the school’s results overall weren’t."],
+    "ATSI": ["Additional Targeted Support and Improvement",
+             "New York State lists this school for Additional Targeted Support and Improvement (ATSI): results for "
+             "{groups} at the school were as low as at the state’s lowest-performing schools."],
+}
+STATE_STATUS_MORE = ("Based on {results} results, for the {status} school year. Schools on the state’s lists make "
+                     "an improvement plan, and the state checks their progress each year. About {n} of NYC’s "
+                     "{total:,} public schools are on one.")
+STATE_STATUS_HS = ("High schools that serve students who are behind in credits, like transfer schools, are often "
+                   "on the list, since it counts how many students graduate.")
+STATE_GROUPS = {"Black or African American": "Black students", "Hispanic or Latino": "Hispanic students",
+                "White": "White students", "Asian or Native Hawaiian/Other Pacific Islander": "Asian and Pacific Islander students",
+                "Multiracial": "multiracial students", "American Indian or Alaska Native": "Native American students",
+                "English Language Learner": "English learners", "Students with Disabilities": "students with disabilities",
+                "Economically Disadvantaged": "low-income students"}
 
 # NYC-wide high school averages from that Snapshot, quoted next to each school's numbers
 CITY_GRAD = 81        # 4-year graduation rate, %
