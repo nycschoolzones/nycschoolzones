@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.77.0 (2026-11-11)
 
 ### Added
 - Middle schools can now be colored by accelerated classes, in a new "Accelerated classes" group under Color by. **8th graders passing** colors each middle school by the share of its 8th graders who passed an accelerated class: a Regents-level high school course like Algebra I or Living Environment, which earns them high school credit early. From the 2024–25 School Quality Snapshot (NYC average: 44%). **Classes offered** opens a checklist of the accelerated and honors classes middle schools list on MySchools, by subject, each with how many schools offer it: tick the ones you want, like Algebra and Geometry, and the map shows which schools have all of them and which have some. A link to the map keeps your picks.
