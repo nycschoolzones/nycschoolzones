@@ -711,18 +711,18 @@ def acc_html(ix, areas, credit=None):
         i += len(names)
         if got:
             h += f'<h3 class="ex-h">{e(a)}</h3><ul class="ap">' + "".join(f"<li>{e(n)}</li>" for n in got) + "</ul>"
-    cred = (f"<p><b>{round(credit)}%</b> of 8th graders earned high school credit in {SNAPSHOT_LABEL}, by passing an "
-            f"accelerated, Regents-level class (NYC: {settings.CITY_HS_CREDIT}%).</p>" if credit is not None else "")
+    cred = (f"<p><b>{round(credit)}%</b> of the school’s 8th graders passed an accelerated, Regents-level class in "
+            f"{SNAPSHOT_LABEL}, earning high school credit (NYC: {settings.CITY_HS_CREDIT}%).</p>" if credit is not None else "")
     src = ((f"Classes as the school lists them on MySchools, {settings.MYSCHOOLS_LABEL}. Accelerated classes can earn "
             "high school credit; honors classes don’t. Ask the school who can take each one. " if ix else "")
-           + (f"High school credit: {SNAPSHOT_LABEL} School Quality Snapshot." if credit is not None else ""))
+           + (f"8th graders passing: {SNAPSHOT_LABEL} School Quality Snapshot." if credit is not None else ""))
     return "<h2>Accelerated classes</h2>" + cred + h + f'<p class="src">{src}</p>'
 
 
 def acc_summary(ix, credit=None):
-    """The folded card's line: "4 classes · 87% of 8th graders earned HS credit"."""
+    """The folded card's line: "4 classes · 87% of 8th graders passed one"."""
     return " · ".join(x for x in (f"{len(ix)} class{'es' if len(ix) > 1 else ''}" if ix else "",
-                                  f"{round(credit)}% of 8th graders earned HS credit" if credit is not None else "") if x)
+                                  f"{round(credit)}% of 8th graders passed one" if credit is not None else "") if x)
 
 
 def ap_charter_html(q):
