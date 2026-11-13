@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Fixed
+- Switching school level while the map is colored by something the new level doesn't have (After school, Pre-K or G&T on the elementary map, Screened programs, AP classes, sports or accelerated classes) used to switch the colors to Dual language. Now the map goes to Overall rating, and your coloring comes back when you switch back to a level that has it.
+
 ## 1.81.0 (2026-11-13)
 
 ### Changed

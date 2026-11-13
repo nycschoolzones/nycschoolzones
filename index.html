@@ -1914,7 +1914,9 @@ let curGroup='quality';
 function showGroup(g){curGroup=g;
   document.getElementById('grp-src').textContent=g==='tests'?(level==='hs'?'DOE School Quality Snapshot · 2024–25':'New York State tests · spring 2026'):GROUP_SRC[g];}
 let quietColor=false;
-document.querySelectorAll('input[name=metric]').forEach(r=>r.addEventListener('change',()=>{const s=r.closest('.seg[data-g]');if(s){lastPick[s.dataset.g]=r.value;showGroup(s.dataset.g)}
+// the coloring a level switch set aside because the new level doesn't have it (setLevel); any pick forgets it
+let awayMetric=null;
+document.querySelectorAll('input[name=metric]').forEach(r=>r.addEventListener('change',()=>{awayMetric=null;const s=r.closest('.seg[data-g]');if(s){lastPick[s.dataset.g]=r.value;showGroup(s.dataset.g)}
   if(!quietColor)markEngaged();metric=r.value;syncLegend();restyle();drawLabels();setColorParam();placePanel();refreshPickSecs();if(isPick()&&!quietColor)setApPop(true);
   // picking a Color by opens its section on the card; a ?c= link loading (quietColor) opens it only if you've never
   // opened or closed that section yourself (SEC)
@@ -1986,20 +1988,23 @@ async function setLevel(lv){if(lv===level)return;if(!LV[lv]&&!(await loadLevel(l
   // G&T is an elementary program; hide it for middle school
   const noGT=lv!=='es',gt=document.getElementById('m-gt');gt.hidden=noGT;document.getElementById('lbl-gt').hidden=noGT;
   ['pk','as'].forEach(m=>{document.getElementById('m-'+m).hidden=noGT;document.getElementById('lbl-'+m).hidden=noGT;  // pre-K and after school: the elementary map
-    if(noGT&&metric===m){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
     if(noGT&&lastPick.programs===m)lastPick.programs='dl'});
   gt.closest('.seg').classList.toggle('three',noGT);
-  if(noGT&&metric==='gt'){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
   if(noGT&&lastPick.programs==='gt')lastPick.programs='dl';
   // screened programs: middle and high school
   const noScr=lv==='es';document.getElementById('m-scr').hidden=noScr;document.getElementById('lbl-scr').hidden=noScr;
-  if(noScr&&metric==='scr'){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
   if(noScr&&lastPick.programs==='scr')lastPick.programs='dl';
   // AP classes and sports: high school only, groups of their own
   ['ap','sp'].forEach(g=>{document.getElementById('g-'+g).hidden=!hs;document.querySelector('.seg[data-g='+g+']').hidden=!hs});
   // accelerated classes and high school credit: middle school only
   const ms=lv==='ms';document.getElementById('g-acc').hidden=!ms;document.querySelector('.seg[data-g=acc]').hidden=!ms;
-  if(kindOf(metric)&&kindOf(metric).lv!==lv||metric==='hsc'&&!ms){const r=document.getElementById('m-dl');r.checked=true;r.dispatchEvent(new Event('change'))}
+  // a coloring this level doesn't have (After school, Pre-K, G&T, Screened, AP classes, sports, accelerated classes)
+  // falls back to Overall rating, and comes back on a level that has it, unless another coloring was picked meanwhile
+  const mIn=m=>document.querySelector('input[name=metric][value="'+m+'"]'),
+    shown=m=>{const r=mIn(m);return !r||!r.hidden&&!r.closest('.seg[data-g]').hidden},
+    pick=m=>{const r=mIn(m),q=quietColor;quietColor=true;r.checked=true;r.dispatchEvent(new Event('change'));quietColor=q};
+  if(!shown(metric)){const m=metric;pick('comp');awayMetric=m}
+  else if(awayMetric&&metric==='comp'&&shown(awayMetric))pick(awayMetric);
   if(curGroup!=='programs'&&document.querySelector('.seg[data-g='+curGroup+']').hidden)curGroup='programs';
   showGroup(curGroup);
   emptyCard();sheetDefault();
