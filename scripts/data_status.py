@@ -21,7 +21,7 @@ DATA = os.path.join(ROOT, "data")
 # refresh, or "rarely": never due). Keep in step with README "Refresh the data".
 DATASETS = [
     ("1 Zones", ("elem_zones.json", "ms_zones.json", "hs_zones.json"), "each fall, when Find a School updates", 10),
-    ("2 MySchools", ("hs_directory.json", "ms_directory.json", "accessibility.json"), "October, when applications open", 10),
+    ("2 MySchools", ("hs_directory.json", "ms_directory.json", "accessibility.json", "school_day.json"), "October, when applications open", 10),
     ("2 MySchools", ("nonzoned_k.json", "citywide_gt_k.json", "k_priority.json"), "December, kindergarten applications", 12),
     ("2b PSAL campuses and teams", ("psal_campuses.json", "psal_teams.json"), "each fall, after MySchools", 11),
     ("3 Snapshot", ("snapshot_ratings.json", "snapshot_extra.json", "snapshot_tests.json", "hs_outcomes.json",
