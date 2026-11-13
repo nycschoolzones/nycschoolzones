@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- On the middle school map, the Color by option "Classes offered" is now "Accelerated classes," so it's clear it colors by the accelerated and honors classes a school offers, not all its classes.
+
 ## 1.80.0 (2026-11-13)
 
 ### Added
