@@ -345,6 +345,21 @@ def facts_rows(rows):
                                           for r in rows) + "</dl>"
 
 
+def school_day(row):
+    """A school's hours and after-school program from its level's MySchools listing (AS row, build.py: [start, end,
+    flags]: F free, P paid, A offered with no cost stated, C "contact the program for extended day options"), as
+    (hours "8:39 am – 3:00 pm" or None, the after-school line, the same short for a summary), the map card's words
+    (dayHtml/asTxt). (None, None, None) when the school isn't listed (charters)."""
+    if not row:
+        return None, None, None
+    f = row[2]
+    txt = ("Free and paid programs" if "P" in f else "Free program") if "F" in f else "Paid program" if "P" in f else \
+        "Offered (ask about cost)" if "A" in f else "Ask the school" if "C" in f else "None listed"
+    short = {"Free program": "Free after-school", "Free and paid programs": "Free after-school",
+             "Paid program": "Paid after-school"}.get(txt)
+    return f"{row[0]} – {row[1]}" if row[0] and row[1] else None, ("✓ " if "F" in f else "") + txt, short
+
+
 def bar(label, v, stops, txt=None, lo=0, hi=100):
     """A bar colored on the same ramp as the map's card (TEST_STOPS or OUT_STOPS)."""
     if v is None:
@@ -1202,7 +1217,11 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
 
         students = f"{dm[0]:,}" if dm and dm[0] else f"{x[0]:,}" if x and x[0] else None
         attend = pct(x[1]) if len(x) > 1 else None
+        hours, after, after_short = school_day(({"es": d, "ms": MS, "hs": HS}[lv].get("AS") or {}).get(dbn))
         facts = facts_rows([
+            ("School day", hours),
+            ("After school", after and (f"<b>{after}</b>" if after.startswith("✓") else after),
+             after and "As the school lists it on MySchools. Programs can fill up: ask the school about spaces, cost and how to sign up."),
             ("Students", students),
             ("Attendance", attend),
             ("Teachers with 3+ years’ experience", pct(x[2]) if len(x) > 2 else None),
@@ -1222,7 +1241,8 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
         if facts:
             cards.append(("<h2>School details</h2>" + facts + more(
                 ext(f"https://www.schools.nyc.gov/schools/{dbn[2:]}", "School page: contacts, hours, bell schedule")),
-                " · ".join(x2 for x2 in (f"{students} students" if students else "", f"{attend} attendance" if attend else "") if x2), False))
+                " · ".join(x2 for x2 in (f"{students} students" if students else "", f"{attend} attendance" if attend else "",
+                                         after_short or "") if x2), False))
         cards.append((demo_html(dm, d.get("DMC"), ch, of_all(d.get("XN", {}).get(dbn), x, 2, 6),
                                 of_all(d.get("XN", {}).get(dbn), x, 1, 5)), demo_summary(dm), False))
         if lv in ("ms", "hs"):

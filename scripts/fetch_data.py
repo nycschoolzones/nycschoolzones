@@ -64,7 +64,7 @@ HISTORY_PERIODS = {
                           "nonzoned_snapshot.json", "ms_snapshot.json", "hs_snapshot.json", "charter_snapshot.json",
                           "snapshot_counts.json", "colocation.json")},
     **{n: _FALL for n in ("nonzoned_k.json", "citywide_gt_k.json", "k_priority.json", "ms_directory.json",
-                          "hs_directory.json", "accessibility.json")},
+                          "hs_directory.json", "accessibility.json", "school_day.json")},
     "demographics.json": DEMOGRAPHICS_LABEL.replace("–", "-"),
     "class_size.json": None,   # from the report's file name (CLASS_SIZE_URL), set below
     "prek.json": PREK_LABEL.replace(" ", "-"),
@@ -1513,9 +1513,62 @@ def import_accessibility(paths):
     print(f"  accessibility: {len(acc)} schools")
 
 
+def _clock(t):
+    """A MySchools start or end time as "8:00 am": they come as "8:00am", "08:00am", "8:00 AM", " 8:00:00 AM",
+    "2:19:59 PM" (the next minute), "3pm" and "14:20:00"; '' for "TBD", "Varies" and the like. Text after the time
+    ("2:50pm (Fridays 1:12pm)") is dropped."""
+    import re
+    m = re.match(r"\s*(\d{1,2})(?::(\d\d))?(?::(\d\d))?\s*([ap])?\.?m?\b", (t or "").replace("\xa0", " "), re.I)
+    if not m:
+        return ""
+    h, mi = int(m.group(1)), int(m.group(2) or 0) + (int(m.group(3) or 0) >= 30)
+    ap = (m.group(4) or "").lower() or ("p" if h >= 12 or h < 6 else "a")  # no am/pm: "14:20:00", "08:25:00"
+    h, mi = h + mi // 60, mi % 60
+    h = h - 12 if h > 12 else h
+    return f"{h}:{mi:02d} {ap}m" if 1 <= h <= 12 else ""
+
+
+# MySchools "other features" that say whether a school has an after-school program: F free, P paid, A offered (cost
+# not stated), C "Contact Program for Extended Day Options" (ask the school). "Extended Day" alone isn't here: at
+# middle and high schools it usually means extra class time, not care after school.
+AFTER_SCHOOL = {"free after school": "F", "free after school program": "F", "paid after school": "P",
+                "afterschool programming available": "A", "extended day: yes - after-school": "A",
+                "extended day: yes - before- and after-school": "A", "contact program for extended day options": "C"}
+
+
+def import_school_day(paths):
+    """Each school's hours and after-school program from MySchools directory downloads, merged into school_day.json:
+    {"es"|"ms"|"hs": {dbn: [start ("8:00 am" or ''), end, after-school flags (AFTER_SCHOOL letters, in "FPAC" order,
+    '' for none listed)]}}, a level per directory (kindergarten, middle, high school), since a K-8 or 6-12 school
+    lists each level on its own. A level whose directory isn't passed keeps what the file had."""
+    path = os.path.join(DATA, "school_day.json")
+    out = {}
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            out = json.load(f)
+    level = {"4": "es", "6": "ms", "1": "hs"}
+    for p in paths:
+        with open(os.path.expanduser(p), encoding="utf-8") as f:
+            raw = json.load(f)
+        lv = level.get(raw.get("source", "").rsplit(" ", 1)[-1])
+        if not lv:
+            continue
+        rows = {}
+        for x in raw["schools"]:
+            fl = {AFTER_SCHOOL[n] for z in x.get("other_features") or []
+                  if (n := " ".join((z.get("name") or "").lower().split())) in AFTER_SCHOOL}
+            rows[x["school"]["dbn"]] = [_clock(x.get("start_time")), _clock(x.get("end_time")),
+                                        "".join(c for c in "FPAC" if c in fl)]
+        out[lv] = dict(sorted(rows.items()))
+        print(f"  school day ({lv}): {len(rows)} schools, {sum(1 for r in rows.values() if r[0] and r[1])} with hours, "
+              f"{sum(1 for r in rows.values() if 'F' in r[2])} with a free after-school program")
+    save("school_day.json", {k: out[k] for k in ("es", "ms", "hs") if k in out})
+
+
 def import_myschools(paths):
     """Turn myschools_k.json / myschools_ms.json / myschools_hs.json (from scripts/browser/myschools.js) into
-    nonzoned_k.json + citywide_gt_k.json, ms_directory.json and hs_directory.json."""
+    nonzoned_k.json + citywide_gt_k.json, ms_directory.json and hs_directory.json, plus accessibility.json and
+    school_day.json (hours and after-school programs) from all of them."""
     for path in paths:
         with open(os.path.expanduser(path), encoding="utf-8") as f:
             raw = json.load(f)
@@ -1535,6 +1588,7 @@ def import_myschools(paths):
         else:
             print(f"  skip {path}: not a kindergarten, middle or high school directory")
     import_accessibility(paths)
+    import_school_day(paths)
 
 
 def _zoned(name):
@@ -1796,6 +1850,10 @@ if __name__ == "__main__":
     if args[:1] == ["accessibility"] and len(args) >= 2:  # just building accessibility, from the same downloads
         print("-- accessibility (from browser downloads)")
         import_accessibility(args[1:])
+        sys.exit()
+    if args[:1] == ["school-day"] and len(args) >= 2:  # just hours and after-school programs, from the same downloads
+        print("-- school day (from browser downloads)")
+        import_school_day(args[1:])
         sys.exit()
     if args[:1] == ["snapshot-job"]:  # writes ~/Downloads/snapshot_job.js to paste into the browser
         snapshot_job(args[1] if len(args) > 1 else None)

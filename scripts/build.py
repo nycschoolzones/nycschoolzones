@@ -1149,6 +1149,19 @@ def main(standalone_path=None, pages=None):
                 d["XN"][dbn] = m
         print(f"English learner and IEP counts: {len(d['XN'])} of {len(d['X'])} schools with Snapshot facts")
 
+    # Hours and after-school programs (MySchools, fetch_data.py import_school_day): AS {dbn: [start ("8:00 am" or ''),
+    # end, after-school flags: F free, P paid, A offered (cost not stated), C ask the school about extended day; ''
+    # none listed]}, a level's own directory's for each map: d["AS"] the kindergarten one, MS.AS and HS.AS theirs
+    if os.path.exists(os.path.join(DATA, "school_day.json")):
+        sd = load("school_day.json")
+        for key, lv in (("es", d), ("ms", d.get("MS")), ("hs", d.get("HS"))):
+            if lv is None or key not in sd:
+                continue
+            shown = {x for f in lv["features"] for x in f["properties"]["dbns"]} | {r[0] for r in lv.get("NZ", [])}
+            lv["AS"] = {k: v for k, v in sd[key].items() if k in shown}
+            print(f"school day ({key}): {len(lv['AS'])} of {len(shown)} schools, "
+                  f"{sum(1 for v in lv['AS'].values() if 'F' in v[2])} with a free after-school program")
+
     # Building accessibility (MySchools): AC {dbn: "F" fully, "P" partially, "N" not accessible}, every level
     if os.path.exists(os.path.join(DATA, "accessibility.json")):
         d["AC"] = load("accessibility.json")
