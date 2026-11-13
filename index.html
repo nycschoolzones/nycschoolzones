@@ -89,7 +89,7 @@ button{font:inherit;font-family:var(--display);font-weight:600;font-size:.9rem;p
 .copy-addr:hover{border-color:var(--muted)}
 .addr-box{font-size:.82rem;padding:3px 6px;flex:1;min-width:140px}
 .school .meta{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
-.school .day{display:block}.school .day .as3{color:var(--fg);font-weight:600;white-space:nowrap}
+.school .day{display:block}.school .day .as3,.school .day .as4{color:var(--fg);font-weight:600;white-space:nowrap}
 .school a{color:var(--hl);font-size:.85rem}
 .opts-note{font-size:.8rem;color:var(--muted);margin:4px 0 6px}
 .dist-page{color:var(--hl);font-family:var(--display);font-weight:600;font-size:.88rem}
@@ -897,16 +897,17 @@ function zonePk(dbns){const v=dbns.map(pkCat).filter(x=>x!=null);return v.length
 // school hours and after-school programs, as each school lists them in its level's MySchools directory (LV[level].AS
 // {dbn: [start "8:00 am" or '', end, flags]}: F free, P paid, A offered (cost not stated), C "contact the program for
 // extended day options"; build.py, fetch_data.py import_school_day). asCat: 3 free, 2 paid only, 1 ask the school, 0 none
-// listed; null when the school isn't in the directory (charters). A zone with several schools shows the best
-const AS_COL=['var(--off)','#cbbde3','#e8892b','#2f9a44'],AS_LAB=['None listed','Ask the school','Paid only','Free'],
-  AS_SHORT=['no after-school listed','ask about after-school','paid after-school','free after-school'];
+// listed, 4 free and paid (green like free, for the labels' words); null when the school isn't in the directory
+// (charters). A zone with several schools shows the best
+const AS_COL=['var(--off)','#cbbde3','#e8892b','#2f9a44','#2f9a44'],AS_LAB=['None listed','Ask the school','Paid only','Free'],
+  AS_SHORT=['no after-school listed','ask about after-school','paid after-school','free after-school','free + paid after-school'];
 const asRow=d=>LV[level]&&LV[level].AS&&LV[level].AS[d]||null;
-function asCat(d){const r=asRow(d);if(!r)return null;const f=r[2];return f.includes('F')?3:f.includes('P')?2:/[AC]/.test(f)?1:0}
+function asCat(d){const r=asRow(d);if(!r)return null;const f=r[2];return f.includes('F')?(f.includes('P')?4:3):f.includes('P')?2:/[AC]/.test(f)?1:0}
 function zoneAs(dbns){const v=dbns.map(asCat).filter(x=>x!=null);return v.length?Math.max(...v):null}
 function asTxt(d){const f=(asRow(d)||[])[2]||'';return f.includes('F')?(f.includes('P')?'Free and paid after-school programs':'Free after-school program'):f.includes('P')?'Paid after-school program':f.includes('A')?'After-school program (ask about cost)':f.includes('C')?'Ask the school about after-school':'No after-school program listed'}
 // the card's line under the grades: "School day 8:39 am – 3:00 pm · ✓ Free after-school program"
 function dayHtml(d){const r=asRow(d);if(!r)return '';const c=asCat(d),h=r[0]&&r[1]?'School day '+r[0]+' – '+r[1]:'';
-  return '<span class="meta day">'+(h?h+' · ':'')+'<span class="as'+c+'">'+(c===3?'✓ ':'')+asTxt(d)+'</span></span>'}
+  return '<span class="meta day">'+(h?h+' · ':'')+'<span class="as'+c+'">'+(c>=3?'✓ ':'')+asTxt(d)+'</span></span>'}
 // building use (SCA Blue Book 2025-26): [utilization %, enrollment, capacity] per school
 const U=D.U||{};
 // pre-K and 3-K (Local Law 72 report, fall 2025 admissions): [pre-K seats, applicants, 3-K seats, applicants, pre-K offers,
@@ -1907,7 +1908,7 @@ function syncLegend(){syncName();syncPick();syncHsc();const lo=document.getEleme
   else{const v=mapSchools().map(d=>zoneProg([d],metric)),n=k=>v.filter(x=>x===k).length;
     sw.innerHTML=apSw(PROG_COL,metric==='gt'?'Has G&amp;T':'Has dual language',n(true))+apSw('var(--off)','Doesn’t',n(false))+(n(null)?apSw('na','No data',n(null)):'')}}
   if(metric==='as'){const v=mapSchools().map(asCat),n=k=>v.filter(x=>x===k).length;
-    document.getElementById('as-sw').innerHTML=[3,2,1,0].map(k=>apSw(AS_COL[k],AS_LAB[k],n(k))).join('')+(n(null)?apSw('na','No data',n(null)):'')}
+    document.getElementById('as-sw').innerHTML=[3,2,1,0].map(k=>apSw(AS_COL[k],AS_LAB[k],n(k)+(k===3?n(4):0))).join('')+(n(null)?apSw('na','No data',n(null)):'')}
   if(metric==='pk'||metric==='scr'){const f=metric==='pk'?pkCat:scrCat,v=mapSchools().map(f),n=k=>v.filter(x=>x===k).length,
       lab=metric==='pk'?['Neither','Pre-K only','Pre-K and 3-K']:['None','Some screened','All screened'],col=metric==='pk'?PK_COL:SCR_COL;
     document.getElementById(metric+'-sw').innerHTML=[2,1,0].map(k=>apSw(col[k],lab[k],n(k))).join('')+(n(null)?apSw('na','No data',n(null)):'')}document.getElementById('prog-hint').textContent=metric==='gt'?'District Gifted & Talented programs listed for the zoned school in the 2024–25 Snapshot. G&T seats aren’t assigned by zone: families apply separately, and admission rules have changed in recent years, so check MySchools for this year’s process.':'Dual-language programs at the zoned school, from the 2024–25 Snapshot. Each color is a language. “Two or more” means the school runs programs in more than one language. Seats are usually by application, often with priority for zoned families. Most charter schools aren’t in the Snapshot’s program lists, so they show as no data.';

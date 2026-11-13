@@ -355,7 +355,7 @@ def school_day(row):
     f = row[2]
     txt = ("Free and paid programs" if "P" in f else "Free program") if "F" in f else "Paid program" if "P" in f else \
         "Offered (ask about cost)" if "A" in f else "Ask the school" if "C" in f else "None listed"
-    short = {"Free program": "Free after-school", "Free and paid programs": "Free after-school",
+    short = {"Free program": "Free after-school", "Free and paid programs": "Free + paid after-school",
              "Paid program": "Paid after-school"}.get(txt)
     return f"{row[0]} – {row[1]}" if row[0] and row[1] else None, ("✓ " if "F" in f else "") + txt, short
 

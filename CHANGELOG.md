@@ -9,7 +9,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ## Unreleased
 
 ### Added
-- School cards and school pages now show each school's hours and whether it has an after-school program, as the school lists it on MySchools: "School day 8:39 am – 3:00 pm · ✓ Free after-school program" under the grades on the map card, and "School day" and "After school" rows in School details on the school page. Elementary schools also say when their program is paid, or when the school asks families to contact it about extended-day options; schools that list nothing say "No after-school program listed."
+- School cards and school pages now show each school's hours and whether it has an after-school program, as the school lists it on MySchools: "School day 8:39 am – 3:00 pm · ✓ Free after-school program" under the grades on the map card, and "School day" and "After school" rows in School details on the school page. Elementary schools also say when their program is paid, or when they list both free and paid programs (PS 33 in Chelsea and 16 others), or when the school asks families to contact it about extended-day options; schools that list nothing say "No after-school program listed."
 - Color by → Programs → After school on the elementary map: zones by whether their school lists a free after-school program, a paid one only, "ask the school," or none. Of about 800 elementary schools, 471 list a free program.
 
 ## 1.79.0 (2026-11-12)
