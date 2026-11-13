@@ -758,7 +758,7 @@ def acc_html(ix, areas, credit=None):
             f"{SNAPSHOT_LABEL}, earning high school credit (NYC: {settings.CITY_HS_CREDIT}%).</p>" if credit is not None else "")
     src = ((f"Classes as the school lists them on MySchools, {settings.MYSCHOOLS_LABEL}. Accelerated classes can earn "
             "high school credit; honors classes don’t. Ask the school who can take each one. " if ix else "")
-           + (f"8th graders passing: {SNAPSHOT_LABEL} School Quality Snapshot." if credit is not None else ""))
+           + (f"8th graders with HS credit: {SNAPSHOT_LABEL} School Quality Snapshot." if credit is not None else ""))
     return "<h2>Accelerated classes</h2>" + cred + h + f'<p class="src">{src}</p>'
 
 

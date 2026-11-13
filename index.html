@@ -674,7 +674,7 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
     </div>
     <div class="grp-h" id="g-acc" hidden>Accelerated classes</div>
     <div class="seg two" data-g="acc" role="radiogroup" aria-labelledby="g-acc" hidden>
-        <input type="radio" name="metric" id="m-hsc" value="hsc"><label for="m-hsc">8th graders passing</label>
+        <input type="radio" name="metric" id="m-hsc" value="hsc"><label for="m-hsc">8th graders with HS credit</label>
         <input type="radio" name="metric" id="m-acc" value="acc"><label for="m-acc">Accelerated classes</label>
     </div>
     </div>
@@ -1623,9 +1623,9 @@ function accSec(d){if(level!=='ms')return '';const lp=LV.ms,x=lp&&lp.AX&&lp.AX[d
   const miss=K.set.filter(k=>pick.has(k)&&!has.has(k)),nm=kNames(K);
   const missing=miss.length?'<p class="ap-miss"><b>Missing:</b> '+miss.map(k=>esc(nm[k])).join(', ')+'</p>':'';
   const cred=h!=null?'<p class="acc-cred"><b>'+Math.round(h)+'%</b> of the school’s 8th graders passed an accelerated class in 2024–25, earning high school credit (NYC: 44%).</p>':'';
-  const sum=[x?x.length+' class'+(x.length>1?'es':''):'No classes listed',pick.size?(x?x.filter(k=>pick.has(k)).length:0)+' of your '+pick.size:h!=null?'8th graders passing one':''].filter(Boolean).join(' · ');
+  const sum=[x?x.length+' class'+(x.length>1?'es':''):'No classes listed',pick.size?(x?x.filter(k=>pick.has(k)).length:0)+' of your '+pick.size:h!=null?'8th graders with HS credit':''].filter(Boolean).join(' · ');
   const right=h!=null?'<span class="chip"><i style="background:'+hscColor(h)+'"></i>'+Math.round(h)+'%</span>':'<span class="sa">'+x.length+'</span>';
-  return sec('acc','<span class="st">Accelerated classes<small>'+sum+'</small></span>'+right,missing+cred+body+'<small class="ex-src">'+(x?'Classes as the school lists them on MySchools, fall 2026. Accelerated classes can earn high school credit; honors classes don’t. Ask the school who can take each one. ':'')+(h!=null?'8th graders passing: 2024–25 School Quality Snapshot.':'')+'</small>')}
+  return sec('acc','<span class="st">Accelerated classes<small>'+sum+'</small></span>'+right,missing+cred+body+'<small class="ex-src">'+(x?'Classes as the school lists them on MySchools, fall 2026. Accelerated classes can earn high school credit; honors classes don’t. Ask the school who can take each one. ':'')+(h!=null?'8th graders with HS credit: 2024–25 School Quality Snapshot.':'')+'</small>')}
 // specialized high schools: last fall's SHSAT cutoff up top
 function cutSec(d){const c=LV.hs&&LV.hs.CUT;if(level!=='hs'||!c||!c.c[d])return '';
   return sec('cut','<span class="st">SHSAT cutoff<small>Lowest score offered a seat, fall '+c.y+'</small></span><span class="sa">'+c.c[d][0]+'</span>',cutHtml(d))}
@@ -1816,7 +1816,7 @@ document.getElementById('llf').addEventListener('submit',async e=>{e.preventDefa
   catch(err){geoFail()}});
 
 
-const METRIC_NAME={comp:'Overall rating',ip:'Instruction rating',ss:'Safety rating',rf:'Families rating',both:'ELA + Math scores',scr:'Screened programs',ela:'ELA scores',math:'Math scores',pk:'Pre-K & 3-K',as:'After-school programs',grad:'Graduation rate',coll:'College & career',ccr:'College readiness',sat:'Average SAT',gt:'G&T programs',dl:'Dual language',iep:'Special ed (IEP share)',ap:'AP class count',apc:'AP courses',spn:'PSAL team count',spt:'PSAL teams',hsc:'8th graders passing accelerated classes',acc:'Accelerated classes'};
+const METRIC_NAME={comp:'Overall rating',ip:'Instruction rating',ss:'Safety rating',rf:'Families rating',both:'ELA + Math scores',scr:'Screened programs',ela:'ELA scores',math:'Math scores',pk:'Pre-K & 3-K',as:'After-school programs',grad:'Graduation rate',coll:'College & career',ccr:'College readiness',sat:'Average SAT',gt:'G&T programs',dl:'Dual language',iep:'Special ed (IEP share)',ap:'AP class count',apc:'AP courses',spn:'PSAL team count',spt:'PSAL teams',hsc:'8th graders with HS credit',acc:'Accelerated classes'};
 // (AP courses and Teams: the button beside Color by says how many are picked)
 function syncName(){const n=METRIC_NAME[metric]||'';['leg-title','color-name'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=n})}
 document.querySelectorAll('#search-sec [role=tab]').forEach(b=>b.addEventListener('click',()=>{const s=b.dataset.s;
