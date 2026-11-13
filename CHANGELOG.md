@@ -11,6 +11,16 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ### Changed
 - On the middle school map, the Color by option "Classes offered" is now "Accelerated classes," so it's clear it colors by the accelerated and honors classes a school offers, not all its classes, and "8th graders passing" is now "8th graders with HS credit," the share of a school's 8th graders who earned high school credit in an accelerated class. School cards and pages use the same words.
 
+## 1.82.0 (2026-11-13)
+
+### Fixed
+- Switching school level while the map is colored by something the new level doesn't have (After school, Pre-K or G&T on the elementary map, Screened programs, AP classes, sports or accelerated classes) used to switch the colors to Dual language. Now the map goes to Overall rating, and your coloring comes back when you switch back to a level that has it.
+
+## 1.81.0 (2026-11-13)
+
+### Changed
+- Color by → Programs no longer has a Special ed option, to keep the menu short. Each school's share of students with IEPs is still in the Demographics section of its card and page. Old links to that coloring open the map's usual coloring.
+
 ## 1.80.0 (2026-11-13)
 
 ### Added

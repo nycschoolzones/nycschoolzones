@@ -6,7 +6,7 @@ An interactive map of New York City's elementary (kindergarten), middle and high
 - **School Quality Snapshot (2024–25):** Instruction and Performance, Safety and School Climate, and Relationships with Families, each rated 1–4, plus an Overall average of the three
 - **State tests (spring 2026):** share of students scoring proficient in ELA and Math, every tested grade at the school, from the DOE's school results (`data/state_tests.json`); charter schools, which those leave out, show their 2024–25 Snapshot scores; high schools show 4-year graduation and college/career enrollment instead
 - **Programs:** gifted & talented, dual language and special education
-- **Students with IEPs and English language learners:** counts from the Demographic Snapshot (`data/demographics.json`, also behind Color by special ed); the School Quality Snapshot's counts (`data/snapshot_counts.json`) fill in for the few schools it doesn't list
+- **Students with IEPs and English language learners:** counts from the Demographic Snapshot (`data/demographics.json`); the School Quality Snapshot's counts (`data/snapshot_counts.json`) fill in for the few schools it doesn't list
 - **Demographics:** race and ethnicity, girls and boys, the share of low-income students (the DOE's "poverty" count), and students with IEPs and English language learners at each school, next to all of NYC, from the DOE's Demographic Snapshot (`data/demographics.json`)
 - **Building accessibility:** fully, partially or not accessible, from the MySchools directories (`data/accessibility.json`)
 - **School hours and after-school programs:** start and end times, and whether the school lists a free or paid after-school program, from the MySchools directories (`data/school_day.json`)
