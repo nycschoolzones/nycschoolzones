@@ -863,7 +863,7 @@ function zonePk(dbns){const v=dbns.map(pkCat).filter(x=>x!=null);return v.length
 // {dbn: [start "8:00 am" or '', end, flags]}: F free, P paid, A offered (cost not stated), C "contact the program for
 // extended day options"; build.py, fetch_data.py import_school_day). asCat: 3 free, 2 paid only, 1 ask the school, 0 none
 // listed; null when the school isn't in the directory (charters). A zone with several schools shows the best
-const AS_COL=['var(--off)','#d9eac6','#97c878','#3b8a35'],AS_LAB=['None listed','Ask the school','Paid only','Free'],
+const AS_COL=['var(--off)','#cbbde3','#e8892b','#2f9a44'],AS_LAB=['None listed','Ask the school','Paid only','Free'],
   AS_SHORT=['no after-school listed','ask about after-school','paid after-school','free after-school'];
 const asRow=d=>LV[level]&&LV[level].AS&&LV[level].AS[d]||null;
 function asCat(d){const r=asRow(d);if(!r)return null;const f=r[2];return f.includes('F')?3:f.includes('P')?2:/[AC]/.test(f)?1:0}
