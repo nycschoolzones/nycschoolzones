@@ -926,6 +926,8 @@ def fetch_k_admissions(paths, grade="Kindergarten", outname="k_admissions.json")
 
     Writes k_admissions.json: {dbn: {year: [seats, true applicants, offers lo, hi,
       own-district true lo, hi, offers lo, hi, other-districts true lo, hi, offers lo, hi]}}
+    A school the report gives no true applicants for ("N/A": the specialized high schools and LaGuardia, which take a
+    separate application) gets [seats, total applicants, offers, offers, 1]: everyone who listed it.
     """
     import re
     out = {}
@@ -942,9 +944,10 @@ def fetch_k_admissions(paths, grade="Kindergarten", outname="k_admissions.json")
             print(f"  skip {year}: no {grade} true applicants")
             continue
         col = {k: head.index(f"{grade} " + k) for k in ("Seats Available", "True Applicants", "Offers")}
+        tcol = head.index(f"{grade} Total Applicants") if f"{grade} Total Applicants" in head else None
 
         def rng(v, cap=None):
-            if v in (None, "N/A"):
+            if v in (None, "", "N/A"):
                 return (0, 0)
             if v == "s":
                 return (1 if year >= "2025" else 0, 5)
@@ -961,6 +964,13 @@ def fetch_k_admissions(paths, grade="Kindergarten", outname="k_admissions.json")
             cell = lambda r, k: r[col[k]] if len(r) > col[k] else None
             tot = next((r for r in rs if r[3] == "All Students"), None)
             if not tot:
+                continue
+            if cell(tot, "True Applicants") == "N/A" and tcol is not None:
+                # the specialized high schools and LaGuardia take a separate application, so the report has no "true"
+                # applicants for them: keep everyone who listed the school, and mark the record with a 5th value 1
+                s, a, o = (rng(tot[i] if len(tot) > i else None) for i in (col["Seats Available"], tcol, col["Offers"]))
+                if a[0] == a[1] and a[1] and o[0] == o[1]:
+                    out.setdefault(dbn, {})[year] = [s[0], a[0], o[0], o[1], 1]
                 continue
             t = rng(cell(tot, "True Applicants"))
             if t[0] != t[1] or not t[1]:

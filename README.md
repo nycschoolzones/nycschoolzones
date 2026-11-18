@@ -21,7 +21,7 @@ An interactive map of New York City's elementary (kindergarten), middle and high
 - **High school outcomes:** average SAT, college readiness, where graduates went and advanced courses from the 2024–25 School Quality Snapshot (`data/hs_snapshot.json`), read through a browser
 - **SHSAT cutoffs:** `data/shsat_cutoffs.json`, DOE figures as reported by Caddell Prep
 - **Non-zoned schools (elementary):** the MySchools kindergarten directory (`data/nonzoned_k.json`; kindergarten priority groups for every school in `data/k_priority.json`) and their Snapshot pages (`data/nonzoned_snapshot.json`); both read through a browser, since those sites block scripts here
-- **Kindergarten admissions (zone card):** seats, true applicants and offers for fall 2023–2025, from the DOE's Local Law 72 reports; refresh with `python3 scripts/fetch_data.py kadmissions <files...>`
+- **Kindergarten admissions (zone card):** seats, true applicants and offers for fall 2023–2026, from the DOE's Local Law 72 reports; refresh with `python3 scripts/fetch_data.py kadmissions <files...>`
 - **Grade 6 and grade 9 admissions (middle and high school cards):** the same Local Law 72 files (`data/ms_admissions.json`, `data/hs_admissions.json`); refresh all three grades with `python3 scripts/fetch_data.py admissions <files...>`
 - **Pre-K and 3-K (zone card):** seats, applicants and offers at each elementary school (applicants who didn't get a choice they ranked higher, as for kindergarten), from the DOE's Local Law 72 admissions report
 - **Charter schools (not on the map yet):** the charter schools open now, with locations, grades and last year's enrollment, from the DOE's LCGMS school list and Demographic Snapshot (`data/charters.json`) and their School Quality Snapshot pages (`data/charter_snapshot.json`)
@@ -203,7 +203,7 @@ python3 scripts/fetch_data.py admissions ~/Downloads/fall-202*-admissions*.xlsx
 python3 scripts/fetch_data.py prek ~/Downloads/fall-YYYY-admissions_72_suppressed.xlsx   # the newest one
 ```
 
-After the pre-K step, set `PREK_LABEL` in `scripts/settings.py` to that report's year ("fall 2025").
+Before the pre-K step, set `PREK_LABEL` in `scripts/settings.py` to that report's year ("fall 2026"): the step files its dated copy in `data/history/prek/` under that label, so running it first would overwrite last year's copy.
 
 ### 5. Class size (spring, for February of the school year)
 
@@ -274,7 +274,7 @@ Look over a few school cards and pages, bump `VERSION`, add a `CHANGELOG.md` ent
 - [ELA Test Results 2013–2023](https://data.cityofnewyork.us/Education/English-Language-Arts-ELA-Test-Results-2013-2023/iebs-5yhr) and [Math Test Results 2013–2023](https://data.cityofnewyork.us/Education/Math-Test-Results-2013-2023/74kb-55u9), NYC Open Data
 - [Class size reports](https://infohub.nyced.org/reports/government-reports/class-size-reports), NYC DOE (February 2025–26 school-level report; refresh with `python3 scripts/fetch_data.py classsize`, or pass a downloaded copy of the file)
 - [Enrollment, Capacity & Utilization Report](https://www.nycsca.org/Community/Capital-Plan-Reports-Data), NYC School Construction Authority (2025–26 "Blue Book", Classic Edition; PDF only, refresh with `python3 scripts/fetch_data.py utilization <file.pdf>`, needs `pdftotext`)
-- [Local Law 72 admissions report](https://infohub.nyced.org/reports/government-reports), NYC DOE (fall 2025 admissions, School tab; refresh with `python3 scripts/fetch_data.py prek <file.xlsx>`)
+- [Local Law 72 admissions report](https://infohub.nyced.org/reports/government-reports), NYC DOE (fall 2026 admissions, School tab; refresh with `python3 scripts/fetch_data.py prek <file.xlsx>`)
 - [School Quality Snapshot 2024–25](https://tools.nycenet.edu/snapshot/), NYC DOE (ratings, test scores, graduation rates, programs and current school names)
 - [Centerline (CSCL)](https://data.cityofnewyork.us/City-Government/Centerline/inkn-q76z), NYC Open Data (major streets)
 - [PSAL](https://www.psal.org/profiles/profile.aspx), the Public Schools Athletic League: each school's teams and "Campus Schools List" (refresh with `scripts/browser/psal.js`, see "Refresh the data")

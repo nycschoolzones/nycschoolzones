@@ -993,17 +993,19 @@ function admHtml(d,lv,noHead){lv=lv||'es';const src=lv==='es'?KA:(LV[lv]&&LV[lv]
   // one row: offers, applicants, share; a hidden count we can't pin to within a few shows as a dash
   const row=(lab,o0,o1,t0,t1,cls)=>{const ok=t1!=null&&fine(o0,o1,t1)&&fine(t0,t1,t1),ex=o0===o1&&t0===t1,
       o=Math.round((o0+o1)/2),t=Math.round((t0+t1)/2),a=ex?'':'~';
-    return '<tr'+(cls?' class="'+cls+'"':'')+'><th>'+lab+'</th>'+(ok?'<td>'+(o0===o1?'':'~')+o+'</td><td>'+(t0===t1?'':'~')+t+'</td><td>'+(!t?'':o>=t?'all':a+Math.round(100*o/t)+'%')+'</td>':'<td>—</td><td>'+(t0===t1?t:'—')+'</td><td></td>')+'</tr>'};
+    return '<tr'+(cls?' class="'+cls+'"':'')+'><th>'+lab+'</th>'+(ok?'<td>'+(o0===o1?'':'~')+o.toLocaleString()+'</td><td>'+(t0===t1?'':'~')+t.toLocaleString()+'</td><td>'+(!t?'':o>=t?'all':a+Math.round(100*o/t)+'%')+'</td>':'<td>—</td><td>'+(t0===t1?t.toLocaleString():'—')+'</td><td></td>')+'</tr>'};
   // high schools don't give district priority, so the district split would mislead there
-  const hasD=r.length>4&&lv!=='hs',who=lv==='es'?'families':'students';
+  // r[4]===1: a specialized high school or LaGuardia, on their own application: applicants are everyone who listed it
+  const sep=r.length===5&&r[4]===1,hasD=r.length>4&&lv!=='hs'&&!sep,who=lv==='es'?'families':'students';
   let h=(noHead?'':'<div class="adm-h">'+G+' admissions, fall '+y+'<span>'+r[0]+' seats</span></div>')+'<table class="adm-t"><thead><tr><th></th><th>Offers</th><th>Applied</th><th></th></tr></thead><tbody>'+
     row('All '+who,r[2],r[3],r[1],r[1],'all')+
     (hasD?row('District '+dist,r[6],r[7],r[4],r[5])+row('Other districts',r[10],r[11],r[8],r[9]):'')+'</tbody></table>';
   if(lv==='es'&&hasD&&r[10]>0&&!nzGet(d))h+='<p class="adm-note">Some seats went to families from other districts, which usually means every zoned family who applied got one.</p>';
   if(lv==='ms'&&hasD)h+='<p class="adm-note">Most middle school programs fill seats with District '+dist+' students and residents first, then consider other districts.</p>';
-  const about=(lv==='es'?'Applicants are families who listed the school and didn’t get a choice they ranked higher. Offers are seats offered. Offers can top applicants when the DOE places a child who didn’t list the school there, often at their zoned school. '
-    :'Applicants are students who listed the school (any of its programs) and didn’t get a choice they ranked higher. Offers are seats offered; they can top applicants when the DOE places students who didn’t get any of their choices. '+(lv==='ms'?'A district row counts students who live or go to school in that district. ':'Counts cover every program at the school. '))+
-    '“—” means the DOE hid the count for privacy. Source: <a href="https://infohub.nyced.org/reports/government-reports" target="_blank" rel="noopener">DOE Local Law 72 reports</a>.';
+  const about=(sep?'Applied counts every student who listed the school on the specialized high schools application (by SHSAT score, or by audition at LaGuardia), at any rank. Offers are seats offered; they can top seats because some students who get an offer go to another school. '
+    :(lv==='es'?'Applicants are families who listed the school and didn’t get a choice they ranked higher. Offers are seats offered. Offers can top applicants when the DOE places a child who didn’t list the school there, often at their zoned school. '
+    :'Applicants are students who listed the school (any of its programs) and didn’t get a choice they ranked higher. Offers are seats offered; they can top applicants when the DOE places students who didn’t get any of their choices. '+(lv==='ms'?'A district row counts students who live or go to school in that district. ':'Counts cover every program at the school. ')))+
+    (sep?'':'“—” means the DOE hid the count for privacy. ')+'Source: <a href="https://infohub.nyced.org/reports/government-reports" target="_blank" rel="noopener">DOE Local Law 72 reports</a>.';
   return '<div class="adm">'+h+'<details class="adm-about"><summary>About this data</summary><p>'+about+'</p></details></div>'}
 // the MySchools tables with their "About this data". The Local Law 72 numbers stay out: they're a year older than
 // MySchools', so they show only where MySchools has nothing for that grade.
