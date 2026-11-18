@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 NYC School Zones
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MIT
 """Draw the YouTube channel art in brand/ from the data in data/, in the map's light theme:
 
     brand/youtube-icon.png    800x800, a close-up of Manhattan, Brooklyn and western Queens with the red address pin

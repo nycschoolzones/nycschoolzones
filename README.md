@@ -59,7 +59,7 @@ To put it on Google Sites, click **Insert → Embed → By URL** and paste the P
 index.html              built page (this is what GitHub Pages serves)
 VERSION                 site version, shown in the footer
 CHANGELOG.md            what changed in each version
-LICENSE                 AGPL-3.0
+LICENSE                 MIT
 assets/                 ms.js, hs.js, ls.js, parks.js — built by build.py, loaded on demand
 schools/<DBN>/          one page per school — built by build.py (scripts/pages.py)
 districts/              one page per district + an index — built by build.py
@@ -288,6 +288,6 @@ Zones change from year to year. Before applying, always confirm a specific addre
 
 Copyright (C) 2026 NYC School Zones
 
-The code and design in this repository (`src/`, `scripts/`, and the built `index.html` and `assets/`) are licensed under the [GNU Affero General Public License v3.0 or later](LICENSE). You can use, change and share them, but if you run a modified version as a website, you must offer its source code to its visitors under the same license.
+The code and design in this repository (`src/`, `scripts/`, and the built `index.html` and `assets/`) are licensed under the [MIT License](LICENSE). You can use, change and share them, including in your own projects, as long as you keep the copyright and license notice.
 
 The data is not covered by this license and isn't ours to license. School zones, school locations and street centerlines come from [NYC Open Data](https://opendata.cityofnewyork.us/) under the City's [terms of use](https://www.nyc.gov/home/terms-of-use.page). Ratings, test results, graduation rates, programs and school names come from the NYC Department of Education's [School Quality Snapshot](https://tools.nycenet.edu/snapshot/). Address lookup is provided by NYC Planning's [GeoSearch](https://geosearch.planninglabs.nyc/).
