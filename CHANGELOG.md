@@ -12,6 +12,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - The specialized high schools (Stuyvesant, Bronx Science, Brooklyn Tech and the rest) and LaGuardia now show grade 9 admissions on their school cards and pages: seats, how many students applied and how many got an offer, from the DOE's admissions report. Because these schools have their own application, "applied" counts everyone who listed the school.
 
 ### Changed
+- Admissions numbers are now from fall 2026, the DOE's newest admissions report: kindergarten, pre-K and 3-K seats, applicants and offers on elementary school cards and pages, and grade 6 and grade 9 numbers for schools MySchools doesn't list.
 - Large applicant counts in admissions tables now have commas (18,312, not 18312).
 
 ## 1.83.0 (2026-11-13)

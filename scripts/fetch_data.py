@@ -947,7 +947,7 @@ def fetch_k_admissions(paths, grade="Kindergarten", outname="k_admissions.json")
         tcol = head.index(f"{grade} Total Applicants") if f"{grade} Total Applicants" in head else None
 
         def rng(v, cap=None):
-            if v in (None, "N/A"):
+            if v in (None, "", "N/A"):
                 return (0, 0)
             if v == "s":
                 return (1 if year >= "2025" else 0, 5)

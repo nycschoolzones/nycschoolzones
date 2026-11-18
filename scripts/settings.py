@@ -23,7 +23,7 @@ TESTS_NOTE = ("ELA scores jumped across New York State in 2025 and fell back in 
               "Compare schools with each other rather than with last year.")
 TESTS_NOTE_SHORT = "ELA jumped statewide in 2025, then fell back"
 # Pre-K and 3-K seats and applicants: the DOE's Local Law 72 admissions report (data/prek.json)
-PREK_LABEL = "fall 2025"
+PREK_LABEL = "fall 2026"
 # MySchools directories (data/ms_directory.json, hs_directory.json, k_priority.json): the admissions round their
 # "last year" seats, applicants and priority groups describe. The 2026-27 directories report fall 2026 admissions;
 # fetch_data.py warns when a download's school year doesn't match.
