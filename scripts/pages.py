@@ -885,14 +885,19 @@ def k_adm_html(ka, lv="es", dist=None, zoned=False):
     def row(lab, o0, o1, t0, t1, cls=""):  # a hidden count we can't pin to within a few shows as a dash
         if t1 is not None and fine(o0, o1, t1) and fine(t0, t1, t1):
             o, t = round((o0 + o1) / 2), round((t0 + t1) / 2)
-            off, app = ("" if o0 == o1 else "~") + str(o), ("" if t0 == t1 else "~") + str(t)
+            off, app = ("" if o0 == o1 else "~") + f"{o:,}", ("" if t0 == t1 else "~") + f"{t:,}"
             pc = "" if not t else "all" if o >= t else ("" if o0 == o1 and t0 == t1 else "~") + f"{round(100 * o / t)}%"
         else:
-            off, app, pc = "—", str(t0) if t0 == t1 else "—", ""
+            off, app, pc = "—", f"{t0:,}" if t0 == t1 else "—", ""
         return f'<tr{f" class={chr(34)}{cls}{chr(34)}" if cls else ""}><th>{lab}</th><td>{off}</td><td>{app}</td><td>{pc}</td></tr>'
 
     who = "families" if lv == "es" else "students"
     rows = [row(f"All {who}", r[2], r[3], r[1], r[1], "all")]
+    if len(r) == 5 and r[4] == 1:  # a specialized high school or LaGuardia: its own application, so everyone who listed it
+        src = ('<p class="src">Applied counts every student who listed the school on the specialized high schools application '
+               "(by SHSAT score, or by audition at LaGuardia), at any rank. Offers can top seats because some students who "
+               "get an offer go to another school. DOE Local Law 72 report.</p>")
+        return f"<h2>{G} admissions, fall {e(y)}</h2><p>{r[0]:,} seats · {r[1]:,} applied</p>" + _table(rows) + src
     if lv != "hs" and len(r) > 4:  # high schools don't give district priority, so the split would mislead there
         rows += [row(f"District {dist}", r[6], r[7], r[4], r[5]), row("Other districts", r[10], r[11], r[8], r[9])]
     note = {"es": "Most zoned schools offer a seat to every zoned family who applies on time.",
