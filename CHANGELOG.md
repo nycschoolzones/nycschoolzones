@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- Map layers now lists the school types first (Zoned schools, Non-zoned, Specialized or Citywide, Charter), then a dividing line, then the map's own layers: zones, district lines, place names, and parks and water.
+
 ## 1.84.2 (2026-11-18)
 
 ### Changed

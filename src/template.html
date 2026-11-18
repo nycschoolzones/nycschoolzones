@@ -333,6 +333,7 @@ __RAMP_CSS__
 .layers{display:flex;flex-direction:column;gap:9px}
 .layers .chk i{margin-left:auto}
 .layers .chk[hidden]{display:none}
+.layers .ly-div{border:0;border-top:1px solid var(--line);margin:1px 0;width:100%}
 .dk{display:inline-block;width:18px;height:0;border-top:3px solid var(--dist-line)}
 .layers-ctl a{display:flex!important;align-items:center;justify-content:center}
 .gtm{display:block;width:100%;height:100%;overflow:visible;cursor:pointer;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))}
@@ -583,12 +584,13 @@ details.kind>summary{cursor:pointer}details.kind>p{margin:4px 0 2px}
   </div>
   <div class="map-pop" id="layers-pop" role="dialog" aria-labelledby="ly-lab" hidden><div class="cp-head"><span class="lab" id="ly-lab">Map layers</span><button type="button" class="cp-close" id="ly-close" aria-label="Close">✕</button></div>
     <div class="layers">
-      <label class="chk"><input type="checkbox" id="ly-zones" checked> Zones</label>
-      <label class="chk" id="ly-dist-row" hidden><input type="checkbox" id="ly-dist" checked> District lines <i class="dk" aria-hidden="true"></i></label>
+      <label class="chk"><input type="checkbox" id="ly-zs" checked> <span>Zoned schools</span> <i class="zsk" aria-hidden="true"></i></label>
       <label class="chk ly-nzrow"><input type="checkbox" id="ly-nz" checked> <span>Non-zoned</span> <i class="nzk" aria-hidden="true"></i></label>
       <label class="chk ly-es"><input type="checkbox" id="ly-gt" checked> <span id="ly-gt-lab">Citywide G&amp;T</span> <i class="gtk" aria-hidden="true"></i></label>
       <label class="chk ly-chrow"><input type="checkbox" id="ly-ch" checked> <span>Charter</span> <i class="chs" aria-hidden="true"></i></label>
-      <label class="chk"><input type="checkbox" id="ly-zs" checked> <span>Zoned schools</span> <i class="zsk" aria-hidden="true"></i></label>
+      <hr class="ly-div">
+      <label class="chk"><input type="checkbox" id="ly-zones" checked> Zones</label>
+      <label class="chk" id="ly-dist-row" hidden><input type="checkbox" id="ly-dist" checked> District lines <i class="dk" aria-hidden="true"></i></label>
       <label class="chk"><input type="checkbox" id="ly-names" checked> Place names</label>
       <label class="chk" id="ly-parks-row"><input type="checkbox" id="ly-parks" checked> Parks &amp; water</label>
     </div>
