@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- The map's code is now under the MIT License instead of the AGPL, so anyone can reuse it in their own projects with fewer strings attached. The school data still belongs to its city sources.
+
 ## 1.84.1 (2026-11-18)
 
 ### Changed

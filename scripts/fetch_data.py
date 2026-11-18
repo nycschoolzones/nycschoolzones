@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (C) 2026 NYC School Zones
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MIT
 """Download fresh source data into data/. Standard library only.
 
     python3 scripts/fetch_data.py            # everything

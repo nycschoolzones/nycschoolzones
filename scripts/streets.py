@@ -1,5 +1,5 @@
 # Copyright (C) 2026 NYC School Zones
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MIT
 """Simplify NYC Street Centerline rows into a light map overlay (used by fetch_data.py)."""
 import json, collections, math, re
 
