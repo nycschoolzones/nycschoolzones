@@ -9,7 +9,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 ## Unreleased
 
 ### Changed
-- In Map layers, "Zoned schools" now comes first among the school types, above Non-zoned, Specialized (or Citywide) and Charter.
+- Map layers now lists the school types first (Zoned schools, Non-zoned, Specialized or Citywide, Charter), then a dividing line, then the map's own layers: zones, district lines, place names, and parks and water.
 
 ## 1.84.2 (2026-11-18)
 
