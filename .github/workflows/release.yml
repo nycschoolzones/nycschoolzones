@@ -1,16 +1,24 @@
-# NYC School Zones · one-click release from GitHub: Actions → Release → Run workflow.
+# NYC School Zones · release on merge, or by hand from GitHub: Actions → Release → Run workflow.
 # Runs scripts/release.sh on main: bumps VERSION, turns "## Unreleased" in CHANGELOG.md into the new version and
 # today's date (New York time), rebuilds the site, commits "Release vX.Y.Z", tags it and pushes both.
+#
+# Merging a pull request into main releases it. The version comes from the changelog ("auto": an "### Added" entry
+# makes a minor release, otherwise a patch), unless the pull request has a label:
+#   major / minor / patch   bump that number instead
+#   no release              don't release; its entries stay under "## Unreleased" and go out with the next release
 name: Release
 
 on:
+  pull_request:
+    types: [closed]
+    branches: [main]
   workflow_dispatch:
     inputs:
       bump:
-        description: "Which number to bump: patch (fixes, wording), minor (a new feature), major (a new kind of view)"
+        description: "Which number to bump: auto (minor if the changelog has \"### Added\", else patch), patch (fixes, wording), minor (a new feature), major (a new kind of view)"
         type: choice
-        options: [patch, minor, major]
-        default: minor
+        options: [auto, patch, minor, major]
+        default: auto
       dry_run:
         description: "Dry run: only show the version and changelog, change nothing"
         type: boolean
@@ -26,10 +34,22 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    # only from main, and for now only the maintainer can start or re-run a release (see issue #38 before adding collaborators)
-    if: github.ref == 'refs/heads/main' && github.triggering_actor == 'blake-sweeney'
+    # for now only the maintainer can start a release, by hand or by merging (see issue #38 before adding collaborators).
+    # A pull request from a fork gets a read-only token, so its merge can't release: run the workflow by hand then.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+        && github.triggering_actor == 'blake-sweeney')
+      || (github.event_name == 'pull_request' && github.event.pull_request.merged
+        && github.event.pull_request.merged_by.login == 'blake-sweeney'
+        && !contains(github.event.pull_request.labels.*.name, 'no release'))
     env:
       TZ: America/New_York
+      BUMP: >-
+        ${{ inputs.bump
+          || (contains(github.event.pull_request.labels.*.name, 'major') && 'major')
+          || (contains(github.event.pull_request.labels.*.name, 'minor') && 'minor')
+          || (contains(github.event.pull_request.labels.*.name, 'patch') && 'patch')
+          || 'auto' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -45,5 +65,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
+      # Two quick merges: the first release can take both pull requests' entries, which leaves the second nothing
+      - name: Check there's something to release
+        id: check
+        if: github.event_name == 'pull_request'
+        run: |
+          if grep -q '^## Unreleased' CHANGELOG.md; then echo "go=1" >> "$GITHUB_OUTPUT"
+          else echo "::notice::No '## Unreleased' section in CHANGELOG.md: already released, nothing to do."; fi
+
       - name: Release
-        run: scripts/release.sh "${{ inputs.bump }}" --yes ${{ inputs.dry_run && '--dry-run' || '' }}
+        if: github.event_name == 'workflow_dispatch' || steps.check.outputs.go == '1'
+        run: scripts/release.sh "$BUMP" --yes ${{ inputs.dry_run && '--dry-run' || '' }}

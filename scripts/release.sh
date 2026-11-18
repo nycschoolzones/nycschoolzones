@@ -4,6 +4,7 @@
 #   scripts/release.sh patch      # 1.13.0 -> 1.13.1  (fixes and wording)
 #   scripts/release.sh minor      # 1.13.0 -> 1.14.0  (a new feature)
 #   scripts/release.sh major      # 1.13.0 -> 2.0.0   (a new kind of view)
+#   scripts/release.sh auto       # minor if the changelog's Unreleased section has "### Added", else patch
 #   scripts/release.sh minor --dry-run   # show what would happen, change nothing
 #   scripts/release.sh minor --yes       # don't ask "Release vX.Y.Z? [y/N]" (it comes right after the changelog)
 #
@@ -11,12 +12,12 @@
 # CHANGELOG.md. The script renames that heading to the new version and today's date.
 set -euo pipefail
 
-usage() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
+usage() { sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
 
 part="" dry=0 yes=0
 for a in "$@"; do
   case "$a" in
-    major|minor|patch) part="$a" ;;
+    major|minor|patch|auto) part="$a" ;;
     --dry-run|-n) dry=1 ;;
     --yes|-y) yes=1 ;;
     -h|--help) usage ;;
@@ -40,6 +41,11 @@ if [ "$dry" = 0 ]; then git push --dry-run --quiet origin main || die "couldn't 
 old="$(tr -d '[:space:]' < VERSION)"
 [[ "$old" =~ ^([0-9]+)\.([0-9]+)\.([0-9]+)$ ]] || die "VERSION should look like 1.2.3, but it says '$old'."
 maj="${BASH_REMATCH[1]}" min="${BASH_REMATCH[2]}" pat="${BASH_REMATCH[3]}"
+# auto: something new for parents (an "### Added" entry) is a minor release, fixes and changes alone a patch
+if [ "$part" = auto ]; then
+  if awk '/^## Unreleased/{on=1;next} /^## /{if(on)exit} on' CHANGELOG.md | grep -q '^### Added'; then part=minor; else part=patch; fi
+  echo "auto: $part (the Unreleased section $( [ "$part" = minor ] && echo has || echo "has no" ) \"### Added\")"
+fi
 case "$part" in
   major) new="$((maj + 1)).0.0" ;;
   minor) new="$maj.$((min + 1)).0" ;;

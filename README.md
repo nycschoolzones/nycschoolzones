@@ -120,10 +120,12 @@ The site's version is in `VERSION` and shows in the footer next to the "Updated"
 
 1. Work on a branch, like `git checkout -b admissions-data`, and test locally (see "Run it locally"), including on your phone. To try a pushed branch on a phone, open `https://raw.githack.com/nycschoolzones/nycschoolzones/<commit SHA>/index.html` (use the full commit SHA rather than the branch name); Claude sessions post this link after each push.
 2. As you go, describe the changes under a `## Unreleased` heading at the top of `CHANGELOG.md`. Leave `VERSION` alone.
-3. Merge to `main`, then release. From anywhere, including a phone: on GitHub open **Actions → Release → Run workflow**, pick patch, minor or major (tick "Dry run" to only preview) and run it. Only the `blake-sweeney` account can run it for now; anyone else's run is skipped. Or from a computer:
+3. Merge to `main`. Merging the pull request releases it: the Release workflow picks the version from the changelog (an `### Added` entry makes a minor release, only `### Changed` and `### Fixed` a patch). To choose another, give the pull request a `major`, `minor` or `patch` label before merging; to hold it for a later release, the label `no release` (its entries stay under `## Unreleased` and go out with the next release). Only a merge by the `blake-sweeney` account releases for now.
+
+To release by hand (after a `no release` merge, say): on GitHub open **Actions → Release → Run workflow**, pick auto, patch, minor or major (tick "Dry run" to only preview) and run it. Only the `blake-sweeney` account can run it; anyone else's run is skipped. Or from a computer:
 
 ```sh
-scripts/release.sh minor     # or patch, or major
+scripts/release.sh auto      # or patch, minor or major
 ```
 
 Both do the same thing (the workflow, `.github/workflows/release.yml`, runs this script on GitHub): check that everything is committed and up to date with GitHub, bump `VERSION`, rename `## Unreleased` to the new version and today's date (New York time), rebuild the site (the footer shows the version), commit, tag (`v1.14.0`) and push the commit and tag. It asks "Release v1.14.0? [y/N]" right after it shows the changelog, before it changes anything; add `--yes` to skip the question, or `--dry-run` to only preview. The script signs in to GitHub first (a `git push --dry-run`), so any password or key prompt comes up right away rather than after the rebuild.
