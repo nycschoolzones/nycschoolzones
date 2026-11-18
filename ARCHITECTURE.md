@@ -35,7 +35,7 @@ fetch_data.py ──> data/*.json   (yearly refresh; MySchools, Snapshot and PSA
 - `scripts/data_status.py`: `DATASETS` (each data file's README step and the month its source publishes), `report`/`print_report` (`fetch_data.py status`: last refreshed from the file's own "fetched" date or its last commit, due once that month has come round, or a year for sources without one), `summary` (the build's `data: refresh due:` line, which also names data files missing from `DATASETS`).
 - `scripts/fetch_data.py`: one command per source (`zones`, `myschools`, `snapshot-job`, `snapshot-raw`, `snapshot-counts`, `colocation`, `accessibility`, `admissions`, `charters`, `zips`, `demographics`, `charter-snapshot`, `psal` (`import_psal` and `_psal_teams`, from `scripts/browser/psal.js`), …).
   The README's "Refresh the data" section is the checklist.
-- `scripts/release.sh`: bumps `VERSION`, dates the changelog, rebuilds, commits, tags and pushes. `.github/workflows/release.yml` (Actions → Release) runs it on GitHub with a patch/minor/major choice; its push starts the Pages deploy like any other.
+- `scripts/release.sh`: bumps `VERSION`, dates the changelog, rebuilds, commits, tags and pushes. `.github/workflows/release.yml` runs it on GitHub when the maintainer merges a pull request into `main` (bump `auto`: minor if the Unreleased section has `### Added`, else patch; the pull request's `major`/`minor`/`patch` label overrides it, `no release` skips; a run that finds no `## Unreleased` section stops quietly, since a quick earlier merge's release already took it), or by hand from Actions → Release with an auto/patch/minor/major choice; its push starts the Pages deploy like any other.
 
 ## src/template.html
 
