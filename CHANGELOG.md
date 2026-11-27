@@ -6,6 +6,11 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Changed
+- Academy of Cultural Excellence and P.S./M.S. 384 in Long Island City now say on their card and school page that they get a kindergarten zone starting fall 2027, which the map doesn't show yet, instead of "No zone."
+
 ## 1.85.0 (2026-11-26)
 
 ### Added

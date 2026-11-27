@@ -902,14 +902,21 @@ def main(standalone_path=None, pages=None):
 
     # Non-zoned elementary schools (optional): MySchools kindergarten directory + their Snapshot pages.
     # NZ rows: [dbn, name, address, lat, lon, priority districts, district residents only (1/0),
-    #           programs [[code, dual language (1/0), seats, applicants, all seats filled (1/0/None)]], citywide G&T (1/0)]
+    #           programs [[code, dual language (1/0), seats, applicants, all seats filled (1/0/None)]], citywide G&T (1/0),
+    #           and for a school with a new zone the zone map doesn't draw yet, a line saying so (the card's pz)]
     nz_dbns = set()
     if os.path.exists(os.path.join(DATA, "nonzoned_k.json")):
         snap = load("nonzoned_snapshot.json") if os.path.exists(os.path.join(DATA, "nonzoned_snapshot.json")) else {}
         d["NZ"] = []
         # citywide G&T schools ride along, marked with a trailing 1 (no zone, open to eligible children citywide)
         gt_rows = load("citywide_gt_k.json") if os.path.exists(os.path.join(DATA, "citywide_gt_k.json")) else []
-        for row in [r[:8] + [0] for r in load("nonzoned_k.json")] + [r[:8] + [1] for r in gt_rows]:
+        def new_zone(r):  # nonzoned_k.json's 9th value: the fall a new zone starts that the zone map doesn't draw yet
+            if len(r) < 9 or not r[8]:
+                return []
+            when = f"fall {r[8]}" if r[8] > 1 else "next fall"
+            return [f"This school gets a kindergarten zone starting {when}. Families who live in it get priority first, "
+                    "but this map doesn’t show the new zone yet. Check your address with the school or on MySchools."]
+        for row in [r[:8] + [0] + new_zone(r) for r in load("nonzoned_k.json")] + [r[:8] + [1] for r in gt_rows]:
             dbn = row[0]
             if dbn in zoned or not row[3]:
                 continue

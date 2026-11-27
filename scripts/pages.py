@@ -1067,7 +1067,8 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
         elif lv == "ms":
             kind = "Citywide middle school" if gt else "Middle school (no zone)"
         else:
-            kind = "Citywide G&T school" if gt else "Non-zoned elementary school"
+            kind = "Citywide G&T school" if gt else ("Elementary school with a new zone" if nz and len(nz) > 9 and nz[9]
+                                                      else "Non-zoned elementary school")
 
         map_url = f"/#{lv}-{dbn}"
         ms_url = myschools_url(dbn, lv)
@@ -1121,10 +1122,12 @@ def page_html(d, dbn, streets, site_url, goat, nbi=None):
             elif lv == "ms":
                 why = ("Open to students from anywhere in NYC." if gt else "There’s no zone.") + \
                     (listed or (" Most programs give priority to students who live or go to school in District " + str(dist) + "." if not gt else ""))
+            elif nz and len(nz) > 9 and nz[9]:  # a new zone the zone map doesn't draw yet (build.py new_zone)
+                why = nz[9]
             else:
                 why = "Open to children found eligible for Gifted & Talented, from anywhere in NYC." if gt else \
                     f"There’s no zone. Priority goes to District {dist} residents."
-            head = "How to get in" if gt else "No zone"
+            head = "How to get in" if gt else "New zone" if lv == "es" and nz and len(nz) > 9 and nz[9] else "No zone"
             zone_html = (f'<section class="card split"><div>{svg}</div><div><h2>{head}</h2><p>{e(why)}</p>'
                          + more(ext(ms_url, "Apply and see your chances on MySchools"),
                                 ext(SHS_URL, "About the specialized high schools") if lv == "hs" and gt else "",

@@ -1197,7 +1197,8 @@ def _priority_groups(q):
 def _myschools_k(schools):
     """nonzoned_k.json and citywide_gt_k.json rows:
     [dbn, name, address, lat, lon, priority districts, district residents only (1/0),
-     programs [[code, dual language (1/0), seats, applicants, all seats filled (1/0/None)]]];
+     programs [[code, dual language (1/0), seats, applicants, all seats filled (1/0/None)]], and for a school that gets
+     a new zone the zone map doesn't draw yet, the fall it starts (2027)];
     k_priority.json: {dbn: priority groups of the school's kindergarten program}, every school that lists them"""
     import re
     nz, gt, kp = [], [], {}
@@ -1214,6 +1215,10 @@ def _myschools_k(schools):
             print(f"  kindergarten: {x['school']['dbn']} is zoned in MySchools but has no zone in elem_zones.json; "
                   "listed as non-zoned until the zones are refreshed")
             kind.add("Non-Zoned School")
+            sy = x["school"].get("school_year") or ""
+            new_zone = int(sy[:4]) + 1 if sy[:4].isdigit() else 1  # the fall the zone starts: the 2026-27 directory, 2027
+        else:
+            new_zone = 0
         if not kind & {"Non-Zoned School", "Citywide School"}:
             continue
         dbn = x["school"]["dbn"]
@@ -1231,7 +1236,7 @@ def _myschools_k(schools):
             progs.append([code, 0 if code in ("KG", "GT") else 1, seats, apps, None if filled is None else int(filled)])
         if not progs:
             continue  # no kindergarten program but district G&T (a separate application), or none at all
-        row = [dbn, _strip_dbn(x["name"]), addr.upper(), lat, lon, pd, only, progs]
+        row = [dbn, _strip_dbn(x["name"]), addr.upper(), lat, lon, pd, only, progs] + ([new_zone] if new_zone else [])
         (gt if "Citywide School" in kind else nz).append(row)
     save("nonzoned_k.json", nz)
     save("citywide_gt_k.json", gt)
