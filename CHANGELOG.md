@@ -6,7 +6,7 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
-## Unreleased
+## 1.85.0 (2026-11-26)
 
 ### Added
 - Kindergarten admissions now show each school's priority groups from MySchools for the fall 2027 round: who gets an offer first (zone, siblings, pre-K students, district), and roughly how many in each group applied and got offers last fall. Non-zoned and citywide G&T schools' seats and applicants are now fall 2026's numbers instead of fall 2025's.
