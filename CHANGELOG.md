@@ -6,6 +6,14 @@ What changed in each version of [nycschoolzones.com](https://nycschoolzones.com)
 - **Minor** (1.1.0): a new feature, like admissions data in the zone card
 - **Patch** (1.0.1): fixes and wording changes
 
+## Unreleased
+
+### Added
+- Kindergarten admissions now show each school's priority groups from MySchools for the fall 2027 round: who gets an offer first (zone, siblings, pre-K students, district), and roughly how many in each group applied and got offers last fall. Non-zoned and citywide G&T schools' seats and applicants are now fall 2026's numbers instead of fall 2025's.
+
+### Fixed
+- Academy of Cultural Excellence and P.S./M.S. 384 in Long Island City stay on the map as schools without a zone until the city's zone map draws the new zones they get for kindergarten in fall 2027.
+
 ## 1.84.4 (2026-11-18)
 
 ### Fixed

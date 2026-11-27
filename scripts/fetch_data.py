@@ -1201,11 +1201,19 @@ def _myschools_k(schools):
     k_priority.json: {dbn: priority groups of the school's kindergarten program}, every school that lists them"""
     import re
     nz, gt, kp = [], [], {}
+    zoned = _zoned("elem_zones.json")
+    was_nz = {r[0] for r in _load("nonzoned_k.json", [])}
     for x in schools:
         main = next((q for q in x["programs"] if q["program"]["code"] == x["school"]["dbn"] + "KG"), None)
         if main and _priority_groups(main):
             kp[x["school"]["dbn"]] = _priority_groups(main)
         kind = {e.get("name") for e in x.get("eligibility") or []}
+        if "Zoned" in kind and x["school"]["dbn"] in was_nz and zoned and x["school"]["dbn"] not in zoned:
+            # a new zone the city approved for next fall that Find a School hasn't drawn yet: keep the school listed as
+            # non-zoned until it does, so it stays on the map (fall 2027: 30Q384 and 30Q439 in Long Island City)
+            print(f"  kindergarten: {x['school']['dbn']} is zoned in MySchools but has no zone in elem_zones.json; "
+                  "listed as non-zoned until the zones are refreshed")
+            kind.add("Non-Zoned School")
         if not kind & {"Non-Zoned School", "Citywide School"}:
             continue
         dbn = x["school"]["dbn"]
@@ -1221,6 +1229,8 @@ def _myschools_k(schools):
                 continue  # district G&T is a separate application
             seats, apps, filled = _demand(q)
             progs.append([code, 0 if code in ("KG", "GT") else 1, seats, apps, None if filled is None else int(filled)])
+        if not progs:
+            continue  # no kindergarten program but district G&T (a separate application), or none at all
         row = [dbn, _strip_dbn(x["name"]), addr.upper(), lat, lon, pd, only, progs]
         (gt if "Citywide School" in kind else nz).append(row)
     save("nonzoned_k.json", nz)
